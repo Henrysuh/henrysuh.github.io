@@ -352,10 +352,17 @@
     });
   }
 
-  function makeSVGMarker(color) {
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">
-      <path d="M14 0C6.268 0 0 6.268 0 14c0 9.333 14 22 14 22S28 23.333 28 14C28 6.268 21.732 0 14 0z" fill="${color}"/>
-      <circle cx="14" cy="14" r="6" fill="white"/>
+  const CAT_EMOJI = {
+    '오름':     '⛰️',
+    '휴양림':   '🌲',
+    '휴게소':   '🚿',
+    '전통시장': '🛒',
+  };
+
+  function makeSVGMarker(color, emoji) {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="44" viewBox="0 0 36 44">
+      <path d="M18 0C8.059 0 0 8.059 0 18c0 12 18 26 18 26S36 30 36 18C36 8.059 27.941 0 18 0z" fill="${color}"/>
+      <text x="18" y="24" font-size="16" text-anchor="middle" font-family="serif">${emoji}</text>
     </svg>`;
     return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
   }
@@ -407,8 +414,8 @@
 
   function createMarkers(cat, rows) {
     const color = CAT_COLOR[cat];
-    const imgSrc = makeSVGMarker(color);
-    const size = new kakao.maps.Size(28, 36);
+    const imgSrc = makeSVGMarker(color, CAT_EMOJI[cat]);
+    const size = new kakao.maps.Size(36, 44);
     const image = new kakao.maps.MarkerImage(imgSrc, size);
 
     return rows.map(row => {
