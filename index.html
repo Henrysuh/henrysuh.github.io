@@ -414,7 +414,7 @@
   function createMarkers(cat, rows) {
     const color = CAT_COLOR[cat];
     const imgSrc = makeSVGMarker(color, CAT_EMOJI[cat]);
-    const size = new kakao.maps.Size(36, 44);
+    const size = new kakao.maps.Size(36, 36);
     const image = new kakao.maps.MarkerImage(imgSrc, size);
 
     return rows.map(row => {
