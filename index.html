@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Henrysuh의 깃허브 홈페이지</title>
+  <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0f1923;
+      --panel: #162130;
+      --border: #1e3048;
+      --accent: #4fc3a1;
+      --accent2: #f0a500;
+      --text: #e8edf2;
+      --muted: #6b8299;
+      --font-display: 'Black Han Sans', sans-serif;
+      --font-body: 'Noto Sans KR', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    .container {
+      position: relative;
+      width: 100%;
+      max-width: 560px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 48px;
+    }
+
+    header {
+      text-align: center;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .site-title {
+      font-family: var(--font-display);
+      font-size: clamp(28px, 6vw, 40px);
+      color: var(--accent);
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .site-title span { color: var(--accent2); }
+
+    .site-subtitle {
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 300;
+      letter-spacing: 0.5px;
+    }
+
+    .site-desc {
+      margin-top: 6px;
+      font-size: 14px;
+      color: var(--muted);
+      letter-spacing: 0.3px;
+    }
+
+    .divider {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: fadeUp 0.6s ease 0.1s both;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .divider span {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .cards {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 20px 24px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      text-decoration: none;
+      color: var(--text);
+      cursor: pointer;
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .card:nth-child(1) { animation-delay: 0.2s; }
+    .card:nth-child(2) { animation-delay: 0.3s; }
+    .card:nth-child(3) { animation-delay: 0.4s; }
+
+    .card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(79, 195, 161, 0.1);
+    }
+
+    .card-icon {
+      font-size: 32px;
+      flex-shrink: 0;
+      width: 48px;
+      text-align: center;
+    }
+
+    .card-body { flex: 1; }
+
+    .card-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .card-desc {
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 300;
+    }
+
+    .card-arrow {
+      color: var(--muted);
+      font-size: 18px;
+      flex-shrink: 0;
+      transition: color 0.2s, transform 0.2s;
+    }
+
+    .card:hover .card-arrow {
+      color: var(--accent);
+      transform: translateX(4px);
+    }
+
+    footer {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+      animation: fadeUp 0.6s ease 0.5s both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <header>
+      <div class="site-title">Henry<span>suh</span>.github.io</div>
+      <div class="site-subtitle">Henrysuh의 깃허브 홈페이지</div>
+      <div class="site-desc">유용한 사이트 모음 · 계속 추가됩니다</div>
+    </header>
+
+    <div class="divider"><span>사이트 모음</span></div>
+
+    <div class="cards">
+      <a class="card" href="map.html">
+        <div class="card-icon">🚗</div>
+        <div class="card-body">
+          <div class="card-title">차박지도</div>
+          <div class="card-desc">전국 차박 명소 · 휴양림 · 휴게소 · 전통시장</div>
+        </div>
+        <div class="card-arrow">→</div>
+      </a>
+    </div>
+
+    <footer>© 2026 Henrysuh · GitHub Pages</footer>
+
+  </div>
+
+<!--
+  [카드 추가 방법]
+  .cards 블록 안에 아래 형식을 복사해서 추가: 현재 200~208행 참조
+
+  <a class="card" href="링크URL">
+    <div class="card-icon">이모지</div>
+    <div class="card-body">
+      <div class="card-title">제목</div>
+      <div class="card-desc">설명</div>
+    </div>
+    <div class="card-arrow">→</div>
+  </a>
+
+  [넘버링 추가]
+  CSS의 nth-child 블록에 다음 줄 추가:
+  .card:nth-child(4) { animation-delay: 0.5s; }
+  .card:nth-child(5) { animation-delay: 0.6s; }
+-->
+
+</body>
+</html>
