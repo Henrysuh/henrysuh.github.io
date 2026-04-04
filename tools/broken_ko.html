@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>깨진 한글 복원기</title>
+    <style>
+        body { font-family: 'Apple SD Gothic Neo', sans-serif; background-color: #f4f4f9; max-width: 1000px; margin: 40px auto; padding: 20px; }
+        .container { display: flex; gap: 30px; }
+        .left-panel { flex: 1; padding: 20px; background: #fff; border-radius: 12px; border: 1px solid #eee; }
+        .right-panel { flex: 2; padding: 20px; background: #fff; border-radius: 12px; border: 1px solid #eee; }
+        .desc-text { color: #888; font-size: 15px; line-height: 1.6; }
+        textarea { width: 100%; height: 120px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; box-sizing: border-box; }
+        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
+        button { flex: 1; background-color: #2e86de; color: white; border: none; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; }
+        button.secondary { background-color: #636e72; }
+        button:hover { opacity: 0.9; }
+        #result { background-color: #f0f2f6; padding: 15px; border-radius: 8px; min-height: 80px; text-align: left; white-space: pre-wrap; margin-top: 15px;}
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center;">🛠️ 깨진 한글 복원기</h1>
+    <div class="container">
+        <div class="left-panel">
+            <h3>용도 안내</h3>
+            <p class="desc-text">오래된 파일을 수정해 드립니다.<br>깨진 mp3 파일이나, txt 파일을 깔끔한 UTF-8 한글로 변경합니다.</p>
+        </div>
+        
+        <div class="right-panel">
+            <textarea id="inputStr" placeholder="깨진 텍스트를 입력하세요 (예: ¾È³çÇÏ¼¼¿ä)"></textarea>
+            <button onclick="fixText()" style="width: 100%; margin-top:10px;">✨ 복원하기</button>
+
+            <div id="result">여기에 결과가 나옵니다.</div>
+            
+            <div class="btn-group">
+                <button class="secondary" onclick="copyResult()">📋 복사하기</button>
+                <button class="secondary" onclick="downloadTXT()">💾 TXT 다운로드</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // input/output
+        // Input example: ¾È³çÇÏ¼¼¿ä
+        // Output example: 안녕하세요
+
+        let currentResult = ""; // 다운로드/복사용 상태 저장
+
+        function fixText() {
+            const input = document.getElementById('inputStr').value;
+            if (!input.trim()) return;
+
+            try {
+                // 핵심 logic: Latin-1 바이트로 분해 후 EUC-KR로 디코딩
+                const bytes = new Uint8Array(input.length);
+                for (let i = 0; i < input.length; i++) { bytes[i] = input.charCodeAt(i); }
+                const decoder = new TextDecoder('euc-kr');
+                currentResult = decoder.decode(bytes);
+                document.getElementById('result').textContent = currentResult;
+            } catch (e) {
+                document.getElementById('result').textContent = "❌ 복원 실패";
+            }
+        }
+
+        function copyResult() {
+            if(!currentResult) return;
+            navigator.clipboard.writeText(currentResult).then(() => alert("복사되었습니다!"));
+        }
+
+        function downloadTXT() {
+            if(!currentResult) return;
+            // 핵심 logic: Blob을 이용한 클라이언트 사이드 파일 생성
+            const blob = new Blob([currentResult], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'fixed_text.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>

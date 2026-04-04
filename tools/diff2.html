@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>텍스트 비교기</title>
+    <script src="../library/diff.min.js"></script>
+    <style>
+        body { font-family: 'Apple SD Gothic Neo', sans-serif; max-width: 1400px; margin: 0 auto; padding: 20px; background-color: #f4f4f9; height: 95vh; display: flex; flex-direction: column; }
+        .container { display: flex; gap: 20px; flex: 1; min-height: 0; }
+        .box { flex: 1; display: flex; flex-direction: column; background: white; padding: 20px; border-radius: 12px; border: 1px solid #eee; }
+        textarea, #result { width: 100%; flex: 1; padding: 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; resize: none; box-sizing: border-box; }
+        #result { background: #fafafa; overflow-y: auto; display: none; white-space: pre-wrap; }
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+        .btn { padding: 10px 20px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; color: white; background-color: #2e86de; }
+        .btn-secondary { background-color: #636e72; }
+        ins { background-color: #d4edda; color: #155724; text-decoration: none; border-bottom: 2px solid #28a745; font-weight: bold; }
+        del { background-color: #f8d7da; color: #721c24; text-decoration: line-through; opacity: 0.6; }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center;">⚖️ 텍스트 비교기</h1>
+    <div class="container">
+        <div class="box">
+            <h3>📄 원본 (Old)</h3>
+            <textarea id="oldText" placeholder="원본 내용..."></textarea>
+        </div>
+        <div style="display:flex; flex-direction:column; justify-content:center;">
+            <button class="btn" onclick="compareText()">비교하기 ➡️</button>
+        </div>
+        <div class="box">
+            <h3 id="rightTitle">📝 수정본 (New)</h3>
+            <textarea id="newText" placeholder="수정된 내용..."></textarea>
+            <div id="result"></div>
+            
+            <div class="btn-group" id="actionBtns" style="display:none;">
+                <button class="btn btn-secondary" onclick="toggleEditMode()">✏️ 다시 입력</button>
+                <button class="btn" onclick="copyMD()">📋 MD 복사</button>
+                <button class="btn" onclick="downloadMD()">💾 MD 다운로드</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // input/output
+        // Input example: old="테스트입니다", new="수정된 테스트입니다"
+        // Output example: <ins>수정된 </ins>테스트입니다 (화면 및 MD 출력)
+
+        let diffOutputMD = ""; // 추출용 MD 데이터 보관
+
+        function compareText() {
+            const oldTxt = document.getElementById('oldText').value;
+            const newTxt = document.getElementById('newText').value;
+            if (!oldTxt && !newTxt) return;
+
+            // 핵심 logic: Diff.js 배열 기반으로 화면 랜더링 요소와 MD 텍스트 동시 생성
+            const diff = Diff.diffWords(oldTxt, newTxt);
+            const fragment = document.createDocumentFragment();
+            diffOutputMD = ""; 
+
+            diff.forEach((part) => {
+                // 1. 화면 렌더링용 (이 부분은 기존과 동일하게 유지 - 화면엔 초록/빨강으로 예쁘게 보이게)
+                const color = part.added ? 'ins' : part.removed ? 'del' : 'span';
+                const span = document.createElement(color);
+                span.appendChild(document.createTextNode(part.value));
+                fragment.appendChild(span);
+
+                // 2. MD 복사용 (이 부분이 수정됨! - 옵시디언 전용 형광펜/취소선 문법 적용)
+                if (part.added) {
+                    diffOutputMD += `==${part.value}==`;
+                } else if (part.removed) {
+                    diffOutputMD += `~~${part.value}~~`;
+                } else {
+                    diffOutputMD += part.value;
+                }
+            });
+
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = "";
+            resultDiv.appendChild(fragment);
+
+            document.getElementById('newText').style.display = 'none';
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('actionBtns').style.display = 'flex';
+        }
+
+        function copyMD() {
+            navigator.clipboard.writeText(diffOutputMD).then(() => alert("MD 형식으로 복사되었습니다!"));
+        }
+
+        function downloadMD() {
+            const blob = new Blob([diffOutputMD], { type: 'text/markdown;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'diff_result.md';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function toggleEditMode() {
+            document.getElementById('newText').style.display = 'block';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('actionBtns').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

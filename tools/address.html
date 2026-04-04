@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우편번호 검색</title>
+    
+    <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    
+    <style>
+        body { font-family: 'Apple SD Gothic Neo', sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; background: #f4f4f9; border-radius: 12px; border: 1px solid #ddd; }
+        h1 { text-align: center; color: #333; }
+        .search-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        input { flex: 1; padding: 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        input[readonly] { background-color: #eaeaea; color: #555; }
+        button { padding: 12px 20px; background-color: #2e86de; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; white-space: nowrap; }
+        button.copy { background-color: #27ae60; width: 100%; margin-top: 15px; }
+        
+        /* 임베드 레이어 (팝업 대신 화면 내 출력) */
+        #layer { display: none; border: 1px solid #ccc; width: 100%; height: 350px; margin-bottom: 15px; border-radius: 8px; overflow: hidden; }
+    </style>
+</head>
+<body>
+    <h1 style="margin-top: 0;">📮 우편번호 검색</h1>
+    
+    <label style="font-weight:bold; margin-bottom:5px; display:block;">1. 주소 검색</label>
+    <div class="search-group">
+        <input type="text" id="keyword" placeholder="동, 도로명, 건물명 입력 (예: 판교역로)" onkeypress="if(event.keyCode==13) searchAddress()">
+        <button onclick="searchAddress()">🔍 검색</button>
+    </div>
+
+    <div id="layer"></div>
+    
+    <label style="font-weight:bold; margin-bottom:5px; margin-top:10px; display:block;">2. 결과 확인</label>
+    <div style="display: flex; gap:10px; margin-bottom: 10px;">
+        <input type="text" id="postcode" placeholder="우편번호" style="width: 120px;" readonly>
+        <input type="text" id="address" placeholder="기본 주소" readonly>
+    </div>
+    <input type="text" id="detailAddress" placeholder="상세 주소를 입력하세요 (선택)" style="width: 100%;">
+
+    <button class="copy" onclick="copyFullAddress()">📋 전체 주소 복사</button>
+
+    <script>
+        // input/output
+        // Input example: '판교역로' 입력 후 검색
+        // Output example: 레이어에 검색 결과 표시 및 클립보드 복사
+
+        const layer = document.getElementById('layer');
+
+        function searchAddress() {
+            const keyword = document.getElementById('keyword').value;
+            if(!keyword) { alert("주소를 입력해주세요."); return; }
+
+            // 화면 내 Embed 방식으로 속도 및 UX 개선
+            layer.style.display = 'block';
+
+            new daum.Postcode({
+                oncomplete: function(data) {
+                    let addr = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
+                    document.getElementById('postcode').value = data.zonecode;
+                    document.getElementById('address').value = addr;
+                    
+                    layer.style.display = 'none'; // 검색 완료 후 레이어 숨김
+                    document.getElementById('detailAddress').focus(); 
+                },
+                width : '100%',
+                height : '100%'
+            }).embed(layer, { q: keyword }); // 검색어를 API에 미리 전달
+        }
+
+        function copyFullAddress() {
+            const zip = document.getElementById('postcode').value;
+            const addr = document.getElementById('address').value;
+            const detail = document.getElementById('detailAddress').value;
+            
+            if(!addr) { alert("먼저 주소를 검색해주세요."); return; }
+
+            const fullText = `[${zip}] ${addr} ${detail}`.trim();
+            navigator.clipboard.writeText(fullText).then(() => alert("주소가 복사되었습니다!\n\n" + fullText));
+        }
+    </script>
+</body>
+</html>

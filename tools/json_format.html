@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON 예쁘게 보기 (Formatter)</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; max-width: 1000px; margin: 0 auto; background: #f4f4f9; }
+        h1 { text-align: center; color: #333; }
+        .container { display: flex; gap: 20px; height: 500px; }
+        .box { flex: 1; display: flex; flex-direction: column; }
+        textarea { 
+            flex: 1; padding: 15px; border-radius: 8px; border: 1px solid #ccc; 
+            font-family: 'Courier New', monospace; font-size: 14px; resize: none;
+        }
+        button { 
+            margin: 20px auto; display: block; padding: 15px 40px; 
+            background: #2e86de; color: white; border: none; font-size: 18px; 
+            border-radius: 8px; cursor: pointer; font-weight: bold;
+        }
+        button:hover { background: #0984e3; }
+        .error { border: 2px solid red; background: #ffe6e6; }
+    </style>
+</head>
+<body>
+    <h1>📋 JSON Formatter</h1>
+    <div class="container">
+        <div class="box">
+            <label>👇 여기에 못생긴 JSON을 넣으세요</label>
+            <textarea id="inputJson" placeholder='{"name":"경호","age":54,"hobby":["coding","pizza"]}'></textarea>
+        </div>
+        <div class="box">
+            <label>✨ 예쁘게 변한 결과</label>
+            <textarea id="outputJson" readonly style="background: #fff;"></textarea>
+        </div>
+    </div>
+    <button onclick="formatJson()">변환하기 ⚡️</button>
+
+    <script>
+        function formatJson() {
+            const input = document.getElementById('inputJson');
+            const output = document.getElementById('outputJson');
+            
+            try {
+                if (!input.value.trim()) return;
+                // JSON 파싱 후 들여쓰기 4칸으로 다시 문자열화
+                const obj = JSON.parse(input.value);
+                output.value = JSON.stringify(obj, null, 4);
+                
+                input.classList.remove('error'); // 에러 빨간줄 제거
+            } catch (e) {
+                output.value = "❌ 올바르지 않은 JSON 형식입니다:\n" + e.message;
+                input.classList.add('error'); // 입력창에 빨간줄 표시
+            }
+        }
+    </script>
+</body>
+</html>

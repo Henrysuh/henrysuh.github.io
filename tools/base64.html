@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base64 변환기</title>
+    <style>
+        body { font-family: 'Apple SD Gothic Neo', sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; text-align: center; }
+        textarea { width: 100%; height: 120px; padding: 10px; font-size: 15px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 20px; box-sizing: border-box; }
+        .btn-group { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
+        button { padding: 12px 20px; font-size: 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: white; flex: 1; }
+        .btn-file { background-color: #8e44ad; }
+        .btn-encode { background-color: #e67e22; }
+        .btn-decode { background-color: #16a085; }
+        .btn-copy { background-color: #2e86de; }
+        .guide-text { color: #555; background: #eee; padding: 10px; border-radius: 8px; margin-bottom: 20px; text-align: left; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <h1>🔄 Base64 Converter</h1>
+    
+    <div class="guide-text">
+        <strong>💡 활용 가이드:</strong> Obsidian, Typora 같은 마크다운 에디터에서 이미지를 문서 자체에 내장할 때 최적화되어 있습니다.<br>
+        (용량 문제로 사진보다는 <b>SVG 파일 변환이 가장 효율적</b>입니다.)
+    </div>
+
+    <label style="display:block; text-align:left; font-weight:bold; margin-bottom:5px;">📝 텍스트 입력창 (SVG 코드 복사 붙여넣기 등)</label>
+    <textarea id="inputStr" placeholder="텍스트를 입력하거나, 아래 [파일 첨부] 버튼을 누르세요."></textarea>
+
+    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+
+    <div class="btn-group">
+        <button class="btn-file" onclick="document.getElementById('fileInput').click()">📁 JPG/PNG 등 그림파일 첨부</button>
+        <button class="btn-encode" onclick="utf8_to_b64()">⬇️ 텍스트 암호화</button>
+        <button class="btn-decode" onclick="b64_to_utf8()">⬆️ 복호화 (Decode)</button>
+    </div>
+
+    <label style="display:block; text-align:left; font-weight:bold; margin-bottom:5px;">📊 변환 결과</label>
+    <textarea id="outputStr" readonly style="background: #f9f9f9; height: 180px;"></textarea>
+    
+    <button class="btn-copy" onclick="copyResult()" style="width: 100%;">📋 결과 한번에 복사하기</button>
+
+    <script>
+        // 파일 업로드 이벤트 핸들러 (MIME 자동 포함)
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+            
+            // 핵심 logic: FileReader를 활용한 완벽한 데이터 URI 추출
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                document.getElementById('outputStr').value = event.target.result;
+            };
+            reader.readAsDataURL(file); // 이 함수가 헤더를 자동으로 붙여줍니다.
+        });
+
+        function utf8_to_b64() {
+            const str = document.getElementById('inputStr').value;
+            try { document.getElementById('outputStr').value = btoa(unescape(encodeURIComponent(str))); }
+            catch(e) { alert("변환 실패!"); }
+        }
+
+        function b64_to_utf8() {
+            const str = document.getElementById('inputStr').value;
+            try { document.getElementById('outputStr').value = decodeURIComponent(escape(atob(str))); }
+            catch(e) { document.getElementById('outputStr').value = "❌ 올바른 Base64가 아닙니다."; }
+        }
+
+        function copyResult() {
+            const out = document.getElementById('outputStr').value;
+            if(!out) return;
+        // 핵심 logic: 복사할 때 옵시디언이 바로 인식하도록 ![]() 로 감싸기
+            const mdImageFormat = `![](${out})`;
+            navigator.clipboard.writeText(mdImageFormat).then(() => {
+            alert("MD 이미지 형식으로 복사되었습니다!\n옵시디언에 그냥 붙여넣으시면 바로 그림이 됩니다.");
+        });
+        }
+    </script>
+</body>
+</html>

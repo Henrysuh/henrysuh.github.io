@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛠️ 경호의 맥가이버 본부</title>
+    <style>
+        body { font-family: 'Apple SD Gothic Neo', sans-serif; background-color: #2b2d42; color: white; text-align: center; margin: 0; padding: 40px; }
+        h1 { margin-bottom: 10px; font-size: 2.5rem; }
+        p { color: #8d99ae; margin-bottom: 50px; }
+        .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; max-width: 1000px; margin: 0 auto; }
+        .card { background-color: #edf2f4; color: #2b2d42; border-radius: 15px; padding: 30px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; border: none; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.4); background-color: #fff; }
+        .icon { font-size: 50px; margin-bottom: 15px; }
+        .title { font-size: 1.2rem; font-weight: bold; }
+        .desc { font-size: 0.9rem; color: #666; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+    <h1>🛠️ Command Center</h1>
+    <p>경호님의 생산성을 위한 비밀 무기창고</p>
+
+    <div class="dashboard">
+        <a href="tools/broken_ko.html" target="_blank" class="card">
+            <span class="icon">✨</span>
+            <span class="title">한글 복원기</span>
+            <span class="desc">깨진 인코딩 복구</span>
+        </a>
+        <a href="tools/diff2.html" target="_blank" class="card">
+            <span class="icon">⚖️</span>
+            <span class="title">텍스트 비교기</span>
+            <span class="desc">원본 vs 수정본 비교</span>
+        </a>
+        <a href="tools/json_format.html" target="_blank" class="card">
+            <span class="icon">📋</span>
+            <span class="title">JSON 포맷터</span>
+            <span class="desc">못생긴 데이터 정렬</span>
+        </a>
+        <a href="tools/qrcode.html" target="_blank" class="card">
+            <span class="icon">📱</span>
+            <span class="title">QR 코드 생성</span>
+            <span class="desc">URL → QR 변환</span>
+        </a>
+        <a href="tools/password.html" target="_blank" class="card">
+            <span class="icon">🔐</span>
+            <span class="title">암호 생성기</span>
+            <span class="desc">강력한 비번 만들기</span>
+        </a>
+        <a href="tools/base64.html" target="_blank" class="card">
+            <span class="icon">🔄</span>
+            <span class="title">Base64 변환</span>
+            <span class="desc">텍스트/이미지 인코딩</span>
+        </a>
+        <a href="tools/address.html" target="_blank" class="card">
+            <span class="icon">📮</span>
+            <span class="title">우편번호 검색</span>
+            <span class="desc">주소 및 우편번호 찾기</span>
+        </a>
+    </div>
+
+</body>
+</html>
