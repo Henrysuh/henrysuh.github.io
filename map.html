@@ -513,7 +513,8 @@
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
         const locPos = new kakao.maps.LatLng(lat, lng);
-        map.panTo(locPos);
+        map.setCenter(locPos);
+        map.setLevel(4);
         new kakao.maps.Marker({
           map,
           position: locPos,
