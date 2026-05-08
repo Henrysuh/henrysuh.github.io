@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dokanizer Bridge: Pro UI</title>
+    <style>
+        body { font-family: 'Pretendard', sans-serif; padding: 20px; max-width: 1100px; margin: 0 auto; background: #f8f9fa; }
+        h1 { text-align: center; color: #1e3a8a; }
+        .container { display: flex; gap: 20px; height: 500px; }
+        .box { flex: 1; display: flex; flex-direction: column; }
+        label { font-weight: bold; margin-bottom: 8px; display: block; }
+        textarea { flex: 1; padding: 15px; border-radius: 12px; border: 1px solid #ced4da; font-family: monospace; font-size: 14px; resize: none; }
+        .controls { display: flex; flex-direction: column; align-items: center; gap: 15px; margin: 25px 0; padding: 20px; background: #fff; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .btn-group { display: flex; gap: 10px; align-items: center; }
+        
+        /* 파일명 입력창 디자인 트릭 */
+        .file-input-wrapper {
+            display: flex;
+            align-items: center;
+            background: #fff;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            padding: 0 10px;
+            width: 300px;
+            transition: 0.2s;
+        }
+        .file-input-wrapper:focus-within { border-color: #2e86de; box-shadow: 0 0 0 2px rgba(46,134,222,0.1); }
+        
+        .file-name-input {
+            border: none;
+            outline: none;
+            padding: 10px 0;
+            font-size: 14px;
+            color: #000; /* 파일명은 검은색 */
+            text-align: right;
+            flex: 1;
+        }
+        .file-ext {
+            color: #adb5bd; /* .json은 회색 */
+            font-size: 14px;
+            user-select: none; /* 드래그/편집 방지 */
+            padding-left: 2px;
+        }
+
+        button { padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-convert { background: #2e86de; color: white; }
+        .btn-example { background: #f39c12; color: white; }
+        .btn-download { background: #27ae60; color: white; }
+        button:hover { opacity: 0.9; transform: translateY(-1px); }
+        select { padding: 10px; border-radius: 8px; border: 1px solid #2e86de; }
+    </style>
+</head>
+<body>
+    <h1>🚀 Dokanizer Translator</h1>
+    
+    <div class="container">
+        <div class="box">
+            <label>📝 Markdown / Raw Data</label>
+            <textarea id="inputMd" placeholder="모드를 선택하고 '예제 불러오기'를 눌러보세요."></textarea>
+        </div>
+        <div class="box">
+            <label>🤖 Structured JSON</label>
+            <textarea id="outputJson" readonly></textarea>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div>
+            <select id="mode">
+                <option value="config">⚙️ 설계도 (YAML/Config)</option>
+                <option value="record">📑 기록 (Metadata/Properties)</option>
+                <option value="structure">🏗️ 구조 및 연료 (Hierarchy/Data)</option>
+            </select>
+            <button class="btn-example" onclick="loadExample()">예제 불러오기 💡</button>
+        </div>
+        
+        <div class="btn-group">
+            <button class="btn-convert" onclick="convert()">번역하기 ⚡️</button>
+            
+            <div class="file-input-wrapper">
+                <input type="text" id="fileNameInput" class="file-name-input" value="example_settings" placeholder="파일명">
+                <span class="file-ext">.json</span>
+            </div>
+            
+            <button class="btn-download" onclick="downloadJson()">JSON 다운로드 💾</button>
+        </div>
+    </div>
+
+    <script>
+        const examples = {
+            config: "---\ntitle: \"Dokanizer Project\"\nauthor: \"Kyung-ho\"\n---",
+            record: "\"status\": \"Ready\",\n\"version\": \"1.0\"",
+            structure: "# Main Architecture\n## Data Layer"
+        };
+
+        function loadExample() {
+            const mode = document.getElementById('mode').value;
+            document.getElementById('inputMd').value = examples[mode];
+        }
+
+        function convert() {
+            const md = document.getElementById('inputMd').value;
+            const mode = document.getElementById('mode').value;
+            const output = document.getElementById('outputJson');
+            let result = {};
+
+            try {
+                const yamlMatch = md.match(/^---\s*([\s\S]*?)\s*---/);
+                const content = (mode === 'config' && yamlMatch) ? yamlMatch[1] : md;
+                
+                if (mode === 'config' || mode === 'record') {
+                    content.split('\n').forEach(line => {
+                        if (line.includes(':')) {
+                            const [key, ...val] = line.split(':');
+                            const cleanKey = key.trim().replace(/^["']|["']$/g, '');
+                            const cleanVal = val.join(':').trim().replace(/^["']|["']$|[,]$/g, '');
+                            if (cleanKey) result[cleanKey] = cleanVal;
+                        }
+                    });
+                } else {
+                    const lines = md.split('\n');
+                    result = { doc_structure: lines.filter(l => l.startsWith('#')).map(l => ({ level: (l.match(/#/g)||[]).length, title: l.replace(/#/g,'').trim() })) };
+                }
+                output.value = JSON.stringify(result, null, 4);
+            } catch (e) { output.value = "❌ 오류: " + e.message; }
+        }
+
+        function downloadJson() {
+            const content = document.getElementById('outputJson').value;
+            if (!content || content.startsWith('❌')) return;
+
+            let name = document.getElementById('fileNameInput').value.trim() || "example_settings";
+            const fullFileName = name + ".json";
+
+            const blob = new Blob([content], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fullFileName;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
