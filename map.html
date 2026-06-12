@@ -205,7 +205,6 @@
     }
 
     .nav-btn:hover { opacity: 0.85; }
-
     .nav-btn-naver { background: #03C75A; color: #fff; }
     .nav-btn-kakao { background: var(--color-accent2); color: #0f1923; }
 
@@ -403,12 +402,16 @@
       tagsEl.appendChild(tag);
     });
 
+    // 목적지 정보를 네이버 버튼 data 속성에 저장 (클릭 시 현재위치 취득 후 사용)
     const navBtnNaver = document.getElementById('navBtnNaver');
+    navBtnNaver.dataset.dlat = data.lat;
+    navBtnNaver.dataset.dlng = data.lng;
+    navBtnNaver.dataset.dname = data.name;
+
+    // 카카오: 목적지만으로 길찾기 가능 (현재위치는 앱이 자동 처리)
+    const kakaoUrl = `https://map.kakao.com/link/to/${encodeURIComponent(data.name)},${data.lat},${data.lng}`;
     const navBtnKakao = document.getElementById('navBtnKakao');
-    navBtnNaver.dataset.lat  = data.lat;
-    navBtnNaver.dataset.lng  = data.lng;
-    navBtnNaver.dataset.name = data.name;
-    navBtnKakao.href = `https://map.kakao.com/link/to/${encodeURIComponent(data.name)},${data.lat},${data.lng}`;
+    navBtnKakao.href   = kakaoUrl;
     navBtnKakao.target = '_blank';
 
     document.getElementById('popup').classList.add('open');
@@ -519,31 +522,56 @@
 
   document.getElementById('popupClose').addEventListener('click', closePopup);
 
+  // ---------------------------------------------------------------
   // 네이버 네비 클릭 핸들러
+  // 공식 문서:
+  //   네이버 URL Scheme: https://guide.ncloud-docs.com/docs/maps-url-scheme
+  //   카카오 URL Scheme: https://apis.map.kakao.com/ios_v2/docs/getting-started/urlscheme/
+  //
+  // 동작 순서:
+  //   1) geolocation으로 현재 위치 취득
+  //   2) 모바일: nmap:// 앱 실행 시도 → 500ms 내 앱 미실행 시 웹으로 폴백
+  //   3) PC: 네이버 지도 웹 바로 열기
+  //   4) 위치 취득 실패: 목적지만으로 웹 열기
+  // ---------------------------------------------------------------
+
   // tunable
   // variable: 앱 실행 대기 시간(ms), appname
   const NAVER_APP_TIMEOUT = 500;
   const NAVER_APPNAME     = 'chabbakjido';
 
-  document.getElementById('navBtnNaver').addEventListener('click', (e) => {
-    e.preventDefault();
-    const btn    = e.currentTarget;
-    const lat    = btn.dataset.lat;
-    const lng    = btn.dataset.lng;
-    const name   = encodeURIComponent(btn.dataset.name);
-    const webUrl = `https://map.naver.com/p?lat=${lat}&lng=${lng}&title=${name}`;
+  document.getElementById('navBtnNaver').addEventListener('click', () => {
+    const btn   = document.getElementById('navBtnNaver');
+    const dlat  = btn.dataset.dlat;
+    const dlng  = btn.dataset.dlng;
+    const dname = encodeURIComponent(btn.dataset.dname);
+
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-    if (isMobile) {
-      // 1순위: 네이버 지도 앱 실행 시도
-      const appUrl = `nmap://route/car?dlat=${lat}&dlng=${lng}&dname=${name}&appname=${NAVER_APPNAME}`;
-      location.href = appUrl;
-      // 앱 미설치 시 웹으로 폴백
-      setTimeout(() => { window.open(webUrl, '_blank'); }, NAVER_APP_TIMEOUT);
-    } else {
-      // PC: 웹 바로 열기
-      window.open(webUrl, '_blank');
-    }
+    // 현재 위치 취득 후 URL 생성
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const slat  = pos.coords.latitude;
+        const slng  = pos.coords.longitude;
+        const sname = encodeURIComponent('현재위치');
+
+        const appUrl = `nmap://route/car?slat=${slat}&slng=${slng}&sname=${sname}&dlat=${dlat}&dlng=${dlng}&dname=${dname}&appname=${NAVER_APPNAME}`;
+        const webUrl = `https://map.naver.com/p/directions/${slng},${slat},${sname}/${dlng},${dlat},${dname}/-/car`;
+
+        if (isMobile) {
+          location.href = appUrl;
+          setTimeout(() => { window.open(webUrl, '_blank'); }, NAVER_APP_TIMEOUT);
+        } else {
+          window.open(webUrl, '_blank');
+        }
+      },
+      () => {
+        // 위치 취득 실패 시 목적지만으로 웹 열기
+        const webUrl = `https://map.naver.com/p?lat=${dlat}&lng=${dlng}&title=${dname}`;
+        window.open(webUrl, '_blank');
+      },
+      { timeout: 5000 }
+    );
   });
 
   // 내 위치 버튼
