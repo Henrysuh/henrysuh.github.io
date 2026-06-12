@@ -556,7 +556,7 @@
         const sname = encodeURIComponent('현재위치');
 
         const appUrl = `nmap://route/car?slat=${slat}&slng=${slng}&sname=${sname}&dlat=${dlat}&dlng=${dlng}&dname=${dname}&appname=${NAVER_APPNAME}`;
-        const webUrl = `https://map.naver.com/p/directions/${slng},${slat},${sname}/${dlng},${dlat},${dname}/-/car`;
+        const webUrl = `https://map.naver.com/p/directions/-/-/${dlng},${dlat},${dname}/car`;
 
         if (isMobile) {
           location.href = appUrl;
