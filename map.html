@@ -206,15 +206,8 @@
 
     .nav-btn:hover { opacity: 0.85; }
 
-    .nav-btn-naver {
-      background: #03C75A;
-      color: #fff;
-    }
-
-    .nav-btn-kakao {
-      background: var(--color-accent2);
-      color: #0f1923;
-    }
+    .nav-btn-naver { background: #03C75A; color: #fff; }
+    .nav-btn-kakao { background: var(--color-accent2); color: #0f1923; }
 
     .popup-close {
       position: absolute;
@@ -299,8 +292,8 @@
   <div class="popup-desc" id="popupDesc"></div>
   <div class="popup-tags" id="popupTags"></div>
   <div class="nav-btns">
-    <a class="nav-btn nav-btn-naver" id="navBtnNaver" target="_blank">🗺️ 네이버 네비</a>
-    <a class="nav-btn nav-btn-kakao" id="navBtnKakao" target="_blank">🧭 카카오 네비</a>
+    <a class="nav-btn nav-btn-naver" id="navBtnNaver">🗺️ 네이버 네비</a>
+    <a class="nav-btn nav-btn-kakao" id="navBtnKakao">🧭 카카오 네비</a>
   </div>
 </div>
 
@@ -410,10 +403,13 @@
       tagsEl.appendChild(tag);
     });
 
-    const kakaoUrl = `https://map.kakao.com/link/to/${encodeURIComponent(data.name)},${data.lat},${data.lng}`;
-    const naverUrl = `https://map.naver.com/v5/directions/-/-/${data.lng},${data.lat},${encodeURIComponent(data.name)}/-/car`;
-    document.getElementById('navBtnNaver').href = naverUrl;
-    document.getElementById('navBtnKakao').href = kakaoUrl;
+    const navBtnNaver = document.getElementById('navBtnNaver');
+    const navBtnKakao = document.getElementById('navBtnKakao');
+    navBtnNaver.dataset.lat  = data.lat;
+    navBtnNaver.dataset.lng  = data.lng;
+    navBtnNaver.dataset.name = data.name;
+    navBtnKakao.href = `https://map.kakao.com/link/to/${encodeURIComponent(data.name)},${data.lat},${data.lng}`;
+    navBtnKakao.target = '_blank';
 
     document.getElementById('popup').classList.add('open');
   }
@@ -522,6 +518,33 @@
   });
 
   document.getElementById('popupClose').addEventListener('click', closePopup);
+
+  // 네이버 네비 클릭 핸들러
+  // tunable
+  // variable: 앱 실행 대기 시간(ms), appname
+  const NAVER_APP_TIMEOUT = 500;
+  const NAVER_APPNAME     = 'chabbakjido';
+
+  document.getElementById('navBtnNaver').addEventListener('click', (e) => {
+    e.preventDefault();
+    const btn    = e.currentTarget;
+    const lat    = btn.dataset.lat;
+    const lng    = btn.dataset.lng;
+    const name   = encodeURIComponent(btn.dataset.name);
+    const webUrl = `https://map.naver.com/p?lat=${lat}&lng=${lng}&title=${name}`;
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    if (isMobile) {
+      // 1순위: 네이버 지도 앱 실행 시도
+      const appUrl = `nmap://route/car?dlat=${lat}&dlng=${lng}&dname=${name}&appname=${NAVER_APPNAME}`;
+      location.href = appUrl;
+      // 앱 미설치 시 웹으로 폴백
+      setTimeout(() => { window.open(webUrl, '_blank'); }, NAVER_APP_TIMEOUT);
+    } else {
+      // PC: 웹 바로 열기
+      window.open(webUrl, '_blank');
+    }
+  });
 
   // 내 위치 버튼
   document.getElementById('locBtn').addEventListener('click', () => {
