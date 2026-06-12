@@ -185,16 +185,19 @@
     .popup-tag.yes  { border-color: var(--color-accent); color: var(--color-accent); }
     .popup-tag.no   { border-color: #444; color: #555; }
 
+    .nav-btns {
+      display: flex;
+      gap: 8px;
+    }
+
     .nav-btn {
+      flex: 1;
       display: block;
-      width: 100%;
-      padding: 13px;
+      padding: 13px 8px;
       border-radius: 10px;
       border: none;
-      background: var(--color-accent);
-      color: #0f1923;
       font-family: var(--font-display);
-      font-size: 16px;
+      font-size: 15px;
       cursor: pointer;
       text-align: center;
       text-decoration: none;
@@ -202,6 +205,16 @@
     }
 
     .nav-btn:hover { opacity: 0.85; }
+
+    .nav-btn-naver {
+      background: #03C75A;
+      color: #fff;
+    }
+
+    .nav-btn-kakao {
+      background: var(--color-accent2);
+      color: #0f1923;
+    }
 
     .popup-close {
       position: absolute;
@@ -285,7 +298,10 @@
   <div class="popup-name" id="popupName"></div>
   <div class="popup-desc" id="popupDesc"></div>
   <div class="popup-tags" id="popupTags"></div>
-  <a class="nav-btn" id="navBtn" target="_blank">🧭 카카오맵 길찾기</a>
+  <div class="nav-btns">
+    <a class="nav-btn nav-btn-naver" id="navBtnNaver" target="_blank">🗺️ 네이버 네비</a>
+    <a class="nav-btn nav-btn-kakao" id="navBtnKakao" target="_blank">🧭 카카오 네비</a>
+  </div>
 </div>
 
 <!-- tunable -->
@@ -394,8 +410,10 @@
       tagsEl.appendChild(tag);
     });
 
-    const naviUrl = `https://map.kakao.com/link/to/${encodeURIComponent(data.name)},${data.lat},${data.lng}`;
-    document.getElementById('navBtn').href = naviUrl;
+    const kakaoUrl = `https://map.kakao.com/link/to/${encodeURIComponent(data.name)},${data.lat},${data.lng}`;
+    const naverUrl = `nmap://route/car?dlat=${data.lat}&dlng=${data.lng}&dname=${encodeURIComponent(data.name)}&appname=chabbakjido`;
+    document.getElementById('navBtnNaver').href = naverUrl;
+    document.getElementById('navBtnKakao').href = kakaoUrl;
 
     document.getElementById('popup').classList.add('open');
   }
