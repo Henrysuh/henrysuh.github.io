@@ -411,7 +411,7 @@
     });
 
     const kakaoUrl = `https://map.kakao.com/link/to/${encodeURIComponent(data.name)},${data.lat},${data.lng}`;
-    const naverUrl = `nmap://route/car?dlat=${data.lat}&dlng=${data.lng}&dname=${encodeURIComponent(data.name)}&appname=chabbakjido`;
+    const naverUrl = `https://map.naver.com/v5/directions/-/-/${data.lng},${data.lat},${encodeURIComponent(data.name)}/-/car`;
     document.getElementById('navBtnNaver').href = naverUrl;
     document.getElementById('navBtnKakao').href = kakaoUrl;
 
