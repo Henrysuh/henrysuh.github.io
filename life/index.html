@@ -5,12 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>인생게임 — Bricoleur Life Simulator</title>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <style>
 :root {
   --bg:#0f1923; --panel:#162130; --border:#1e3048;
   --accent:#4fc3a1; --accent2:#f0a500; --text:#e8edf2; --muted:#9ab5c8;
-  --cD:#4fc3a1; --cG:#7eb8f7; --cW:#f0a500;
+  --cD:#4fc3a1; --cG:#7eb8f7; --cW:#f0a500; --cUser:#c77dff;
   --fd:'Black Han Sans',sans-serif; --fb:'Noto Sans KR',sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -36,6 +35,11 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;
 .nav-title{font-family:var(--fb);font-size:15px;color:var(--text);font-weight:300;letter-spacing:2px}
 .nav-step{margin-left:auto;font-size:12px;color:var(--muted)}
 
+/* ── STEP 0: LOGIN/START ── */
+.login-warning{background:#2a1f10;border:1px solid var(--accent2);border-radius:12px;
+  padding:16px 18px;font-size:13px;line-height:1.6;color:var(--text)}
+.login-warning strong{color:var(--accent2)}
+
 /* ── STEP 1: PERSONA ── */
 .hero{text-align:center;padding:24px 0 8px}
 .hero h1{font-family:var(--fb);font-size:clamp(24px,5vw,36px);color:var(--accent);letter-spacing:4px;font-weight:300}
@@ -48,7 +52,6 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;
 .pc.D:hover{border-color:var(--cD)}
 .pc.G:hover{border-color:var(--cG)}
 .pc.W:hover{border-color:var(--cW)}
-.pc-avatar{font-size:52px;line-height:1}
 .pc-avatar-img{width:100%;height:220px;object-fit:cover;object-position:top center;
   border-radius:12px;margin-bottom:4px}
 .pc-nick{font-size:12px;letter-spacing:1px;text-transform:uppercase}
@@ -62,11 +65,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;
 .pc-tag{background:#1a2a3a;border:1px solid var(--border);border-radius:20px;
   font-size:11px;color:var(--muted);padding:4px 10px}
 
-/* ── STEP 2: SETUP ── */
+/* ── STEP 2: HOUSEHOLD ── */
 .setup-header{font-family:var(--fb);font-size:13px;color:var(--muted);font-weight:300;letter-spacing:2px;text-transform:uppercase}
-.setup-persona-badge{display:inline-flex;align-items:center;gap:8px;
-  background:var(--panel);border:1px solid var(--border);border-radius:10px;
-  padding:8px 16px;font-size:14px}
 .hh-row{display:flex;gap:10px;flex-wrap:wrap}
 .hh-btn{background:var(--panel);border:1px solid var(--border);border-radius:10px;
   padding:12px 20px;cursor:pointer;color:var(--muted);font-size:14px;font-family:var(--fb);
@@ -74,40 +74,65 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;
 .hh-btn.selected{border-color:var(--accent);color:var(--text);background:#1a2a3a}
 .hh-btn:hover{border-color:var(--accent);color:var(--text)}
 
-/* ITEM ACCORDION */
-.cat-block{border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:8px}
-.cat-hdr{background:var(--panel);padding:14px 16px;cursor:pointer;
-  display:flex;align-items:center;gap:10px;transition:background .15s;user-select:none}
-.cat-hdr:hover{background:#1a2a3a}
-.cat-hdr-name{font-size:14px;font-weight:500;color:var(--accent);flex:1}
-.cat-hdr-count{font-size:12px;color:var(--muted)}
-.cat-hdr-chev{color:var(--muted);font-size:12px;transition:transform .2s}
-.cat-hdr.open .cat-hdr-chev{transform:rotate(180deg)}
-.cat-body{display:none}
-.cat-body.open{display:block}
-.item-row{display:grid;grid-template-columns:1fr auto;align-items:center;
-  padding:10px 16px;border-top:1px solid var(--border);gap:12px;cursor:pointer;
-  transition:background .15s}
-.item-row:hover{background:var(--panel)}
-.item-row.off{opacity:.35}
-.item-info{display:flex;flex-direction:column;gap:2px}
-.item-sub{font-size:13px;color:var(--text)}
-.item-approach{font-size:11px;color:var(--muted)}
-.toggle{width:36px;height:20px;border-radius:10px;border:none;cursor:pointer;
-  position:relative;transition:background .2s;flex-shrink:0}
-.toggle.on{background:var(--accent)}
-.toggle.off{background:var(--border)}
-.toggle::after{content:'';position:absolute;width:14px;height:14px;border-radius:50%;
-  background:#fff;top:3px;transition:left .2s}
-.toggle.on::after{left:19px}
-.toggle.off::after{left:3px}
-
 .proceed-btn{background:var(--accent);color:var(--bg);border:none;border-radius:12px;
   padding:14px 32px;font-size:14px;font-family:var(--fb);font-weight:400;cursor:pointer;
   transition:opacity .2s;margin-top:8px;align-self:center;letter-spacing:1px}
 .proceed-btn:hover{opacity:.85}
 
-/* ── STEP 3: RESULTS ── */
+/* ── STEP 3: CATEGORY PERSONA OVERRIDE ── */
+.cat-tab-row{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+  padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.cat-tab-name{font-size:17px;font-weight:500;color:var(--text)}
+.cat-tab-hdr-row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.cat-collapse-btn{background:none;border:1px solid var(--border);border-radius:8px;color:var(--muted);
+  font-size:11px;padding:4px 10px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.cat-collapse-btn:hover{border-color:var(--accent);color:var(--accent)}
+.cat-collapse-all-btn{align-self:center;background:none;border:1px solid var(--border);border-radius:10px;
+  color:var(--muted);font-size:12px;font-family:var(--fb);padding:6px 16px;cursor:pointer;transition:all .2s}
+.cat-collapse-all-btn:hover{border-color:var(--accent);color:var(--accent)}
+.confirm-bottom-btn{width:100%;margin-top:4px}
+.cat-tab-pills{display:flex;gap:8px;flex-wrap:wrap}
+.loan-estimate{font-size:11px;color:var(--muted);opacity:.85}
+.persona-pill{background:var(--bg);border:1px solid var(--border);border-radius:10px;
+  padding:8px 14px;cursor:pointer;color:var(--muted);font-family:var(--fb);
+  transition:all .2s;display:flex;flex-direction:column;align-items:flex-start;gap:2px;flex:1;min-width:100px}
+.persona-pill:hover{border-color:var(--muted)}
+.persona-pill.D.active{border-color:var(--cD);background:#0f2b23;color:var(--cD)}
+.persona-pill.G.active{border-color:var(--cG);background:#10233a;color:var(--cG)}
+.persona-pill.W.active{border-color:var(--cW);background:#332107;color:var(--cW)}
+
+.uid-list{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.uid-block{border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.uid-hdr{background:var(--bg);padding:10px 14px;cursor:pointer;
+  display:flex;align-items:center;gap:10px;transition:background .15s;user-select:none}
+.uid-hdr:hover{background:#16222f}
+.uid-hdr-name{font-size:13px;color:var(--text);flex:1}
+.uid-hdr-amt{font-size:13px;color:var(--muted)}
+.uid-hdr-chev{color:var(--muted);font-size:11px;transition:transform .2s}
+.uid-hdr-chev.open{transform:rotate(180deg)}
+.uid-body{display:none;border-top:1px solid var(--border)}
+.uid-body.open{display:block}
+.uid-item-row{padding:10px 14px;border-bottom:1px solid var(--border)}
+.uid-item-row:last-child{border-bottom:none}
+.uid-item-top{display:flex;justify-content:space-between;gap:8px;font-size:13px}
+.uid-item-name{color:var(--text);font-weight:500}
+.uid-item-cost{color:var(--accent)}
+.uid-item-desc{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5}
+.uid-item-vars{font-size:11px;color:var(--muted);margin-top:4px;opacity:.75}
+.var-group{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.var-field{display:flex;flex-direction:column;gap:3px;font-size:10px;color:var(--muted)}
+.var-field input{width:90px;background:var(--bg);border:1px solid var(--border);
+  border-radius:6px;color:var(--text);padding:5px 7px;font-size:12px;font-family:var(--fb)}
+.var-field input:focus{outline:none;border-color:var(--accent)}
+.uid-item-code{margin-top:6px}
+.code-select{background:var(--bg);border:1px solid var(--border);border-radius:6px;
+  color:var(--text);padding:5px 7px;font-size:11px;font-family:var(--fb)}
+.uid-item-approach{display:inline-block;background:#1a2a3a;border-radius:10px;
+  font-size:10px;color:var(--muted);padding:2px 8px;margin-right:6px}
+.pill-nick{font-size:14px;letter-spacing:.5px}
+.pill-amt{font-size:16px;font-weight:500}
+
+/* ── STEP 4: RESULTS ── */
 .result-hero{background:var(--panel);border-radius:16px;padding:28px;text-align:center}
 .result-persona-label{font-size:13px;color:var(--muted);margin-bottom:8px}
 .result-total{font-family:var(--fb);font-size:clamp(28px,5vw,42px);letter-spacing:-1px;font-weight:300}
@@ -115,119 +140,127 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;
 .result-monthly-note{font-size:13px;color:var(--muted);margin-top:8px}
 
 .result-actions{display:flex;flex-direction:column;gap:8px}
-.action-cat{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-.action-cat-hdr{padding:12px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;
-  user-select:none;transition:background .15s}
-.action-cat-hdr:hover{background:#1a2a3a}
-.action-cat-name{font-size:13px;font-weight:500;color:var(--accent);flex:1}
-.action-cat-total{font-size:13px;color:var(--text)}
-.action-items{display:none;border-top:1px solid var(--border)}
-.action-items.open{display:block}
-.action-item{padding:12px 16px;border-bottom:1px solid var(--border);display:grid;
-  grid-template-columns:1fr auto;gap:16px;align-items:start}
-.action-item:last-child{border-bottom:none}
-.action-item-name{font-size:13px;color:var(--text);margin-bottom:3px}
-.action-item-method{font-size:12px;color:var(--muted);line-height:1.5}
-.action-item-cost{font-size:14px;font-weight:500;white-space:nowrap;text-align:right}
-.action-item-cost.D{color:var(--cD)} .action-item-cost.G{color:var(--cG)} .action-item-cost.W{color:var(--cW)}
+.cat-block{border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:8px}
+.cat-hdr{background:var(--panel);padding:14px 16px;cursor:pointer;
+  display:flex;align-items:center;gap:10px;transition:background .15s;user-select:none}
+.cat-hdr:hover{background:#1a2a3a}
+.cat-hdr-name{font-size:14px;font-weight:500;color:var(--accent);flex:1}
+.cat-hdr-count{font-size:13px;color:var(--text);font-weight:500}
+.cat-hdr-chev{color:var(--muted);font-size:12px;transition:transform .2s}
+.cat-hdr.open .cat-hdr-chev{transform:rotate(180deg)}
+.cat-body{display:none;border-top:1px solid var(--border)}
+.cat-body.open{display:block}
+.cat-persona-badge{font-size:10px;padding:2px 8px;border-radius:20px;border:1px solid;letter-spacing:.3px}
+.cat-persona-badge.D{color:var(--cD);border-color:var(--cD)}
+.cat-persona-badge.G{color:var(--cG);border-color:var(--cG)}
+.cat-persona-badge.W{color:var(--cW);border-color:var(--cW)}
+.subcat-row{display:flex;justify-content:space-between;align-items:center;
+  padding:10px 16px;border-bottom:1px solid var(--border);font-size:13px}
+.subcat-row:last-child{border-bottom:none}
+.subcat-name{color:var(--text)}
+.subcat-amt{color:var(--muted)}
+.proceed-btn-secondary{background:none;border:1px solid var(--accent);color:var(--accent)}
+.proceed-btn-secondary:hover{background:#0f2b23;opacity:1}
 
-/* COMPARE TOGGLE */
-.compare-toggle{border:1px solid var(--border);border-radius:10px;padding:12px 20px;
-  cursor:pointer;background:none;color:var(--muted);font-size:14px;font-family:var(--fb);
-  width:100%;text-align:center;transition:border-color .2s,color .2s}
-.compare-toggle:hover{border-color:var(--accent);color:var(--accent)}
-.compare-panel{display:none;background:var(--panel);border:1px solid var(--border);
-  border-radius:12px;overflow:hidden}
-.compare-panel.open{display:block}
-.compare-grid{display:grid;grid-template-columns:repeat(3,1fr)}
-.cmp-col{padding:16px;border-right:1px solid var(--border)}
-.cmp-col:last-child{border-right:none}
-.cmp-persona{font-family:var(--fb);font-size:14px;margin-bottom:4px}
-.cmp-col.D .cmp-persona{color:var(--cD)} .cmp-col.G .cmp-persona{color:var(--cG)} .cmp-col.W .cmp-persona{color:var(--cW)}
-.cmp-total{font-size:18px;font-weight:500;margin-bottom:12px}
-.cmp-row{display:flex;justify-content:space-between;font-size:11px;
-  color:var(--muted);padding:2px 0;border-bottom:1px solid #1e3048}
-.cmp-row:last-child{border-bottom:none}
-.cmp-amt{color:var(--text)}
+/* ── STEP 4.1: BANK SALAD UPLOAD/COMPARE ── */
+.compare-table{display:flex;flex-direction:column;gap:2px;margin-top:12px}
+.compare-row{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:6px;
+  padding:8px 10px;font-size:12px;border-bottom:1px solid var(--border);align-items:center}
+.compare-hdr{color:var(--muted);font-weight:500}
+.compare-total{font-weight:500;color:var(--text);border-top:1px solid var(--border);margin-top:4px}
+.compare-diff.over{color:#e08080}
+.compare-diff.under{color:var(--accent)}
+.upload-label{display:flex;align-items:center;justify-content:center}
 
-.btn-proj{background:var(--panel);border:1px solid var(--accent);border-radius:12px;
-  padding:14px 28px;color:var(--accent);font-size:15px;font-family:var(--fb);cursor:pointer;
-  transition:background .2s;align-self:center}
-.btn-proj:hover{background:var(--accent);color:var(--bg)}
+/* ── STEP 5: ANALYSIS ── */
+.analysis-title{font-family:var(--fb);font-size:16px;font-weight:500;color:var(--accent);text-align:center}
+.pie-grid{display:flex;gap:24px;flex-wrap:wrap;justify-content:center;margin-top:16px}
+.pie-block{display:flex;flex-direction:column;align-items:center;gap:10px;
+  background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;flex:1;min-width:200px}
+.pie-block-title{font-size:13px;color:var(--muted)}
+.pie-legend{display:flex;flex-direction:column;gap:4px;font-size:12px}
+.pie-legend-row{display:flex;align-items:center;gap:6px}
+.pie-legend-swatch{width:10px;height:10px;border-radius:3px;display:inline-block;flex-shrink:0}
 
-/* ── STEP 4: PROJECTION ── */
-.proj-ctrl{background:var(--panel);border:1px solid var(--border);border-radius:14px;
-  padding:24px;display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
-.ctrl-g{display:flex;flex-direction:column;gap:8px}
-.ctrl-lbl{font-size:12px;color:var(--muted)}
-.ctrl-val{font-size:20px;font-weight:500}
-input[type=range]{-webkit-appearance:none;width:100%;height:4px;
-  background:var(--border);border-radius:2px;outline:none}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;
-  border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--bg)}
+.bar-chart{display:flex;flex-direction:column;gap:14px;margin-top:16px;
+  background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px}
+.bar-row{display:flex;align-items:center;gap:10px}
+.bar-row-label{width:56px;font-size:13px;color:var(--text);flex-shrink:0}
+.bar-row.is-user .bar-row-label{color:var(--cUser);font-weight:600}
+.bar-track{flex:1;background:var(--bg);border-radius:6px;overflow:hidden;height:22px}
+.bar-fill{height:100%;border-radius:6px;transition:width .3s}
+.bar-fill.D{background:var(--cD)}
+.bar-fill.G{background:var(--cG)}
+.bar-fill.W{background:var(--cW)}
+.bar-fill.U{background:var(--cUser)}
+.bar-row-amt{width:110px;text-align:right;font-size:12px;color:var(--muted);flex-shrink:0}
+.proj-mode-label{font-size:13px;color:var(--accent2);text-align:center;font-weight:500}
 
-/* PERSONA TOGGLES FOR CHART */
-.chart-toggles{display:flex;gap:10px;margin-bottom:12px}
-.ptog{border-radius:8px;padding:7px 16px;font-size:13px;font-family:var(--fb);
-  cursor:pointer;transition:all .2s;border:2px solid transparent}
-.ptog.D{border-color:var(--cD);background:var(--cD)1a;color:var(--cD)}
-.ptog.G{border-color:var(--cG);background:var(--cG)1a;color:var(--cG)}
-.ptog.W{border-color:var(--cW);background:var(--cW)1a;color:var(--cW)}
-.ptog.off{border-color:var(--border);background:none;color:var(--muted)}
+/* ── STEP 6: PROJECTION ── */
+.slider-panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px;display:flex;flex-direction:column;gap:16px}
+.proj-target-note{font-size:13px;color:var(--muted);text-align:center;
+  padding-bottom:14px;border-bottom:1px solid var(--border)}
+.proj-target-note strong{color:var(--accent2);font-size:15px}
+.slider-row{display:flex;flex-direction:column;gap:6px}
+.slider-row-top{display:flex;justify-content:space-between;font-size:13px}
+.slider-row-top .lbl{color:var(--muted)}
+.slider-row-top .val{color:var(--accent);font-weight:500}
+.slider-row input[type=range]{width:100%;accent-color:var(--accent)}
+.slider-row input[type=range]:disabled{opacity:.4;accent-color:var(--muted)}
 
-.chart-layout{display:flex;gap:12px;align-items:stretch}
-.chart-wrap{flex:1;min-width:0;background:var(--panel);border:1px solid var(--border);border-radius:14px;
-  padding:24px 24px 12px;position:relative}
-.chart-canvas{width:100%!important;height:280px!important}
-/* Trophy sidebar */
-.trophy-sidebar{width:88px;flex-shrink:0;background:var(--panel);border:1px solid var(--border);
-  border-radius:14px;padding:14px 10px;display:flex;flex-direction:column;
-  justify-content:space-between;gap:2px}
-.ts-item{display:flex;align-items:flex-start;gap:5px;padding:3px 0}
-.ts-icon{font-size:13px;flex-shrink:0;margin-top:1px}
-.ts-name{font-size:11px;color:var(--text);line-height:1.3}
-.ts-amt{font-size:10px;color:var(--muted)}
+.proj-btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.proj-btn{flex:1;min-width:120px;background:var(--bg);border:1px solid var(--border);color:var(--text);
+  border-radius:8px;font-size:12px;font-family:var(--fb);padding:8px 10px;cursor:pointer;transition:all .2s}
+.proj-btn:hover{border-color:var(--accent);color:var(--accent)}
+.proj-btn.locked{border-color:var(--accent);color:var(--accent);background:#0f2b23}
+.proj-btn.danger{border-color:#5a2a2a;color:#e08080}
+.proj-btn.danger:hover{border-color:#e05050;color:#e05050;background:#2a1414}
 
-/* TROPHY TIMELINE */
-.tl-wrap{background:var(--panel);border:1px solid var(--border);
-  border-top:none;border-radius:0 0 14px 14px;padding:20px 24px}
-.tl-label{font-size:11px;color:var(--muted);margin-bottom:12px;letter-spacing:.5px}
-.tl-track{position:relative;height:64px;margin:0 4px}
-.tl-axis{position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--border)}
-.tl-marker{position:absolute;bottom:0;transform:translateX(-50%);
-  display:flex;flex-direction:column;align-items:center;gap:3px}
-.tl-marker .tm-icon{font-size:20px;line-height:1}
-.tl-marker .tm-name{font-size:10px;color:var(--muted);white-space:nowrap}
-.tl-marker .tm-year{font-size:10px;font-weight:500;white-space:nowrap}
-.tl-marker.reached .tm-name{color:var(--accent2)}
-.tl-marker.reached .tm-year{color:var(--accent2)}
-.tl-tick{position:absolute;bottom:2px;width:1px;height:8px;background:var(--muted)}
-.tl-marker.reached .tl-tick{background:var(--accent2)}
-.tl-end-labels{display:flex;justify-content:space-between;font-size:11px;
-  color:var(--muted);padding-top:6px}
+.proj-chart-wrap{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px}
+.chart-flex{display:flex;gap:16px;align-items:center}
+.chart-flex #proj-chart{flex:1;min-width:0}
+.chart-flex #proj-chart svg{width:100%;height:auto;display:block}
+.chart-legend{width:150px;flex-shrink:0;display:flex;flex-direction:column;gap:10px}
+.legend-item{display:flex;align-items:flex-start;gap:6px;font-size:12px;color:var(--text);line-height:1.4}
+.legend-item.empty{color:var(--muted);opacity:.7}
 
-/* approach badge */
-.approach-badge{display:inline-block;margin-left:8px;font-size:10px;
-  color:var(--muted);background:#1a2a3a;border:1px solid var(--border);
-  border-radius:4px;padding:1px 6px;vertical-align:middle;letter-spacing:.3px}
+.trophy-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.trophy-card{position:relative;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+  padding:14px;display:flex;flex-direction:column;gap:8px}
+.trophy-card.owned{border-color:var(--accent)}
+.trophy-owned-badge{position:absolute;top:-14px;left:50%;transform:translateX(-50%);
+  width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--bg);
+  display:flex;align-items:center;justify-content:center;font-size:15px;
+  box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.trophy-name{font-size:14px;font-weight:500;display:flex;align-items:center;gap:6px}
+.trophy-icon{font-size:16px}
+.trophy-meta{font-size:12px;color:var(--muted)}
+.trophy-card.owned .trophy-meta{opacity:.6}
+.trophy-add-row{display:flex;gap:8px;align-items:center;margin-top:auto}
+.trophy-add-row input{width:60px;background:var(--bg);border:1px solid var(--border);
+  border-radius:8px;color:var(--text);padding:6px 8px;font-size:13px}
+.trophy-add-row input:disabled{opacity:.4}
+.trophy-add-row span{font-size:12px;color:var(--muted)}
+.trophy-unreachable{font-size:12px;color:var(--muted);font-style:italic}
+.trophy-add-btn{background:var(--accent);color:var(--bg);border:none;border-radius:8px;
+  padding:6px 12px;font-size:12px;cursor:pointer;transition:opacity .2s;flex:1}
+.trophy-add-btn:disabled{background:var(--border);color:var(--muted);cursor:not-allowed}
+.trophy-add-btn:not(:disabled):hover{opacity:.85}
 
-/* approach dashboard */
-.approach-section{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-.approach-hdr{padding:12px 16px;font-size:13px;color:var(--muted);letter-spacing:1px;
-  text-transform:uppercase;font-weight:300;border-bottom:1px solid var(--border)}
-.approach-grid{display:flex;flex-wrap:wrap;gap:8px;padding:16px}
-.approach-card{background:#1a2a3a;border:1px solid var(--border);border-radius:8px;
-  padding:10px 14px;min-width:120px}
-.approach-card-name{font-size:12px;color:var(--accent);margin-bottom:4px;letter-spacing:.5px}
-.approach-card-count{font-size:11px;color:var(--muted)}
-.approach-card-cost{font-size:14px;font-weight:500;margin-top:2px}
+.trophy-stack-panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.trophy-stack-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.trophy-stack-hdr-title{font-size:14px;font-weight:500;color:var(--accent)}
+.trophy-stack-item{display:flex;justify-content:space-between;align-items:center;
+  padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.trophy-stack-item:last-child{border-bottom:none}
+.trophy-stack-empty{font-size:13px;color:var(--muted);padding:8px 0}
+.trophy-cancel-btn{background:none;border:1px solid #e05050;color:#e05050;
+  border-radius:8px;font-size:11px;padding:3px 8px;cursor:pointer}
 
 /* ── RESPONSIVE ── */
 @media(max-width:680px){
   .persona-grid{grid-template-columns:1fr}
-  .proj-ctrl{grid-template-columns:1fr}
-  .compare-grid{grid-template-columns:1fr}
-  .cmp-col{border-right:none;border-bottom:1px solid var(--border)}
 }
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 .fu{animation:fadeUp .35s ease both}
@@ -235,15 +268,31 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 </head>
 <body>
 
+<!-- ══ STEP 0: LOGIN/START ══ -->
+<div id="s0" class="step active">
+  <div class="hero fu">
+    <h1>인생게임</h1>
+    <p>당신은 어떤 방식으로 살고 있나요?</p>
+  </div>
+  <div class="login-warning fu">
+    ⚠️ 이 앱은 서버 없이 <strong>이 브라우저에만</strong> 진행 상황을 저장합니다. 캐시를 지우거나 다른 기기·다른 브라우저로 접속하면 저장된 데이터가 보이지 않습니다 — <strong>중요한 결과는 반드시 다운로드</strong>해서 따로 보관하세요.
+  </div>
+  <div class="proj-btn-row fu">
+    <button class="proceed-btn" id="btn-continue" onclick="continueSaved()" disabled>이어하기 →</button>
+    <button class="proceed-btn proceed-btn-secondary" onclick="startFresh()">새로 시작하기 →</button>
+  </div>
+  <div class="setup-header" id="saved-state-note"></div>
+</div>
+
 <!-- ══ STEP 1: PERSONA ══ -->
-<div id="s1" class="step active">
+<div id="s1" class="step">
   <div class="hero fu">
     <h1>인생게임</h1>
     <p>당신은 어떤 방식으로 살고 있나요?</p>
   </div>
   <div class="persona-grid">
 
-    <div class="pc D fu" style="animation-delay:.05s" onclick="selectPersona('설계자')">
+    <div class="pc D fu" style="animation-delay:.05s" onclick="selectBasePersona('설계자')">
       <img class="pc-avatar-img" src="./인생게임/설계자_아치.png" alt="아치">
       <div class="pc-nick">the architect</div>
       <div class="pc-name">archi · 아치</div>
@@ -257,7 +306,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       </div>
     </div>
 
-    <div class="pc G fu" style="animation-delay:.1s" onclick="selectPersona('소비자')">
+    <div class="pc G fu" style="animation-delay:.1s" onclick="selectBasePersona('소비자')">
       <img class="pc-avatar-img" src="./인생게임/소비자_샤이니.png" alt="샤이니">
       <div class="pc-nick">the consumer</div>
       <div class="pc-name">shiny · 샤이니</div>
@@ -271,10 +320,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       </div>
     </div>
 
-    <div class="pc W fu" style="animation-delay:.15s" onclick="selectPersona('노동자')">
-      <img class="pc-avatar-img" src="./인생게임/노동자_토일.png" alt="토일">
+    <div class="pc W fu" style="animation-delay:.15s" onclick="selectBasePersona('노동자')">
+      <img class="pc-avatar-img" src="./인생게임/노동자_토일.png" alt="그라인드">
       <div class="pc-nick">the laborer</div>
-      <div class="pc-name">toil · 토일</div>
+      <div class="pc-name">grind · 그라인드</div>
       <div class="pc-tagline">"최저가를 찾고, 내 손으로 만든다"</div>
       <div class="pc-desc">진공청소기 · 밧줄 · 공구를 몸에 묶고, 최저가를 찾아 방황한다. 충혈된 눈, 다이소 밴드, 목장갑, 시장 슬리퍼. 좌우명은 놀면 안된다.</div>
       <div class="pc-tags">
@@ -288,7 +337,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   </div>
 </div>
 
-<!-- ══ STEP 2: SETUP ══ -->
+<!-- ══ STEP 2: HOUSEHOLD ══ -->
 <div id="s2" class="step">
   <nav class="nav">
     <button class="nav-back" onclick="gotoStep(1)">← 페르소나</button>
@@ -296,196 +345,273 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
     <span class="nav-step" id="s2-badge"></span>
   </nav>
   <div class="setup-header">가구 유형을 선택하세요</div>
+  <button class="proceed-btn" onclick="tryProceedToStep3()">다음 →</button>
   <div class="hh-row" id="hh-row">
-    <button class="hh-btn" onclick="selectHH('싱글남',this)">👨 싱글남</button>
-    <button class="hh-btn" onclick="selectHH('싱글여',this)">👩 싱글여</button>
-    <button class="hh-btn" onclick="selectHH('커플',this)">👫 커플</button>
-    <button class="hh-btn" onclick="selectHH('가족',this)">👨‍👩‍👧 가족</button>
-    <button class="hh-btn" onclick="selectHH('시니어',this)">👴 시니어</button>
+    <button class="hh-btn" onclick="selectHousehold('싱글남',this)">👨 싱글남</button>
+    <button class="hh-btn" onclick="selectHousehold('싱글여',this)">👩 싱글여</button>
+    <button class="hh-btn" onclick="selectHousehold('커플',this)">👫 커플</button>
+    <button class="hh-btn" onclick="selectHousehold('가족',this)">👨‍👩‍👧 가족</button>
+    <button class="hh-btn" onclick="selectHousehold('시니어',this)">👴 시니어</button>
   </div>
-  <div class="setup-header" style="margin-top:8px">항목을 검토하세요</div>
-  <div id="item-list"></div>
   <div id="hh-warning" style="display:none;color:#e05050;font-size:13px;text-align:center;padding:4px 0">
     ⚠ 가구 유형을 선택해 주세요
   </div>
-  <button class="proceed-btn" onclick="tryProceed()">결과 보기 →</button>
 </div>
 
-<!-- ══ STEP 3: RESULTS ══ -->
+<!-- ══ STEP 3: CATEGORY PERSONA OVERRIDE ══ -->
 <div id="s3" class="step">
   <nav class="nav">
-    <button class="nav-back" onclick="gotoStep(2)">← 항목 선택</button>
-    <span class="nav-title">결과</span>
+    <button class="nav-back" onclick="gotoStep(2)">← 가구 선택</button>
+    <span class="nav-title">대분류별 조정</span>
     <span class="nav-step" id="s3-badge"></span>
   </nav>
-  <div class="result-hero fu" id="result-hero"></div>
-  <div class="approach-section" id="approach-section"></div>
-  <button class="compare-toggle" onclick="toggleCompare()" id="cmp-btn">▾ 세 페르소나 비교 보기</button>
-  <div class="compare-panel" id="cmp-panel"></div>
-  <div class="result-actions" id="result-actions"></div>
-  <button class="btn-proj fu" onclick="gotoStep(4)">재무 프로젝션 보기 →</button>
+  <div class="fu" style="font-family:var(--fb);font-size:20px;font-weight:500;color:var(--accent);letter-spacing:1px">월별 지출</div>
+  <div class="setup-header" style="margin-top:-8px">대분류별로 다른 페르소나를 적용해 보세요 (기본값: 선택한 페르소나)</div>
+  <button class="proceed-btn" id="btn-confirm-total-top" onclick="gotoResults()"></button>
+  <button class="cat-collapse-all-btn" id="btn-collapse-all" onclick="toggleAllCatsCollapse()"></button>
+  <div id="cat-tabs" style="display:flex;flex-direction:column;gap:10px"></div>
 </div>
 
-<!-- ══ STEP 4: PROJECTION ══ -->
+<!-- ══ STEP 4: RESULTS ══ -->
 <div id="s4" class="step">
   <nav class="nav">
-    <button class="nav-back" onclick="gotoStep(3)">← 결과</button>
-    <span class="nav-title">재무 프로젝션</span>
+    <button class="nav-back" onclick="gotoStep(3)">← 대분류 조정</button>
+    <span class="nav-title">결과</span>
     <span class="nav-step" id="s4-badge"></span>
   </nav>
+  <div class="result-hero fu" id="result-hero"></div>
+  <div class="proj-btn-row">
+    <button class="proceed-btn" onclick="startCharacterPath()">확정하고 프로젝션 →</button>
+    <button class="proceed-btn proceed-btn-secondary" onclick="startComparePath()">확정하고 실적과 비교 →</button>
+  </div>
+  <div class="result-actions" id="result-actions"></div>
+</div>
 
-  <div class="proj-ctrl fu">
-    <div class="ctrl-g">
-      <div class="ctrl-lbl">월 소득</div>
-      <div class="ctrl-val" id="v-income">5,000,000원</div>
-      <input type="range" id="sl-income" min="1000000" max="15000000" step="500000" value="5000000" oninput="updateParam('income',+this.value)">
+<!-- ══ STEP 4.1: BANK SALAD UPLOAD/COMPARE ══ -->
+<div id="s4b" class="step">
+  <nav class="nav">
+    <button class="nav-back" onclick="gotoStep(4)">← 결과</button>
+    <span class="nav-title">실적 업로드</span>
+    <span class="nav-step" id="s4b-badge"></span>
+  </nav>
+  <div class="setup-header">뱅크샐러드에서 기간(from~to)을 선택해 대분류별 총액을 확인하고, <strong>총액 ÷ 일수 × 30</strong>으로 월평균을 계산해서 템플릿에 입력해 주세요 (최소 6개월 데이터 권장)</div>
+  <div class="proj-btn-row">
+    <button class="proj-btn" onclick="downloadTemplate()">템플릿 다운로드</button>
+    <label class="proj-btn upload-label">
+      실적 업로드
+      <input type="file" accept=".csv" onchange="handleFileUpload(event)" style="display:none">
+    </label>
+    <button class="proj-btn" onclick="toggleCompareAnnual()" id="btn-compare-annual">월간 보기</button>
+  </div>
+  <div id="compare-table" class="compare-table"></div>
+  <button class="proj-btn" onclick="downloadComparisonResult()" id="btn-download-compare" disabled>비교결과 다운로드</button>
+  <button class="proceed-btn" id="btn-goto-analysis-compare" onclick="proceedFromCompare()" disabled>다음: 분석 결과 →</button>
+</div>
+
+<!-- ══ STEP 5: ANALYSIS ══ -->
+<div id="s5" class="step">
+  <nav class="nav">
+    <button class="nav-back" id="s5-back-btn" onclick="gotoStep(4)">← 결과</button>
+    <span class="nav-title">분석 결과</span>
+    <span class="nav-step" id="s5-badge"></span>
+  </nav>
+  <div id="analysis-content"></div>
+  <button class="proceed-btn" onclick="gotoProjection()">재무 프로젝션 →</button>
+</div>
+
+<!-- ══ STEP 6: FINANCIAL PROJECTION ══ -->
+<div id="s6" class="step">
+  <nav class="nav">
+    <button class="nav-back" onclick="gotoStep(5)">← 분석</button>
+    <span class="nav-title">재무 프로젝션</span>
+    <span class="nav-step" id="s6-badge"></span>
+  </nav>
+  <div class="proj-mode-label" id="proj-mode-label"></div>
+
+  <div class="slider-panel fu">
+    <div class="proj-target-note" id="proj-target-note"></div>
+    <div class="slider-row">
+      <div class="slider-row-top"><span class="lbl">월 소득</span><span class="val" id="v-income"></span></div>
+      <input type="range" id="sl-income" min="1000000" max="20000000" step="100000" oninput="onProjInput()">
     </div>
-    <div class="ctrl-g">
-      <div class="ctrl-lbl">기간</div>
-      <div class="ctrl-val" id="v-years">20년</div>
-      <input type="range" id="sl-years" min="5" max="40" step="1" value="20" oninput="updateParam('years',+this.value)">
+    <div class="slider-row">
+      <div class="slider-row-top"><span class="lbl">기간</span><span class="val" id="v-years"></span></div>
+      <input type="range" id="sl-years" min="1" max="50" step="1" oninput="onProjInput()">
     </div>
-    <div class="ctrl-g">
-      <div class="ctrl-lbl">연평균 수익률</div>
-      <div class="ctrl-val" id="v-rate">5%</div>
-      <input type="range" id="sl-rate" min="1" max="20" step="0.5" value="5" oninput="updateParam('rate',+this.value)">
+    <div class="slider-row">
+      <div class="slider-row-top"><span class="lbl">연평균 수익률</span><span class="val" id="v-return"></span></div>
+      <input type="range" id="sl-return" min="1" max="30" step="0.5" oninput="onProjInput()">
+    </div>
+    <div class="slider-row">
+      <div class="slider-row-top"><span class="lbl">근로소득 중단 시점</span><span class="val" id="v-retire"></span></div>
+      <input type="range" id="sl-retire" min="1" max="35" step="1" oninput="onProjInput()">
+    </div>
+    <div class="proj-btn-row">
+      <button class="proj-btn" id="btn-lock" onclick="lockSliders()">소득 전망 고정</button>
+      <button class="proj-btn" onclick="resetSliders()">소득 전망 초기화</button>
+      <button class="proj-btn" onclick="clearTrophies()">트로피 초기화</button>
+      <button class="proj-btn danger" onclick="resetAll()">전체 초기화</button>
+    </div>
+    <div class="proj-btn-row">
+      <button class="proj-btn" onclick="downloadProjectionResult()">📥 결과 다운로드 (CSV)</button>
+    </div>
+    <div class="login-warning" style="font-size:11px;padding:10px 14px">
+      ⚠️ 이 결과는 브라우저에만 저장됩니다. 꼭 다운로드해서 보관하세요.
     </div>
   </div>
 
-  <div>
-    <div class="chart-toggles" id="chart-toggles"></div>
-    <div class="chart-layout">
-      <div class="chart-wrap">
-        <canvas id="proj-chart" class="chart-canvas"></canvas>
-      </div>
-      <div class="trophy-sidebar" id="trophy-sidebar"></div>
+  <div class="proj-chart-wrap fu">
+    <div class="chart-flex">
+      <div id="proj-chart"></div>
+      <div class="chart-legend" id="chart-legend"></div>
     </div>
-    <div class="tl-wrap">
-      <div class="tl-label">TROPHY MILESTONES</div>
-      <div class="tl-track">
-        <div class="tl-axis"></div>
-        <div id="tl-markers"></div>
-      </div>
-      <div class="tl-end-labels"><span>0년</span><span id="tl-end-year">20년</span></div>
+  </div>
+
+  <div class="setup-header" id="trophy-section-note"></div>
+  <div class="trophy-grid" id="trophy-grid"></div>
+
+  <div class="trophy-stack-panel">
+    <div class="trophy-stack-hdr">
+      <span class="trophy-stack-hdr-title">선택한 트로피</span>
     </div>
+    <div id="trophy-stack-list"></div>
   </div>
 </div>
 
+<script src="./calc.js"></script>
 <script>
-// ── CONSTANTS ──
 const PERSONAS = [
-  {key:'설계자',cls:'D',color:'#4fc3a1'},
-  {key:'소비자',cls:'G',color:'#7eb8f7'},
-  {key:'노동자',cls:'W',color:'#f0a500'},
-];
-const ASSET_TROPHIES = [
-  {name:'자동차',    amount:5e7, icon:'🚗', desc:'5천만원'},
-  {name:'농막',      amount:1e8, icon:'🏕️', desc:'1억원'},
-  {name:'My Space',  amount:2e8, icon:'🏢', desc:'2억원'},
-  {name:'세컨하우스',amount:2e8, icon:'🏠', desc:'2억원'},
-  {name:'섬·산',    amount:4e8, icon:'🏝️', desc:'4억원'},
+  {key:'설계자',cls:'D',nick:'아치'},
+  {key:'소비자',cls:'G',nick:'샤이니'},
+  {key:'노동자',cls:'W',nick:'그라인드'},
 ];
 
-// 트로피 마일스톤 계산
-// proj: 연도별 누적 자산 배열 [0년, 1년, ..., N년] (원 단위)
-// monthlyCost: 월 지출 (원)
-// returns: [{type, name, icon, threshold, year(null=미달성)}, ...]
-function calcMilestones(proj, monthlyCost) {
-  const annualRate = params.rate / 100;
-  const milestones = [];
-
-  // ① 지출 재생산 (FI): 첫 번째 트로피 — 이후 자산 트로피의 차감 기준점
-  const fiThreshold = (annualRate > 0) ? (monthlyCost * 12 / annualRate) : Infinity;
-  const fiYear = proj.findIndex(v => v >= fiThreshold);
-  milestones.push({
-    type: 'fi',
-    name: '지출 재생산',
-    icon: '🌱',
-    desc: `월지출 × 12 ÷ ${params.rate}%`,
-    threshold: fiThreshold,
-    individual: fiThreshold,
-    year: fiYear >= 0 ? fiYear : null,
-  });
-
-  // ② 자산 트로피: FI threshold 차감 후 순차 누적
-  let cumulative = fiThreshold;   // FI 달성 금액을 기준점으로 차감하고 시작
-  ASSET_TROPHIES.forEach(t => {
-    cumulative += t.amount;
-    const year = proj.findIndex(v => v >= cumulative);
-    milestones.push({
-      type: 'asset',
-      ...t,
-      threshold: cumulative,       // 실제 필요 누적 자산 (FI + 이전 자산 포함)
-      individual: t.amount,
-      year: year >= 0 ? year : null,
-    });
-  });
-
-  return milestones;
-}
-
-// ── STATE ──
 let ITEMS = [];
-let persona = null;         // selected persona key
-let household = null;       // selected household
-let itemState = {};         // id → boolean
-let params = {income:5000000,years:20,rate:5};
-let chartPersonasOrder = []; // ordered list of toggled personas for chart
-let projChart = null;
+let FILTERED = [];
+let CATS = [];
+let basePersona = null;
+let household = null;
+let catPersona = {};
+let loan = { principal: 0, termYears: 10, rate: 4 };
+let collapsedCats = new Set();
+let comparisonMode = false;
+let userCategoryAvgs = {};
+let userActualTotal = 0;
+let compareAnnualView = false;
 
-// ── LOAD ──
-fetch('./data.json').then(r=>r.json()).then(d=>{ITEMS=d;});
+const dataLoadPromise = fetch('./data.json').then(r=>r.json()).then(d=>{ d.forEach((item, i) => { item._idx = i; }); ITEMS = d; });
 
-// ── CALC ──
-function calcCost(item, pKey) {
-  const d = item[pKey]; if(!d||!d['유형']) return 0;
-  const cap  = (d['가격']&&d['내용연수']) ? d['가격']/d['내용연수']/12 : 0;
-  const opex = (d['사용시간']!=null&&d['사용횟수']!=null&&d['단가']!=null)
-               ? d['사용시간']*d['사용횟수']*d['단가'] : 0;
-  const con  = (d['소모품가격']&&d['소모품내용연수']) ? d['소모품가격']/d['소모품내용연수']/12 : 0;
-  return [0,cap,opex,con,cap+opex,cap+con,opex+con][d['유형']]||0;
-}
-function calcTotal(pKey) {
-  return ITEMS.filter(i=>itemState[i.id]).reduce((s,i)=>s+calcCost(i,pKey),0);
-}
-function calcProj(monthlyCost) {
-  const r=params.rate/100/12, months=params.years*12;
-  const saving=params.income-monthlyCost;
-  let acc=0; const out=[0];
-  for(let m=1;m<=months;m++){acc=acc*(1+r)+saving; if(m%12===0) out.push(Math.round(acc));}
-  return out;
+function fmt(n){ return Math.round(n).toLocaleString('ko-KR'); }
+function nickOf(key){ return PERSONAS.find(p=>p.key===key).nick; }
+function clsOf(key){ return PERSONAS.find(p=>p.key===key).cls; }
+
+// ══ STEP 0: LOGIN/START (LocalStorage 저장/복원) ══
+
+const SAVE_KEY = 'lifegame_state_v1';
+
+function saveState() {
+  const sliders = projInitialized ? {
+    income: document.getElementById('sl-income').value,
+    years: document.getElementById('sl-years').value,
+    ret: document.getElementById('sl-return').value,
+    retire: document.getElementById('sl-retire').value,
+    locked: sliderLocked,
+  } : null;
+  const state = {
+    basePersona, household, catPersona, loan, trophyStack,
+    comparisonMode, userCategoryAvgs, userActualTotal, sliders,
+    items: ITEMS.map(i => ({ _idx: i._idx, 설계자: i.설계자, 소비자: i.소비자, 노동자: i.노동자 })),
+  };
+  localStorage.setItem(SAVE_KEY, JSON.stringify(state));
 }
 
-function fmt(n){return Math.round(n).toLocaleString('ko-KR');}
-function fmtOk(n){
-  if(n>=1e8) return (n/1e8).toFixed(1)+'억';
-  if(n>=1e4) return Math.round(n/1e4)+'만';
-  return fmt(n);
+function initLoginScreen() {
+  const raw = localStorage.getItem(SAVE_KEY);
+  if (!raw) return;
+  try {
+    const state = JSON.parse(raw);
+    if (!state.basePersona || !state.household) return;
+    document.getElementById('btn-continue').disabled = false;
+    document.getElementById('saved-state-note').textContent =
+      `이전 기록: ${nickOf(state.basePersona)} / ${state.basePersona} · ${state.household}`;
+  } catch (e) { /* 저장된 데이터가 깨졌으면 이어하기 비활성 유지 */ }
 }
-const cats = ()=>[...new Set(ITEMS.map(i=>i['대분류']))];
 
-// ── NAVIGATION ──
+function continueSaved() {
+  const raw = localStorage.getItem(SAVE_KEY);
+  if (!raw) return;
+  const state = JSON.parse(raw);
+  dataLoadPromise.then(() => {
+    basePersona = state.basePersona;
+    household = state.household;
+    catPersona = state.catPersona;
+    loan = state.loan || { principal: 0, termYears: 10, rate: 4 };
+    trophyStack = state.trophyStack || [];
+    comparisonMode = state.comparisonMode || false;
+    userCategoryAvgs = state.userCategoryAvgs || {};
+    userActualTotal = state.userActualTotal || 0;
+
+    (state.items || []).forEach(saved => {
+      const item = ITEMS.find(i => i._idx === saved._idx);
+      if (item) { item.설계자 = saved.설계자; item.소비자 = saved.소비자; item.노동자 = saved.노동자; }
+    });
+    FILTERED = filterByHousehold(ITEMS, household);
+    CATS = getCategoriesInOrder(FILTERED);
+
+    const badge = nickOf(basePersona) + ' / ' + basePersona;
+    ['s2-badge','s3-badge','s4-badge','s4b-badge','s5-badge','s6-badge'].forEach(id => {
+      document.getElementById(id).textContent = badge;
+    });
+
+    if (state.sliders) {
+      projInitialized = true;
+      sliderLocked = state.sliders.locked;
+      document.getElementById('sl-income').value = state.sliders.income;
+      document.getElementById('sl-years').value = state.sliders.years;
+      document.getElementById('sl-return').value = state.sliders.ret;
+      document.getElementById('sl-retire').value = state.sliders.retire;
+    }
+
+    gotoStep(4);
+    renderResults();
+  });
+}
+
+function startFresh() {
+  gotoStep(1);
+}
+
 function gotoStep(n) {
   document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
   document.getElementById('s'+n).classList.add('active');
   window.scrollTo(0,0);
-  if(n===2) renderSetup();
-  if(n===3) renderResults();
-  if(n===4) renderProjection();
 }
 
-function selectPersona(p) {
-  persona = p;
-  const info = {설계자:{name:'아치'},소비자:{name:'샤이니'},노동자:{name:'토일'}};
-  const badge = info[p].name + ' / ' + p;
-  document.getElementById('s2-badge').textContent = badge;
-  document.getElementById('s3-badge').textContent = badge;
-  document.getElementById('s4-badge').textContent = badge;
-  chartPersonasOrder = [p];
+function selectBasePersona(key) {
+  basePersona = key;
+  const badge = nickOf(key) + ' / ' + key;
+  ['s2-badge','s3-badge','s4-badge','s4b-badge','s5-badge','s6-badge'].forEach(id => {
+    document.getElementById(id).textContent = badge;
+  });
   gotoStep(2);
 }
 
-function tryProceed() {
+function selectHousehold(hh, btn) {
+  household = hh;
+  document.querySelectorAll('.hh-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('hh-warning').style.display = 'none';
+  FILTERED = filterByHousehold(ITEMS, hh);
+  CATS = getCategoriesInOrder(FILTERED);
+  resetCatPersona();
+}
+
+function resetCatPersona() {
+  catPersona = {};
+  CATS.forEach(c => catPersona[c] = basePersona);
+}
+
+function tryProceedToStep3() {
   if (!household) {
     const w = document.getElementById('hh-warning');
     w.style.display = 'block';
@@ -493,343 +619,725 @@ function tryProceed() {
     return;
   }
   gotoStep(3);
+  renderCategoryTabs();
 }
 
-function selectHH(hh, btn) {
-  household = hh;
-  document.querySelectorAll('.hh-btn').forEach(b=>b.classList.remove('selected'));
-  btn.classList.add('selected');
-  document.getElementById('hh-warning').style.display = 'none';
-  // Init item state
-  itemState = {};
-  ITEMS.forEach(item=>{ itemState[item.id] = (item['가구'][hh]==='O'); });
-  renderItemList();
+let expandedUid = null;
+
+const CODE_GROUPS = { 1: ['capex'], 2: ['opex'], 3: ['con'], 4: ['capex','opex'], 5: ['capex','con'], 6: ['opex','con'], 7: [], 8: ['opex'] };
+const CODE_LABELS = { 1: 'CAPEX', 2: 'OPEX', 3: 'Consumable', 4: 'CAPEX+OPEX', 5: 'CAPEX+소모품', 6: 'OPEX+소모품', 7: '지인찬스', 8: 'Utility' };
+
+// code(1-8)가 정의하는 그룹만 값을 갖도록 맞춘다 — 그룹 밖 필드는 null로, 그룹 안 필드는 null이면 기본값(0/1)으로 채운다.
+function normalizeItemGroups(p) {
+  const active = CODE_GROUPS[p.code] || [];
+  if (active.includes('capex')) {
+    if (p.qty == null) p.qty = 1;
+    if (p.price == null) p.price = 0;
+    if (p.life == null) p.life = 1;
+  } else { p.qty = null; p.price = null; p.life = null; }
+  if (active.includes('opex')) {
+    if (p.freq == null) p.freq = 0;
+    if (p.period == null) p.period = 0;
+    if (p.unit == null) p.unit = 0;
+  } else { p.freq = null; p.period = null; p.unit = null; }
+  if (active.includes('con')) {
+    if (p.conP == null) p.conP = 0;
+    if (p.conL == null) p.conL = 1;
+  } else { p.conP = null; p.conL = null; }
 }
 
-// ── STEP 2: SETUP ──
-function renderSetup() {
-  if(!household) { document.getElementById('item-list').innerHTML=''; return; }
-  renderItemList();
+function varInput(idx, pKey, field, value, unit, min) {
+  return `<label class="var-field">${unit}<input type="number" min="${min}" value="${value}"
+    onchange="updateItemVar(${idx},'${pKey}','${field}',this.value)"></label>`;
 }
-function renderItemList() {
-  const list = document.getElementById('item-list');
-  list.innerHTML = cats().map((cat,ci)=>{
-    const catItems = ITEMS.filter(i=>i['대분류']===cat);
-    const rows = catItems.map(item=>{
-      const on = itemState[item.id];
-      const method = item[persona]&&item[persona]['실행방법'];
-      const apBadges = PERSONAS.map(p=>{
-        const ap = item[p.key]&&item[p.key]['approach'];
-        return ap ? `<span class="approach-badge" style="color:var(--c${p.cls})">${p.key[0]}: ${ap}</span>` : '';
-      }).join('');
-      return `<div class="item-row${on?'':' off'}" onclick="toggleItem(${item.id})">
-        <div class="item-info">
-          <div class="item-sub">${item['소분류']} ${apBadges}</div>
-          ${method?`<div class="item-approach">→ ${method}</div>`:''}
+
+function codeSelect(idx, pKey, code) {
+  const options = Object.keys(CODE_LABELS).map(c =>
+    `<option value="${c}" ${+c === code ? 'selected' : ''}>${c}. ${CODE_LABELS[c]}</option>`
+  ).join('');
+  return `<select class="code-select" onchange="updateItemCode(${idx},'${pKey}',this.value)">${options}</select>`;
+}
+
+function renderItemVarInputs(idx, pKey, vars) {
+  if (!vars) return '<div class="uid-item-vars">해당 없음</div>';
+  normalizeItemGroups(vars);
+  const active = CODE_GROUPS[vars.code] || [];
+  const groups = [];
+  if (active.includes('capex')) {
+    groups.push(`<div class="var-group">
+      ${varInput(idx, pKey, 'price', vars.price, '가격(원)', 0)}
+      ${varInput(idx, pKey, 'qty', vars.qty, '개수', 0)}
+      ${varInput(idx, pKey, 'life', vars.life, '내용연수(년)', 1)}
+    </div>`);
+  }
+  if (active.includes('opex')) {
+    const freqLabel = vars.code === 8 ? '월 사용시간' : '사용빈도';
+    groups.push(`<div class="var-group">
+      ${varInput(idx, pKey, 'freq', vars.freq, freqLabel, 0)}
+      ${varInput(idx, pKey, 'period', vars.period, '기간', 0)}
+      ${varInput(idx, pKey, 'unit', vars.unit, '단가(원)', 0)}
+    </div>`);
+  }
+  if (active.includes('con')) {
+    groups.push(`<div class="var-group">
+      ${varInput(idx, pKey, 'conP', vars.conP, '소모품가격(원)', 0)}
+      ${varInput(idx, pKey, 'conL', vars.conL, '소모품수명(년)', 1)}
+    </div>`);
+  }
+  const body = groups.length ? groups.join('') : '<div class="uid-item-vars">해당 없음</div>';
+  return `<div class="uid-item-code">${codeSelect(idx, pKey, vars.code)}</div>${body}`;
+}
+
+function updateItemVar(idx, pKey, field, rawValue) {
+  const value = rawValue === '' ? null : +rawValue;
+  ITEMS[idx][pKey][field] = value;
+  renderCategoryTabs();
+}
+
+function updateItemCode(idx, pKey, rawCode) {
+  const p = ITEMS[idx][pKey];
+  p.code = +rawCode;
+  normalizeItemGroups(p);
+  renderCategoryTabs();
+}
+
+function renderLoanBox() {
+  const monthlyPrincipal = loan.termYears > 0 ? loan.principal / loan.termYears / 12 : 0;
+  const monthlyInterest = loan.principal * loan.rate / 100 / 12;
+  return `<div class="cat-tab-row fu">
+    <div class="cat-tab-hdr-row">
+      <div class="cat-tab-name">🏦 대출</div>
+    </div>
+    <div class="var-group">
+      <label class="var-field">대출 원금(원)<input type="number" min="0" value="${loan.principal}" onchange="updateLoan('principal',this.value)"></label>
+      <label class="var-field">상환기간(년)<input type="number" min="1" value="${loan.termYears}" onchange="updateLoan('termYears',this.value)"></label>
+      <label class="var-field">대출금리(%)<input type="number" min="0" step="0.1" value="${loan.rate}" onchange="updateLoan('rate',this.value)"></label>
+    </div>
+    ${loan.principal > 0 ? `<div class="loan-estimate">초기 월 상환 예상: 원금 ${fmt(monthlyPrincipal)}원 + 이자 ${fmt(monthlyInterest)}원 (재무 프로젝션에 반영, 상환기간 이후 소멸)</div>` : ''}
+  </div>`;
+}
+
+function updateLoan(field, rawValue) {
+  loan[field] = +rawValue;
+  renderCategoryTabs();
+}
+
+function toggleCatCollapse(cat) {
+  if (collapsedCats.has(cat)) collapsedCats.delete(cat); else collapsedCats.add(cat);
+  renderCategoryTabs();
+}
+
+function toggleAllCatsCollapse() {
+  const allCollapsed = CATS.every(c => collapsedCats.has(c));
+  if (allCollapsed) collapsedCats.clear();
+  else CATS.forEach(c => collapsedCats.add(c));
+  renderCategoryTabs();
+}
+
+function confirmButtonLabel() {
+  const total = grandTotal(FILTERED, catPersona);
+  return `총 ${fmt(total)}원/월로 확정하고 결과 보기 →`;
+}
+
+function renderCategoryTabs() {
+  const allCollapsed = CATS.length > 0 && CATS.every(c => collapsedCats.has(c));
+  document.getElementById('btn-collapse-all').textContent = allCollapsed ? '▾ 전체 펼치기' : '✕ 전체 접기';
+  document.getElementById('btn-confirm-total-top').textContent = confirmButtonLabel();
+
+  const wrap = document.getElementById('cat-tabs');
+  wrap.innerHTML = renderLoanBox() + CATS.map(cat => {
+    const pills = PERSONAS.map(p => {
+      const sub = categorySubtotal(FILTERED, cat, p.key);
+      const active = catPersona[cat] === p.key;
+      return `<button class="persona-pill ${p.cls}${active?' active':''}" onclick="setCatPersona('${cat}','${p.key}')">
+        <span class="pill-nick">${p.nick}</span><span class="pill-amt">${fmt(sub)}원/월</span>
+      </button>`;
+    }).join('');
+
+    const pKey = catPersona[cat];
+    const groups = groupItemsByUid(FILTERED.filter(i => i.대분류 === cat), pKey);
+    const uidRows = groups.map(g => {
+      const uidKey = cat + '::' + g.uid;
+      const open = expandedUid === uidKey;
+      const total = g.items.reduce((sum, it) => sum + it.cost, 0);
+      const itemRows = !open ? '' : g.items.map(it => `<div class="uid-item-row">
+          <div class="uid-item-top">
+            <span class="uid-item-name">${it.아이템}</span>
+            <span class="uid-item-cost">${fmt(it.cost)}원/월</span>
+          </div>
+          <div class="uid-item-desc">${it.approach ? `<span class="uid-item-approach">${it.approach}</span>` : ''}${it.실행 || '—'}</div>
+          ${renderItemVarInputs(it.idx, pKey, it.vars)}
+        </div>`).join('');
+      return `<div class="uid-block">
+        <div class="uid-hdr" onclick="toggleUidDetail('${uidKey}')">
+          <span class="uid-hdr-name">${g.소분류}</span>
+          <span class="uid-hdr-amt">${fmt(total)}원/월</span>
+          <span class="uid-hdr-chev${open ? ' open' : ''}">▾</span>
         </div>
-        <div class="toggle ${on?'on':'off'}" id="tog-${item.id}"></div>
+        <div class="uid-body${open ? ' open' : ''}">${itemRows}</div>
       </div>`;
     }).join('');
-    const onCount = catItems.filter(i=>itemState[i.id]).length;
+
+    const collapsed = collapsedCats.has(cat);
+    return `<div class="cat-tab-row fu">
+      <div class="cat-tab-hdr-row">
+        <div class="cat-tab-name">${cat}</div>
+        <button class="cat-collapse-btn" onclick="toggleCatCollapse('${cat}')" title="${collapsed ? '펼치기' : '접기'}">${collapsed ? '▾ 펼치기' : '✕ 접기'}</button>
+      </div>
+      <div class="cat-tab-pills">${pills}</div>
+      ${collapsed ? '' : `<div class="uid-list">${uidRows}</div>`}
+    </div>`;
+  }).join('') + `<button class="proceed-btn confirm-bottom-btn" onclick="gotoResults()">${confirmButtonLabel()}</button>`;
+  saveState();
+}
+
+function toggleUidDetail(uidKey) {
+  expandedUid = (expandedUid === uidKey) ? null : uidKey;
+  renderCategoryTabs();
+}
+
+function setCatPersona(cat, key) {
+  catPersona[cat] = key;
+  renderCategoryTabs();
+}
+
+function gotoResults() {
+  gotoStep(4);
+  renderResults();
+}
+
+function renderResults() {
+  const total = grandTotal(FILTERED, catPersona);
+  document.getElementById('result-hero').innerHTML = `
+    <div class="result-persona-label">${nickOf(basePersona)} 기준 (대분류별 조정 반영)</div>
+    <div class="result-total">${fmt(total)}<span>원/월</span></div>
+    <div class="result-monthly-note">${household} · ${CATS.length}개 대분류</div>`;
+
+  const accordion = CATS.map((cat, ci) => {
+    const pKey = catPersona[cat];
+    const catTotal = categorySubtotal(FILTERED, cat, pKey);
+    const subs = groupByUid(FILTERED.filter(i => i.대분류 === cat), pKey);
+    const rows = subs.map(s => `<div class="subcat-row">
+        <span class="subcat-name">${s.소분류}</span>
+        <span class="subcat-amt">${fmt(s.total)}원</span>
+      </div>`).join('');
     return `<div class="cat-block">
       <div class="cat-hdr" id="ch${ci}" onclick="toggleCatHdr(${ci})">
         <span class="cat-hdr-name">${cat}</span>
-        <span class="cat-hdr-count" id="cc${ci}">${onCount}/${catItems.length}</span>
+        <span class="cat-persona-badge ${clsOf(pKey)}">${nickOf(pKey)}</span>
+        <span class="cat-hdr-count">${fmt(catTotal)}원</span>
         <span class="cat-hdr-chev">▾</span>
       </div>
       <div class="cat-body" id="cb${ci}">${rows}</div>
     </div>`;
   }).join('');
+  document.getElementById('result-actions').innerHTML = accordion;
 }
+
 function toggleCatHdr(ci) {
   document.getElementById('ch'+ci).classList.toggle('open');
   document.getElementById('cb'+ci).classList.toggle('open');
 }
-function toggleItem(id) {
-  itemState[id] = !itemState[id];
-  const row = document.querySelector(`[onclick="toggleItem(${id})"]`);
-  const tog = document.getElementById('tog-'+id);
-  if(itemState[id]){ row.classList.remove('off'); tog.className='toggle on'; }
-  else { row.classList.add('off'); tog.className='toggle off'; }
-  // Update category count
-  cats().forEach((cat,ci)=>{
-    const catItems = ITEMS.filter(i=>i['대분류']===cat);
-    const on = catItems.filter(i=>itemState[i.id]).length;
-    const cc = document.getElementById('cc'+ci);
-    if(cc) cc.textContent = on+'/'+catItems.length;
-  });
+
+function startCharacterPath() {
+  comparisonMode = false;
+  gotoStep(5);
+  renderAnalysis();
 }
 
-// ── STEP 3: RESULTS ──
-function renderResults() {
-  const pCls = {설계자:'D',소비자:'G',노동자:'W'};
-  const cls = pCls[persona];
-  const total = calcTotal(persona);
+function startComparePath() {
+  userCategoryAvgs = {};
+  userActualTotal = 0;
+  compareAnnualView = false;
+  document.getElementById('compare-table').innerHTML = '';
+  document.getElementById('btn-goto-analysis-compare').disabled = true;
+  document.getElementById('btn-download-compare').disabled = true;
+  document.getElementById('btn-compare-annual').textContent = '월간 보기';
+  gotoStep('4b');
+}
 
-  // Hero
-  document.getElementById('result-hero').innerHTML=`
-    <div class="result-persona-label" style="color:var(--c${cls})">${persona}</div>
-    <div class="result-total" style="color:var(--c${cls})">${fmt(Math.round(total))}<span>원/월</span></div>
-    <div class="result-monthly-note">선택된 ${Object.values(itemState).filter(Boolean).length}개 항목 기준</div>`;
+// ══ STEP 4.1: BANK SALAD UPLOAD/COMPARE ══
 
-  // Compare panel
-  const cmpGrid = PERSONAS.map(p=>{
-    const t = calcTotal(p.key);
-    const catRows = cats().map(cat=>{
-      const sub = ITEMS.filter(i=>itemState[i.id]&&i['대분류']===cat)
-                       .reduce((s,i)=>s+calcCost(i,p.key),0);
-      if(!sub) return '';
-      return `<div class="cmp-row"><span>${cat}</span><span class="cmp-amt">${fmt(Math.round(sub))}</span></div>`;
-    }).join('');
-    return `<div class="cmp-col ${p.cls}">
-      <div class="cmp-persona">${p.key}</div>
-      <div class="cmp-total">${fmt(Math.round(t))}원</div>
-      ${catRows}
+function downloadTemplate() {
+  const header = '대분류,월평균(원)\n';
+  const rows = CATS.map(c => `${c},`).join('\n');
+  downloadCSV('뱅크샐러드_실적_템플릿.csv', header + rows);
+}
+
+function downloadCSV(filename, content) {
+  const csv = '﻿' + content;
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function handleFileUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const text = e.target.result.replace(/^﻿/, '');
+    const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
+    const map = {};
+    lines.slice(1).forEach(line => {
+      const [cat, val] = line.split(',');
+      if (cat && CATS.includes(cat.trim())) {
+        map[cat.trim()] = +val || 0;
+      }
+    });
+    userCategoryAvgs = map;
+    userActualTotal = Object.values(map).reduce((s, v) => s + v, 0);
+    document.getElementById('btn-goto-analysis-compare').disabled = false;
+    document.getElementById('btn-download-compare').disabled = false;
+    renderCompareTable();
+    saveState();
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function toggleCompareAnnual() {
+  compareAnnualView = !compareAnnualView;
+  document.getElementById('btn-compare-annual').textContent = compareAnnualView ? '연간 보기' : '월간 보기';
+  renderCompareTable();
+}
+
+function renderCompareTable() {
+  const mult = compareAnnualView ? 12 : 1;
+  const rows = CATS.map(cat => {
+    const plan = categorySubtotal(FILTERED, cat, catPersona[cat]) * mult;
+    const actual = (userCategoryAvgs[cat] || 0) * mult;
+    const diff = actual - plan;
+    return `<div class="compare-row">
+      <span class="compare-cat">${cat}</span>
+      <span class="compare-plan">${fmt(plan)}원</span>
+      <span class="compare-actual">${fmt(actual)}원</span>
+      <span class="compare-diff ${diff > 0 ? 'over' : 'under'}">${diff > 0 ? '+' : ''}${fmt(diff)}원</span>
     </div>`;
   }).join('');
-  document.getElementById('cmp-panel').innerHTML=`<div class="compare-grid">${cmpGrid}</div>`;
-
-  // Approach dashboard — 현재 페르소나 기준
-  const approachMap = {};
-  ITEMS.filter(i=>itemState[i.id]).forEach(item=>{
-    const ap = (item[persona]&&item[persona]['approach'])||'기타';
-    if(!approachMap[ap]) approachMap[ap]={count:0,cost:0};
-    approachMap[ap].count++;
-    approachMap[ap].cost += calcCost(item, persona);
-  });
-  const approachCards = Object.entries(approachMap)
-    .sort((a,b)=>b[1].cost-a[1].cost)
-    .map(([ap,{count,cost}])=>`
-      <div class="approach-card">
-        <div class="approach-card-name">${ap}</div>
-        <div class="approach-card-count">${count}개 항목</div>
-        <div class="approach-card-cost" style="color:var(--c${cls})">${fmt(Math.round(cost))}원</div>
-      </div>`).join('');
-  document.getElementById('approach-section').innerHTML=`
-    <div class="approach-hdr">전략 유형별 지출</div>
-    <div class="approach-grid">${approachCards}</div>`;
-
-  // Action list
-  const actions = cats().map(cat=>{
-    const catItems = ITEMS.filter(i=>itemState[i.id]&&i['대분류']===cat);
-    if(!catItems.length) return '';
-    const catTotal = catItems.reduce((s,i)=>s+calcCost(i,persona),0);
-    const rows = catItems.map(item=>{
-      const cost = calcCost(item, persona);
-      const method = item[persona]&&item[persona]['실행방법'];
-      const ap = item[persona]&&item[persona]['approach'];
-      const label = `${item['대분류']}/${item['소분류']}${ap?` (${ap})`:''}`;
-      return `<div class="action-item">
-        <div>
-          <div class="action-item-name">${label}</div>
-          ${method?`<div class="action-item-method">→ ${method}</div>`:''}
-        </div>
-        <div class="action-item-cost ${cls}">${fmt(Math.round(cost))}원</div>
-      </div>`;
-    }).join('');
-    return `<div class="action-cat">
-      <div class="action-cat-hdr" onclick="this.nextElementSibling.classList.toggle('open')">
-        <span class="action-cat-name">${cat}</span>
-        <span class="action-cat-total">${fmt(Math.round(catTotal))}원</span>
-      </div>
-      <div class="action-items">${rows}</div>
+  const planTotal = grandTotal(FILTERED, catPersona) * mult;
+  const actualTotal = userActualTotal * mult;
+  const totalDiff = actualTotal - planTotal;
+  document.getElementById('compare-table').innerHTML = `
+    <div class="compare-row compare-hdr">
+      <span class="compare-cat">대분류</span><span class="compare-plan">계획</span><span class="compare-actual">실적</span><span class="compare-diff">차이</span>
+    </div>
+    ${rows}
+    <div class="compare-row compare-total">
+      <span class="compare-cat">합계 (${compareAnnualView ? '연간' : '월간'})</span>
+      <span class="compare-plan">${fmt(planTotal)}원</span>
+      <span class="compare-actual">${fmt(actualTotal)}원</span>
+      <span class="compare-diff ${totalDiff > 0 ? 'over' : 'under'}">${totalDiff > 0 ? '+' : ''}${fmt(totalDiff)}원</span>
     </div>`;
-  }).join('');
-  document.getElementById('result-actions').innerHTML=actions;
-}
-function toggleCompare() {
-  const p = document.getElementById('cmp-panel');
-  const b = document.getElementById('cmp-btn');
-  const open = p.classList.toggle('open');
-  b.textContent = (open?'▴':'▾') + ' 세 페르소나 비교 보기';
 }
 
-// ── TROPHY SIDEBAR ──
-function renderTrophySidebar() {
-  const refP = chartPersonasOrder[0];
-  let fiAmt = '—';
-  if (refP && params.rate > 0) {
-    const mc = calcTotal(refP);
-    fiAmt = fmtOk(Math.round(mc * 12 / (params.rate / 100)));
-  }
-  // 섬·산이 맨 위, 지출 재생산이 맨 아래
-  const items = [
-    {icon:'🏝️', name:'섬·산',      amt:'4억'},
-    {icon:'🏠', name:'세컨하우스', amt:'2억'},
-    {icon:'🏢', name:'My Space',   amt:'2억'},
-    {icon:'🏕️', name:'농막',       amt:'1억'},
-    {icon:'🚗', name:'자동차',     amt:'5천만'},
-    {icon:'🌱', name:'지출 재생산', amt: fiAmt},
-  ];
-  document.getElementById('trophy-sidebar').innerHTML = items.map(t=>`
-    <div class="ts-item">
-      <span class="ts-icon">${t.icon}</span>
-      <div><div class="ts-name">${t.name}</div><div class="ts-amt">${t.amt}</div></div>
+function downloadComparisonResult() {
+  const planTotal = grandTotal(FILTERED, catPersona);
+  const header = '대분류,계획(월),실적(월평균),차이\n';
+  const rows = CATS.map(cat => {
+    const plan = categorySubtotal(FILTERED, cat, catPersona[cat]);
+    const actual = userCategoryAvgs[cat] || 0;
+    return `${cat},${Math.round(plan)},${Math.round(actual)},${Math.round(actual - plan)}`;
+  }).join('\n');
+  const totalRow = `합계,${Math.round(planTotal)},${Math.round(userActualTotal)},${Math.round(userActualTotal - planTotal)}`;
+  downloadCSV('계획_실적_비교.csv', header + rows + '\n' + totalRow);
+}
+
+function proceedFromCompare() {
+  comparisonMode = true;
+  gotoStep(5);
+  renderAnalysis();
+}
+
+// ══ STEP 5: ANALYSIS ══
+
+function computePersonaMix() {
+  const itemCounts = { 설계자: 0, 소비자: 0, 노동자: 0 };
+  const costSums = { 설계자: 0, 소비자: 0, 노동자: 0 };
+  CATS.forEach(cat => {
+    const pKey = catPersona[cat];
+    itemCounts[pKey] += FILTERED.filter(i => i.대분류 === cat).length;
+    costSums[pKey] += categorySubtotal(FILTERED, cat, pKey);
+  });
+  return { itemCounts, costSums };
+}
+
+function computeReferenceTotals() {
+  const totals = {};
+  PERSONAS.forEach(p => {
+    const map = {};
+    CATS.forEach(cat => { map[cat] = p.key; });
+    totals[p.key] = grandTotal(FILTERED, map);
+  });
+  return totals;
+}
+
+function polarToCartesian(cx, cy, r, angleDeg) {
+  const rad = (angleDeg - 90) * Math.PI / 180;
+  return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+}
+
+function describeArc(cx, cy, r, startAngle, endAngle) {
+  const start = polarToCartesian(cx, cy, r, endAngle);
+  const end = polarToCartesian(cx, cy, r, startAngle);
+  const largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
+  return `M ${cx} ${cy} L ${start.x} ${start.y} A ${r} ${r} 0 ${largeArcFlag} 0 ${end.x} ${end.y} Z`;
+}
+
+function buildPieSVG(slices, size) {
+  size = size || 160;
+  const total = slices.reduce((s, x) => s + x.value, 0) || 1;
+  let angle = 0;
+  const r = size / 2 - 4, cx = size / 2, cy = size / 2;
+  const paths = slices.map(sl => {
+    const frac = sl.value / total;
+    const startAngle = angle;
+    const endAngle = frac >= 1 ? angle + 359.99 : angle + frac * 360;
+    angle = endAngle;
+    return { path: describeArc(cx, cy, r, startAngle, endAngle), color: sl.color, label: sl.label, pct: (frac * 100).toFixed(1) };
+  });
+  const svg = `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+    ${paths.map(p => `<path d="${p.path}" fill="${p.color}" stroke="var(--bg)" stroke-width="1.5"/>`).join('')}
+  </svg>`;
+  return { svg, paths };
+}
+
+function buildPieLegend(paths) {
+  return `<div class="pie-legend">${paths.map(p =>
+    `<div class="pie-legend-row"><span class="pie-legend-swatch" style="background:${p.color}"></span>${p.label} ${p.pct}%</div>`
+  ).join('')}</div>`;
+}
+
+function buildBarChartHTML(entries) {
+  const max = Math.max(...entries.map(e => e.value), 1);
+  return entries.map(e => `
+    <div class="bar-row${e.isUser ? ' is-user' : ''}">
+      <div class="bar-row-label">${e.isUser ? '👤 나' : e.label}</div>
+      <div class="bar-track"><div class="bar-fill ${e.cls}" style="width:${(e.value / max * 100).toFixed(1)}%"></div></div>
+      <div class="bar-row-amt">${fmt(e.value)}원</div>
     </div>`).join('');
 }
 
-// ── STEP 4: PROJECTION ──
-function renderProjection() {
-  document.getElementById('tl-end-year').textContent = params.years+'년';
-  renderChartToggles();
-  renderChart();
-  renderTrophyTimeline();
-  renderTrophySidebar();
-}
-function updateParam(k,v) {
-  params[k]=v;
-  if(k==='income') document.getElementById('v-income').textContent=fmt(v)+'원';
-  if(k==='years') { document.getElementById('v-years').textContent=v+'년';
-    document.getElementById('tl-end-year').textContent=v+'년'; }
-  if(k==='rate') document.getElementById('v-rate').textContent=v+'%';
-  renderChart(); renderTrophyTimeline(); renderTrophySidebar();
-}
-
-function renderChartToggles() {
-  const el = document.getElementById('chart-toggles');
-  el.innerHTML = PERSONAS.map(p=>{
-    const on = chartPersonasOrder.includes(p.key);
-    return `<button class="ptog ${p.cls}${on?'':' off'}" onclick="toggleChartPersona('${p.key}')">${p.key}</button>`;
-  }).join('');
-}
-function toggleChartPersona(key) {
-  const idx = chartPersonasOrder.indexOf(key);
-  if(idx>=0) chartPersonasOrder.splice(idx,1);
-  else chartPersonasOrder.push(key);
-  renderChartToggles();
-  renderChart();
-  renderTrophyTimeline();
-  renderTrophySidebar();
-}
-
-function renderChart() {
-  const years = params.years;
-  const labels = Array.from({length:years+1},(_,i)=>i===0?'0':i+'년');
-  const datasets = PERSONAS
-    .filter(p=>chartPersonasOrder.includes(p.key))
-    .map(p=>{
-      const total = calcTotal(p.key);
-      const data = calcProj(total).map(v=>parseFloat((v/1e8).toFixed(2)));
-      return {label:p.key,data,borderColor:p.color,backgroundColor:p.color+'22',
-              borderWidth:2.5,pointRadius:0,tension:.3,fill:false};
-    });
-
-  if(projChart) projChart.destroy();
-  const ctx = document.getElementById('proj-chart').getContext('2d');
-  projChart = new Chart(ctx,{
-    type:'line', data:{labels,datasets},
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      layout:{padding:{top:8}},
-      interaction:{mode:'index',intersect:false},
-      plugins:{
-        legend:{
-          position:'bottom',
-          labels:{color:'#c4d4e0',font:{family:'Noto Sans KR',size:12},padding:16}
-        },
-        tooltip:{
-          backgroundColor:'#162130',borderColor:'#1e3048',borderWidth:1,
-          titleColor:'#e8edf2',bodyColor:'#a8bdd0',
-          callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y.toFixed(2)}억원`}
-        }
-      },
-      scales:{
-        x:{ticks:{color:'#a8bdd0',maxTicksLimit:10},grid:{color:'#1e3048'}},
-        y:{ticks:{color:'#a8bdd0',callback:v=>v+'억'},grid:{color:'#1e3048'}}
-      }
-    },
-    plugins:[{
-      id:'trophyLines',
-      afterDraw(chart){
-        const {ctx,scales:{x,y},canvas} = chart;
-        ctx.save();
-        ctx.rect(0,0,canvas.width,canvas.height);
-        ctx.clip();
-
-        const refP = chartPersonasOrder[0];
-        if(!refP){ ctx.restore(); return; }
-
-        const ms = calcMilestones(calcProj(calcTotal(refP)), calcTotal(refP));
-
-        // FI 수직선
-        const fi = ms.find(m=>m.type==='fi');
-        if(fi && fi.year !== null && fi.year <= params.years){
-          const xpos = x.getPixelForValue(fi.year);
-          ctx.save();
-          ctx.setLineDash([6,4]);
-          ctx.strokeStyle='rgba(79,195,161,0.6)';
-          ctx.lineWidth=1.5;
-          ctx.beginPath(); ctx.moveTo(xpos,y.top); ctx.lineTo(xpos,y.bottom); ctx.stroke();
-          ctx.setLineDash([]);
-          ctx.font='bold 12px Noto Sans KR';
-          ctx.fillStyle='rgba(79,195,161,0.95)';
-          ctx.fillText('🌱 지출재생산', xpos+5, y.top+18);
-          ctx.restore();
-        }
-
-        // 자산 트로피 수평선 (라벨 없음 — 사이드바 참조)
-        ms.filter(m=>m.type==='asset').forEach(m=>{
-          const yv   = m.threshold/1e8;
-          const ypos = y.getPixelForValue(yv);
-          if(ypos<y.top||ypos>y.bottom) return;
-          ctx.save();
-          ctx.setLineDash([3,5]);
-          ctx.strokeStyle='rgba(240,165,0,0.35)';
-          ctx.lineWidth=1;
-          ctx.beginPath(); ctx.moveTo(x.left,ypos); ctx.lineTo(x.right,ypos); ctx.stroke();
-          ctx.restore();
-        });
-
-        ctx.restore();
-      }
-    }]
-  });
-}
-
-// ── TROPHY TIMELINE ──
-function renderTrophyTimeline() {
-  const refPersona = chartPersonasOrder.length > 0 ? chartPersonasOrder[0] : null;
-  const years = params.years;
-  document.getElementById('tl-end-year').textContent = years + '년';
-
-  if (!refPersona) {
-    document.getElementById('tl-markers').innerHTML =
-      '<div style="font-size:12px;color:var(--muted);padding:8px 0">페르소나를 선택하면 달성 시점을 확인할 수 있습니다</div>';
-    return;
+function renderAnalysis() {
+  const backBtn = document.getElementById('s5-back-btn');
+  const wrap = document.getElementById('analysis-content');
+  if (!comparisonMode) {
+    backBtn.onclick = () => gotoStep(4);
+    backBtn.textContent = '← 결과';
+    const { itemCounts, costSums } = computePersonaMix();
+    const itemPie = buildPieSVG(PERSONAS.map(p => ({ label: p.nick, value: itemCounts[p.key], color: `var(--c${p.cls})` })));
+    const costPie = buildPieSVG(PERSONAS.map(p => ({ label: p.nick, value: costSums[p.key], color: `var(--c${p.cls})` })));
+    wrap.innerHTML = `
+      <div class="analysis-title">${nickOf(basePersona)} 기준 지출 구조 분석</div>
+      <div class="pie-grid">
+        <div class="pie-block">
+          <div class="pie-block-title">아이템 기준</div>
+          ${itemPie.svg}
+          ${buildPieLegend(itemPie.paths)}
+        </div>
+        <div class="pie-block">
+          <div class="pie-block-title">금액 기준</div>
+          ${costPie.svg}
+          ${buildPieLegend(costPie.paths)}
+        </div>
+      </div>`;
+  } else {
+    backBtn.onclick = () => gotoStep('4b');
+    backBtn.textContent = '← 실적 업로드';
+    const refs = computeReferenceTotals();
+    const entries = PERSONAS.map(p => ({ label: p.nick, value: refs[p.key], cls: p.cls, isUser: false }))
+      .concat([{ label: '나', value: userActualTotal, cls: 'U', isUser: true }])
+      .sort((a, b) => a.value - b.value);
+    wrap.innerHTML = `
+      <div class="analysis-title">당신의 실제 지출 위치</div>
+      <div class="bar-chart">${buildBarChartHTML(entries)}</div>`;
   }
+}
 
-  const total      = calcTotal(refPersona);
-  const proj       = calcProj(total);
-  const milestones = calcMilestones(proj, total);
-  const multi      = chartPersonasOrder.length > 1;
-  const note       = multi
-    ? `<div style="font-size:11px;color:var(--accent2);margin-bottom:8px">${refPersona} 기준 (다중 선택 시 첫 번째 페르소나)</div>`
-    : '';
+// ══ STEP 6: FINANCIAL PROJECTION ══
 
-  const html = milestones.map(m => {
-    if (m.year === null || m.year > years) return '';
-    const pct = (m.year / years) * 100;
-    const isFI = m.type === 'fi';
-    const color = isFI ? 'var(--accent)' : 'var(--accent2)';
-    const thresholdLabel = isFI
-      ? `필요 ${fmtOk(m.threshold)}`
-      : `누적 ${fmtOk(m.threshold)} (개별 ${fmtOk(m.individual)})`;
-    return `<div class="tl-marker reached" style="left:${pct}%" title="${thresholdLabel}">
-      <div class="tm-icon">${m.icon}</div>
-      <div class="tm-name" style="color:${color}">${m.name}</div>
-      <div class="tm-year" style="color:${color}">${m.year}년</div>
-      <div class="tl-tick" style="background:${color}"></div>
+const TROPHY_META = {
+  '세컨카':       {label:'세컨 카',       icon:'🚗', priceText:'5,000만원',    opexText:'10만원/월'},
+  '농막':         {label:'농막',          icon:'🛖', priceText:'1억원',        opexText:'10만원/월'},
+  '세컨하우스':   {label:'세컨하우스',    icon:'🏡', priceText:'2.5억원',      opexText:'20만원/월'},
+  '창작공간':     {label:'창작공간',      icon:'🎨', priceText:'2.5억원',      opexText:'20만원/월'},
+  '산섬':         {label:'산/섬',         icon:'🏝️', priceText:'5억원',        opexText:'50만원/월'},
+  '풀빌라회원권': {label:'풀빌라 회원권', icon:'🏖️', priceText:'1억원',        opexText:'100만원/월'},
+  '골프회원권':   {label:'골프 회원권',   icon:'⛳', priceText:'5,000만원',    opexText:'100만원/월'},
+  '포르쉐':       {label:'포르쉐',        icon:'🏎️', priceText:'1.5억원',      opexText:'50만원/월'},
+  '크루즈3개월':  {label:'크루즈 3개월',  icon:'🛳️', priceText:'1억600만원',   opexText:'0 (일괄)'},
+  '해외여행1년':  {label:'1년 해외여행', icon:'✈️', priceText:'1억원',        opexText:'0'},
+};
+
+function fmtMillion(n) {
+  return (n / 1000000).toFixed(1) + '백만원';
+}
+
+let trophyStack = [];
+let projInitialized = false;
+let sliderLocked = false;
+let lastSim = [];
+let lastProjParams = null;
+
+const SLIDER_IDS = ['sl-income', 'sl-years', 'sl-return', 'sl-retire'];
+const SLIDER_DEFAULTS = { 'sl-income': 5000000, 'sl-years': 20, 'sl-return': 5, 'sl-retire': 20 };
+const TROPHY_SECTION_NOTE = {
+  locked: '트로피 — 지출 재생산(Financial Independence) 이후 버킷 리스트를 선택하세요. 선택 시, 지출 재생산이 순연될 수 있습니다.',
+  unlocked: '소득 전망을 먼저 고정해야 트로피를 선택할 수 있어요',
+};
+
+function resetSliderValues() {
+  SLIDER_IDS.forEach(id => { document.getElementById(id).value = SLIDER_DEFAULTS[id]; });
+}
+
+function gotoProjection() {
+  gotoStep(6);
+  document.getElementById('s6-badge').textContent = nickOf(basePersona) + ' / ' + basePersona;
+  if (!projInitialized) {
+    resetSliderValues();
+    projInitialized = true;
+  }
+  updateSliderLockUI();
+  renderProjection();
+}
+
+function onProjInput() {
+  renderProjection();
+}
+
+function updateSliderLockUI() {
+  SLIDER_IDS.forEach(id => { document.getElementById(id).disabled = sliderLocked; });
+  const btn = document.getElementById('btn-lock');
+  btn.textContent = sliderLocked ? '고정됨 ✓' : '소득 전망 고정';
+  btn.classList.toggle('locked', sliderLocked);
+  document.getElementById('trophy-section-note').textContent = sliderLocked
+    ? TROPHY_SECTION_NOTE.locked
+    : TROPHY_SECTION_NOTE.unlocked;
+}
+
+function lockSliders() {
+  sliderLocked = true;
+  updateSliderLockUI();
+  renderProjection();
+}
+
+function resetSlidersState() {
+  sliderLocked = false;
+  resetSliderValues();
+  updateSliderLockUI();
+}
+
+function resetSliders() {
+  resetSlidersState();
+  renderProjection();
+}
+
+function resetAll() {
+  resetSlidersState();
+  trophyStack = [];
+  renderProjection();
+}
+
+function renderProjection() {
+  const income = +document.getElementById('sl-income').value;
+  const years = +document.getElementById('sl-years').value;
+  const ret = +document.getElementById('sl-return').value;
+  const retire = +document.getElementById('sl-retire').value;
+
+  document.getElementById('v-income').textContent = fmt(income) + '원/월';
+  document.getElementById('v-years').textContent = years + '년';
+  document.getElementById('v-return').textContent = ret + '%';
+  document.getElementById('v-retire').textContent = retire + '년차';
+
+  const baseMonthlyCost = comparisonMode ? userActualTotal : grandTotal(FILTERED, catPersona);
+  document.getElementById('proj-mode-label').textContent = comparisonMode
+    ? '👤 사용자 프로젝션 — 실제 지출 평균(뱅크샐러드) 기준'
+    : `🧭 캐릭터 프로젝션 — ${nickOf(basePersona)} 계획 기준`;
+  document.getElementById('proj-target-note').innerHTML =
+    `지출 재생산(FI) 기준 — 월 지출 <strong>${fmtMillion(baseMonthlyCost)}</strong> 초과 시 달성`;
+  const projParams = { monthlyIncome: income, years, annualReturn: ret, retireYear: retire, baseMonthlyCost, trophyDefs: TROPHIES, loan: loan.principal > 0 ? loan : null };
+  lastProjParams = projParams;
+  const sim = simulateProjection({ ...projParams, trophyStack });
+  lastSim = sim;
+
+  const fiYear = firstFiYear(sim, baseMonthlyCost);
+  document.getElementById('proj-chart').innerHTML = buildChartSVG(sim, retire, years, trophyStack, fiYear);
+  renderChartLegend(fiYear, years, trophyStack);
+
+  renderTrophyGrid(projParams, years);
+  renderTrophyStack();
+  saveState();
+}
+
+function downloadProjectionResult() {
+  if (!lastSim.length) return;
+  const modeLabel = comparisonMode ? '사용자 프로젝션(실적 기준)' : `캐릭터 프로젝션(${nickOf(basePersona)} 계획 기준)`;
+  const meta = `${modeLabel}\n월소득,${lastProjParams.monthlyIncome}\n월지출(기준),${Math.round(lastProjParams.baseMonthlyCost)}\n연평균수익률(%),${lastProjParams.annualReturn}\n근로소득중단시점(년),${lastProjParams.retireYear}\n\n`;
+  const header = '연차,자산(원),상태,월간투자수익(원),대출잔액(원)\n';
+  const rows = lastSim.map(p =>
+    `${p.year},${Math.round(p.assets)},${p.retired ? '은퇴' : '근로'},${Math.round(p.investmentIncome)},${Math.round(p.loanBalance || 0)}`
+  ).join('\n');
+  downloadCSV('재무프로젝션_결과.csv', meta + header + rows);
+}
+
+function suggestedYear(key, projParams, years) {
+  for (let y = 1; y <= years; y++) {
+    if (canAddTrophy(projParams, trophyStack, key, y)) return y;
+  }
+  return null;
+}
+
+function isTrophyOwned(key) {
+  return trophyStack.some(t => t.trophy === key);
+}
+
+function renderTrophyGrid(projParams, years) {
+  const wrap = document.getElementById('trophy-grid');
+  wrap.innerHTML = Object.keys(TROPHIES).map(key => {
+    const meta = TROPHY_META[key];
+    const owned = isTrophyOwned(key);
+    const suggested = suggestedYear(key, projParams, years);
+    const unreachable = suggested === null;
+    const disabled = owned || !sliderLocked || unreachable;
+    const addRow = unreachable && !owned
+      ? `<div class="trophy-add-row"><span class="trophy-unreachable">이 기간 내 달성 불가</span></div>`
+      : `<div class="trophy-add-row">
+          <input type="number" id="ty-${key}" min="1" max="${years}" value="${owned ? (trophyStack.find(t => t.trophy === key).year) : suggested}" ${disabled ? 'disabled' : ''} oninput="refreshTrophyButton('${key}')">
+          <span>년차</span>
+          <button class="trophy-add-btn" id="tb-${key}" ${disabled ? 'disabled' : ''} onclick="addTrophy('${key}')">${owned ? '보유중' : '추가'}</button>
+        </div>`;
+    return `<div class="trophy-card${owned ? ' owned' : ''}">
+      ${owned ? `<div class="trophy-owned-badge">${meta.icon}</div>` : ''}
+      <div class="trophy-name"><span class="trophy-icon">${meta.icon}</span>${meta.label}</div>
+      <div class="trophy-meta">${meta.priceText} · OPEX ${meta.opexText}</div>
+      ${addRow}
     </div>`;
   }).join('');
+  Object.keys(TROPHIES).forEach(key => refreshTrophyButton(key));
+}
 
-  if (!html.replace(/\s/g, '')) {
-    document.getElementById('tl-markers').innerHTML =
-      `<div style="font-size:12px;color:var(--muted);padding:8px 0">${refPersona} — ${years}년 내 달성 트로피 없음</div>`;
+function refreshTrophyButton(key) {
+  const input = document.getElementById('ty-' + key);
+  const btn = document.getElementById('tb-' + key);
+  if (!input || !btn) return;
+  if (!sliderLocked || isTrophyOwned(key)) { btn.disabled = true; return; }
+  const year = +input.value;
+  const years = +document.getElementById('sl-years').value;
+  const ok = year >= 1 && year <= years && canAddTrophy(lastProjParams, trophyStack, key, year);
+  btn.disabled = !ok;
+}
+
+function addTrophy(key) {
+  const input = document.getElementById('ty-' + key);
+  const year = +input.value;
+  trophyStack.push({ trophy: key, year });
+  renderProjection();
+}
+
+function popTrophy() {
+  trophyStack.pop();
+  renderProjection();
+}
+
+function clearTrophies() {
+  trophyStack = [];
+  renderProjection();
+}
+
+function renderTrophyStack() {
+  const wrap = document.getElementById('trophy-stack-list');
+  if (trophyStack.length === 0) {
+    wrap.innerHTML = '<div class="trophy-stack-empty">아직 선택한 트로피가 없습니다</div>';
     return;
   }
-
-  document.getElementById('tl-markers').innerHTML = note + html;
+  wrap.innerHTML = trophyStack.map((t, i) => {
+    const isLast = i === trophyStack.length - 1;
+    const meta = TROPHY_META[t.trophy];
+    return `<div class="trophy-stack-item">
+      <span>${t.year}년차 · ${meta.label}</span>
+      ${isLast ? `<button class="trophy-cancel-btn" onclick="popTrophy()">취소</button>` : ''}
+    </div>`;
+  }).join('');
 }
+
+function formatCompact(n) {
+  const abs = Math.abs(n);
+  const sign = n < 0 ? '-' : '';
+  if (abs >= 100000000) return sign + (abs / 100000000).toFixed(1) + '억원';
+  if (abs >= 10000) return sign + Math.round(abs / 10000) + '만원';
+  return sign + fmt(abs) + '원';
+}
+
+function buildChartSVG(sim, retireYear, years, stack, fiYear) {
+  const W = 640, H = 260, padL = 64, padR = 16, padT = 26, padB = 28;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const values = sim.map(p => p.assets);
+  const minV = Math.min(0, ...values);
+  const maxV = Math.max(0, ...values);
+  const range = (maxV - minV) || 1;
+  const xOf = (year) => padL + (year - 1) / Math.max(years - 1, 1) * plotW;
+  const yOf = (v) => padT + (1 - (v - minV) / range) * plotH;
+
+  const path = sim.map((p, i) => `${i === 0 ? 'M' : 'L'}${xOf(p.year).toFixed(1)},${yOf(p.assets).toFixed(1)}`).join(' ');
+  const zeroY = yOf(0).toFixed(1);
+  const retireX = xOf(retireYear).toFixed(1);
+
+  const tickCount = 4;
+  let yAxis = '';
+  for (let i = 0; i <= tickCount; i++) {
+    const v = minV + (maxV - minV) * i / tickCount;
+    const y = yOf(v).toFixed(1);
+    yAxis += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" style="stroke:var(--border)" stroke-width="1" stroke-dasharray="2,2"/>
+      <text x="${padL - 8}" y="${y}" font-size="10" text-anchor="end" dominant-baseline="middle" style="fill:var(--muted)">${formatCompact(v)}</text>`;
+  }
+
+  let markers = retireYear <= years
+    ? `<line x1="${retireX}" y1="${padT}" x2="${retireX}" y2="${H - padB}" style="stroke:var(--muted)" stroke-width="1" stroke-dasharray="4,3"/>`
+    : '';
+
+  if (fiYear) {
+    const fx = xOf(fiYear).toFixed(1);
+    markers += `<line x1="${fx}" y1="${padT}" x2="${fx}" y2="${H - padB}" style="stroke:var(--accent2)" stroke-width="1.5"/>
+      <text x="${fx}" y="${padT - 8}" font-size="13" text-anchor="middle">🌱</text>`;
+  }
+
+  markers += stack.map(t => {
+    const tx = xOf(t.year).toFixed(1);
+    const meta = TROPHY_META[t.trophy];
+    return `<line x1="${tx}" y1="${padT}" x2="${tx}" y2="${H - padB}" style="stroke:var(--accent)" stroke-width="1" stroke-dasharray="2,2"/>
+      <text x="${tx}" y="${padT - 8}" font-size="13" text-anchor="middle">${meta.icon}</text>`;
+  }).join('');
+
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+    ${yAxis}
+    <line x1="${padL}" y1="${zeroY}" x2="${W - padR}" y2="${zeroY}" style="stroke:var(--muted)" stroke-width="1"/>
+    <path d="${path}" fill="none" style="stroke:var(--accent)" stroke-width="2"/>
+    ${markers}
+    <text x="${padL}" y="${H - 8}" font-size="10" style="fill:var(--muted)">1년</text>
+    <text x="${W - padR}" y="${H - 8}" font-size="10" style="fill:var(--muted)" text-anchor="end">${years}년</text>
+  </svg>`;
+}
+
+function renderChartLegend(fiYear, years, stack) {
+  const el = document.getElementById('chart-legend');
+  let rows = fiYear
+    ? `<div class="legend-item"><span>🌱</span><span>지출 재생산(FI)<br>${fiYear}년차</span></div>`
+    : `<div class="legend-item empty"><span>🌱</span><span>${years}년 내 지출 재생산(FI) 미달성</span></div>`;
+  if (stack.length === 0) {
+    rows += `<div class="legend-item empty"><span>🏆</span><span>선택한 트로피 없음</span></div>`;
+  } else {
+    rows += stack.map(t => {
+      const meta = TROPHY_META[t.trophy];
+      return `<div class="legend-item"><span>${meta.icon}</span><span>${meta.label}<br>${t.year}년차</span></div>`;
+    }).join('');
+  }
+  el.innerHTML = rows;
+}
+
+initLoginScreen();
 </script>
 </body>
 </html>
