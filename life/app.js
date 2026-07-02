@@ -12,7 +12,6 @@ let household = null;
 let catPersona = {};
 let loan = { principal: 0, termYears: 10, rate: 4 };
 let currentAssets = 0;
-let ownedTrophies = new Set();
 let collapsedCats = new Set();
 let comparisonMode = false;
 let userCategoryAvgs = {};
@@ -39,7 +38,7 @@ function saveState() {
   } : null;
   const state = {
     basePersona, household, catPersona, loan, trophyStack, trophyLocked,
-    currentAssets, ownedTrophies: Array.from(ownedTrophies),
+    currentAssets,
     comparisonMode, userCategoryAvgs, userActualTotal, sliders,
     items: ITEMS.map(i => ({ _idx: i._idx, 설계자: i.설계자, 소비자: i.소비자, 노동자: i.노동자 })),
   };
@@ -70,7 +69,6 @@ function continueSaved() {
     trophyStack = state.trophyStack || [];
     trophyLocked = state.trophyLocked || false;
     currentAssets = state.currentAssets || 0;
-    ownedTrophies = new Set(state.ownedTrophies || []);
     comparisonMode = state.comparisonMode || false;
     userCategoryAvgs = state.userCategoryAvgs || {};
     userActualTotal = state.userActualTotal || 0;
@@ -228,14 +226,6 @@ function updateItemCode(idx, pKey, rawCode) {
 function renderFinancialStatusBox() {
   const monthlyPrincipal = loan.termYears > 0 ? loan.principal / loan.termYears / 12 : 0;
   const monthlyInterest = loan.principal * loan.rate / 100 / 12;
-  const trophyChips = Object.keys(TROPHY_META).map(key => {
-    const meta = TROPHY_META[key];
-    const checked = ownedTrophies.has(key);
-    return `<label class="owned-trophy-chip${checked ? ' checked' : ''}">
-      <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleOwnedTrophy('${key}')">
-      ${meta.icon} ${meta.label}
-    </label>`;
-  }).join('');
 
   return `<div class="cat-tab-row fu">
     <div class="cat-tab-hdr-row">
@@ -256,11 +246,6 @@ function renderFinancialStatusBox() {
       </div>
       ${loan.principal > 0 ? `<div class="loan-estimate">초기 월 상환 예상: 원금 ${fmt(monthlyPrincipal)}원 + 이자 ${fmt(monthlyInterest)}원 (재무 프로젝션에 반영, 상환기간 이후 소멸)</div>` : ''}
     </div>
-
-    <div class="fin-status-subsection">
-      <div class="fin-status-label">이미 보유한 트로피 — 체크하면 가격은 차감하지 않고 OPEX만 프로젝션 시작부터 반영합니다</div>
-      <div class="owned-trophy-grid">${trophyChips}</div>
-    </div>
   </div>`;
 }
 
@@ -272,17 +257,6 @@ function updateCurrentAssets(rawValue) {
 function updateLoan(field, rawValue) {
   loan[field] = field === 'principal' ? (+rawValue || 0) * 1000000 : +rawValue;
   renderCategoryTabs();
-}
-
-function toggleOwnedTrophy(key) {
-  if (ownedTrophies.has(key)) ownedTrophies.delete(key); else ownedTrophies.add(key);
-  renderCategoryTabs();
-}
-
-function computeOwnedTrophyOpex() {
-  let sum = 0;
-  ownedTrophies.forEach(key => { sum += TROPHIES[key].opex; });
-  return sum;
 }
 
 function toggleCatCollapse(cat) {
@@ -734,7 +708,7 @@ function renderProjection() {
     : `🧭 캐릭터 프로젝션 — ${nickOf(basePersona)} 계획 기준`;
   document.getElementById('proj-target-note').innerHTML =
     `지출 재생산(FI) 기준 — 월 지출 <strong>${fmtMillion(baseMonthlyCost)}</strong> 초과 시 달성`;
-  const projParams = { monthlyIncome: income, years, annualReturn: ret, retireYear: retire, baseMonthlyCost, trophyDefs: TROPHIES, loan: loan.principal > 0 ? loan : null, initialAssets: currentAssets, ownedTrophyOpex: computeOwnedTrophyOpex() };
+  const projParams = { monthlyIncome: income, years, annualReturn: ret, retireYear: retire, baseMonthlyCost, trophyDefs: TROPHIES, loan: loan.principal > 0 ? loan : null, initialAssets: currentAssets };
   lastProjParams = projParams;
   const sim = simulateProjection({ ...projParams, trophyStack });
   lastSim = sim;
@@ -751,8 +725,7 @@ function renderProjection() {
 function downloadProjectionResult() {
   if (!lastSim.length) return;
   const modeLabel = comparisonMode ? '사용자 프로젝션(실적 기준)' : `캐릭터 프로젝션(${nickOf(basePersona)} 계획 기준)`;
-  const ownedList = ownedTrophies.size ? Array.from(ownedTrophies).join('/') : '없음';
-  const meta = `${modeLabel}\n월소득,${lastProjParams.monthlyIncome}\n월지출(기준),${Math.round(lastProjParams.baseMonthlyCost)}\n연평균수익률(%),${lastProjParams.annualReturn}\n근로소득중단시점(년),${lastProjParams.retireYear}\n현재금융자산(원),${Math.round(lastProjParams.initialAssets || 0)}\n이미보유한트로피,${ownedList}\n\n`;
+  const meta = `${modeLabel}\n월소득,${lastProjParams.monthlyIncome}\n월지출(기준),${Math.round(lastProjParams.baseMonthlyCost)}\n연평균수익률(%),${lastProjParams.annualReturn}\n근로소득중단시점(년),${lastProjParams.retireYear}\n현재금융자산(원),${Math.round(lastProjParams.initialAssets || 0)}\n\n`;
   const header = '연차,자산(원),상태,월간투자수익(원),대출잔액(원),트로피구매,트로피OPEX(월)\n';
   const rows = lastSim.map(p =>
     `${p.year},${Math.round(p.assets)},${p.retired ? '은퇴' : '근로'},${Math.round(p.investmentIncome)},${Math.round(p.loanBalance || 0)},${p.trophyPurchased || ''},${Math.round(p.trophyOpex || 0)}`
@@ -768,31 +741,24 @@ function suggestedYear(key, projParams, years) {
 }
 
 function isTrophyOwned(key) {
-  return trophyStack.some(t => t.trophy === key) || ownedTrophies.has(key);
+  return trophyStack.some(t => t.trophy === key);
 }
 
 function renderTrophyGrid(projParams, years) {
   const wrap = document.getElementById('trophy-grid');
   wrap.innerHTML = Object.keys(TROPHIES).map(key => {
     const meta = TROPHY_META[key];
-    const preOwned = ownedTrophies.has(key);
-    const stackEntry = trophyStack.find(t => t.trophy === key);
-    const owned = preOwned || !!stackEntry;
+    const owned = isTrophyOwned(key);
     const suggested = suggestedYear(key, projParams, years);
     const unreachable = suggested === null;
     const disabled = owned || !sliderLocked || unreachable || trophyLocked;
-    let addRow;
-    if (preOwned) {
-      addRow = `<div class="trophy-add-row"><span class="trophy-unreachable">이미 보유 중 (프로젝션 시작부터 반영)</span></div>`;
-    } else if (unreachable) {
-      addRow = `<div class="trophy-add-row"><span class="trophy-unreachable">이 기간 내 달성 불가</span></div>`;
-    } else {
-      addRow = `<div class="trophy-add-row">
-          <input type="number" id="ty-${key}" min="1" max="${years}" value="${stackEntry ? stackEntry.year : suggested}" ${disabled ? 'disabled' : ''} oninput="refreshTrophyButton('${key}')">
+    const addRow = unreachable && !owned
+      ? `<div class="trophy-add-row"><span class="trophy-unreachable">이 기간 내 달성 불가</span></div>`
+      : `<div class="trophy-add-row">
+          <input type="number" id="ty-${key}" min="1" max="${years}" value="${owned ? (trophyStack.find(t => t.trophy === key).year) : suggested}" ${disabled ? 'disabled' : ''} oninput="refreshTrophyButton('${key}')">
           <span>년차</span>
           <button class="trophy-add-btn" id="tb-${key}" ${disabled ? 'disabled' : ''} onclick="addTrophy('${key}')">${owned ? '보유중' : '추가'}</button>
         </div>`;
-    }
     return `<div class="trophy-card${owned ? ' owned' : ''}">
       ${owned ? `<div class="trophy-owned-badge">${meta.icon}</div>` : ''}
       <div class="trophy-name"><span class="trophy-icon">${meta.icon}</span>${meta.label}</div>

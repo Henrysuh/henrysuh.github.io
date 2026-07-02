@@ -88,27 +88,25 @@
   }
 
   // params: monthlyIncome, years, annualReturn(%), retireYear, baseMonthlyCost, trophyStack, trophyDefs,
-  //         loan?, initialAssets?, ownedTrophyOpex?
+  //         loan?, initialAssets?
   // loan(선택): { principal, termYears, rate(%) } — 원금은 CAPEX식 정액상환(termYears에 걸쳐 매달 균등),
   // 이자는 잔액 기준 매달 재계산(OPEX식이지만 동적), termYears 지나면 상환 완료로 소멸.
   // initialAssets(선택): 프로젝션 시작 시점의 현재 금융자산(스칼라, 기본 0)
-  // ownedTrophyOpex(선택): 이미 보유 중인 트로피들의 OPEX 합(가격은 차감하지 않고 OPEX만 시작부터 반영)
   // 반환: [{year, assets, retired, investmentIncome, loanBalance, trophyOpex, trophyPurchased}] (연말 스냅샷)
   // assets = 순자산(투자자산 cash - 대출잔액loanBalance) — 대출 있으면 시작 시점부터 마이너스로 표시됨
-  // trophyOpex = 그 해 활성화된 트로피(구매분+기보유분) OPEX 합, trophyPurchased = 그 해 새로 구매한 트로피명('/' 구분)
+  // trophyOpex = 그 해 활성화된 트로피 OPEX 합, trophyPurchased = 그 해 새로 구매한 트로피명('/' 구분)
   function simulateProjection(params) {
-    const { monthlyIncome, years, annualReturn, retireYear, baseMonthlyCost, trophyStack, trophyDefs, loan, initialAssets, ownedTrophyOpex } = params;
+    const { monthlyIncome, years, annualReturn, retireYear, baseMonthlyCost, trophyStack, trophyDefs, loan, initialAssets } = params;
     let cash = initialAssets || 0;
     let loanBalance = loan ? loan.principal : 0;
     const monthlyPrincipal = (loan && loan.termYears > 0) ? loan.principal / loan.termYears / 12 : 0;
-    const baseOwnedOpex = ownedTrophyOpex || 0;
     const yearly = [];
     for (let month = 1; month <= years * 12; month++) {
       const year = Math.ceil(month / 12);
       if ((month - 1) % 12 === 0) {
         trophyStack.filter(t => t.year === year).forEach(t => { cash -= trophyDefs[t.trophy].price; });
       }
-      const activeOpex = trophyOpexSumAtYear(trophyStack, year, trophyDefs) + baseOwnedOpex;
+      const activeOpex = trophyOpexSumAtYear(trophyStack, year, trophyDefs);
       const retired = year > retireYear;
 
       let principalPayment = 0, interestPayment = 0;
