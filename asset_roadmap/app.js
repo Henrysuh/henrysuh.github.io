@@ -842,33 +842,33 @@ function buildChartSVG(sim, retireYear, years, stack, fiYear) {
     const v = minV + (maxV - minV) * i / tickCount;
     const y = yOf(v).toFixed(1);
     yAxis += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" style="stroke:var(--border)" stroke-width="1" stroke-dasharray="2,2"/>
-      <text x="${padL - 8}" y="${y}" font-size="10" text-anchor="end" dominant-baseline="middle" style="fill:var(--muted)">${formatCompact(v)}</text>`;
+      <text x="${padL - 8}" y="${y}" font-size="13" text-anchor="end" dominant-baseline="middle" style="fill:#c9dced">${formatCompact(v)}</text>`;
   }
 
   let markers = retireYear <= years
-    ? `<line x1="${retireX}" y1="${padT}" x2="${retireX}" y2="${H - padB}" style="stroke:var(--muted)" stroke-width="1" stroke-dasharray="4,3"/>`
+    ? `<line x1="${retireX}" y1="${padT}" x2="${retireX}" y2="${H - padB}" style="stroke:#c9dced" stroke-width="1" stroke-dasharray="4,3"/>`
     : '';
 
   if (fiYear) {
     const fx = xOf(fiYear).toFixed(1);
-    markers += `<line x1="${fx}" y1="${padT}" x2="${fx}" y2="${H - padB}" style="stroke:var(--accent2)" stroke-width="1.5"/>
-      <text x="${fx}" y="${padT - 8}" font-size="13" text-anchor="middle">🌱</text>`;
+    markers += `<line x1="${fx}" y1="${padT}" x2="${fx}" y2="${H - padB}" style="stroke:#ffc247" stroke-width="1.5"/>
+      <text x="${fx}" y="${padT - 8}" font-size="16" text-anchor="middle">🌱</text>`;
   }
 
   markers += stack.map(t => {
     const tx = xOf(t.year).toFixed(1);
     const meta = TROPHY_META[t.trophy];
-    return `<line x1="${tx}" y1="${padT}" x2="${tx}" y2="${H - padB}" style="stroke:var(--accent)" stroke-width="1" stroke-dasharray="2,2"/>
-      <text x="${tx}" y="${padT - 8}" font-size="13" text-anchor="middle">${meta.icon}</text>`;
+    return `<line x1="${tx}" y1="${padT}" x2="${tx}" y2="${H - padB}" style="stroke:#6fe6c2" stroke-width="1" stroke-dasharray="2,2"/>
+      <text x="${tx}" y="${padT - 8}" font-size="16" text-anchor="middle">${meta.icon}</text>`;
   }).join('');
 
   return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
     ${yAxis}
-    <line x1="${padL}" y1="${zeroY}" x2="${W - padR}" y2="${zeroY}" style="stroke:var(--muted)" stroke-width="1"/>
-    <path d="${path}" fill="none" style="stroke:var(--accent)" stroke-width="2"/>
+    <line x1="${padL}" y1="${zeroY}" x2="${W - padR}" y2="${zeroY}" style="stroke:#c9dced" stroke-width="1"/>
+    <path d="${path}" fill="none" style="stroke:#6fe6c2" stroke-width="2"/>
     ${markers}
-    <text x="${padL}" y="${H - 8}" font-size="10" style="fill:var(--muted)">1년</text>
-    <text x="${W - padR}" y="${H - 8}" font-size="10" style="fill:var(--muted)" text-anchor="end">${years}년</text>
+    <text x="${padL}" y="${H - 8}" font-size="13" style="fill:#c9dced">1년</text>
+    <text x="${W - padR}" y="${H - 8}" font-size="13" style="fill:#c9dced" text-anchor="end">${years}년</text>
   </svg>`;
 }
 

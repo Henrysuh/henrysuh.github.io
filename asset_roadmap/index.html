@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>인생게임 — Life Simulator</title>
+<title>자산 로드맵 — Asset Roadmap</title>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg:#0f1923; --panel:#162130; --border:#1e3048;
   --accent:#4fc3a1; --accent2:#f0a500; --text:#e8edf2; --muted:#9ab5c8;
-  --cD:#4fc3a1; --cG:#7eb8f7; --cW:#f0a500; --cUser:#c77dff;
+  --cD:#6fe6c2; --cG:#a3d2ff; --cW:#ffc247; --cUser:#c77dff;
   --fd:'Black Han Sans',sans-serif; --fb:'Noto Sans KR',sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -29,21 +29,21 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;
   background:var(--bg);border-bottom:1px solid var(--border);
   padding:12px 20px;margin:-32px -20px 0;width:calc(100% + 40px)}
 .nav-back{background:none;border:1px solid var(--border);border-radius:8px;
-  color:var(--muted);font-size:13px;padding:6px 12px;cursor:pointer;
+  color:var(--muted);font-size:16px;padding:6px 12px;cursor:pointer;
   transition:border-color .2s,color .2s}
 .nav-back:hover{border-color:var(--accent);color:var(--accent)}
-.nav-title{font-family:var(--fb);font-size:15px;color:var(--text);font-weight:300;letter-spacing:2px}
-.nav-step{margin-left:auto;font-size:12px;color:var(--muted)}
+.nav-title{font-family:var(--fb);font-size:18px;color:var(--text);font-weight:300;letter-spacing:2px}
+.nav-step{margin-left:auto;font-size:15px;color:var(--muted)}
 
 /* ── STEP 0: LOGIN/START ── */
 .login-warning{background:#2a1f10;border:1px solid var(--accent2);border-radius:12px;
-  padding:16px 18px;font-size:13px;line-height:1.6;color:var(--text)}
+  padding:16px 18px;font-size:16px;line-height:1.6;color:var(--text)}
 .login-warning strong{color:var(--accent2)}
 
 /* ── STEP 1: PERSONA ── */
 .hero{text-align:center;padding:24px 0 8px}
-.hero h1{font-family:var(--fb);font-size:clamp(24px,5vw,36px);color:var(--accent);letter-spacing:4px;font-weight:300}
-.hero p{margin-top:8px;font-size:15px;color:var(--muted)}
+.hero h1{font-family:var(--fb);font-size:clamp(27px,5vw,39px);color:var(--accent);letter-spacing:4px;font-weight:300}
+.hero p{margin-top:8px;font-size:18px;color:var(--muted)}
 .persona-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
 .pc{background:var(--panel);border:2px solid var(--border);border-radius:20px;
   padding:28px 20px;cursor:pointer;transition:border-color .2s,transform .2s,box-shadow .2s;
@@ -54,48 +54,48 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;
 .pc.W:hover{border-color:var(--cW)}
 .pc-avatar-img{width:100%;height:220px;object-fit:cover;object-position:top center;
   border-radius:12px;margin-bottom:4px}
-.pc-nick{font-size:12px;letter-spacing:1px;text-transform:uppercase}
+.pc-nick{font-size:15px;letter-spacing:1px;text-transform:uppercase}
 .pc.D .pc-nick{color:var(--cD)}
 .pc.G .pc-nick{color:var(--cG)}
 .pc.W .pc-nick{color:var(--cW)}
-.pc-name{font-family:var(--fb);font-size:18px;font-weight:500}
-.pc-tagline{font-size:13px;color:var(--muted);font-style:italic;line-height:1.5}
-.pc-desc{font-size:12px;color:var(--muted);line-height:1.7;text-align:left}
+.pc-name{font-family:var(--fb);font-size:21px;font-weight:500}
+.pc-tagline{font-size:16px;color:var(--muted);font-style:italic;line-height:1.5}
+.pc-desc{font-size:15px;color:var(--muted);line-height:1.7;text-align:left}
 .pc-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
 .pc-tag{background:#1a2a3a;border:1px solid var(--border);border-radius:20px;
-  font-size:11px;color:var(--muted);padding:4px 10px}
+  font-size:14px;color:var(--muted);padding:4px 10px}
 
 /* ── STEP 2: HOUSEHOLD ── */
-.setup-header{font-family:var(--fb);font-size:13px;color:var(--muted);font-weight:300;letter-spacing:2px;text-transform:uppercase}
+.setup-header{font-family:var(--fb);font-size:16px;color:var(--text);font-weight:300;letter-spacing:2px;text-transform:uppercase}
 .hh-row{display:flex;gap:10px;flex-wrap:wrap}
 .hh-btn{background:var(--panel);border:1px solid var(--border);border-radius:10px;
-  padding:12px 20px;cursor:pointer;color:var(--muted);font-size:14px;font-family:var(--fb);
+  padding:12px 20px;cursor:pointer;color:var(--muted);font-size:17px;font-family:var(--fb);
   transition:all .2s;display:flex;align-items:center;gap:8px}
 .hh-btn.selected{border-color:var(--accent);color:var(--text);background:#1a2a3a}
 .hh-btn:hover{border-color:var(--accent);color:var(--text)}
 
 .proceed-btn{background:var(--accent);color:var(--bg);border:none;border-radius:12px;
-  padding:14px 32px;font-size:14px;font-family:var(--fb);font-weight:400;cursor:pointer;
+  padding:14px 32px;font-size:17px;font-family:var(--fb);font-weight:400;cursor:pointer;
   transition:opacity .2s;margin-top:8px;align-self:center;letter-spacing:1px}
 .proceed-btn:hover{opacity:.85}
 
 /* ── STEP 3: CATEGORY PERSONA OVERRIDE ── */
 .cat-tab-row{background:var(--panel);border:1px solid var(--border);border-radius:12px;
   padding:14px 16px;display:flex;flex-direction:column;gap:10px}
-.cat-tab-name{font-size:17px;font-weight:500;color:var(--text)}
+.cat-tab-name{font-size:20px;font-weight:500;color:var(--text)}
 .cat-tab-hdr-row{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .cat-collapse-btn{background:none;border:1px solid var(--border);border-radius:8px;color:var(--muted);
-  font-size:11px;padding:4px 10px;cursor:pointer;transition:all .2s;white-space:nowrap}
+  font-size:14px;padding:4px 10px;cursor:pointer;transition:all .2s;white-space:nowrap}
 .cat-collapse-btn:hover{border-color:var(--accent);color:var(--accent)}
 .cat-collapse-all-btn{align-self:center;background:none;border:1px solid var(--border);border-radius:10px;
-  color:var(--muted);font-size:12px;font-family:var(--fb);padding:6px 16px;cursor:pointer;transition:all .2s}
+  color:var(--muted);font-size:15px;font-family:var(--fb);padding:6px 16px;cursor:pointer;transition:all .2s}
 .cat-collapse-all-btn:hover{border-color:var(--accent);color:var(--accent)}
 .confirm-bottom-btn{width:100%;margin-top:4px}
 .cat-tab-pills{display:flex;gap:8px;flex-wrap:wrap}
-.loan-estimate{font-size:11px;color:var(--muted);opacity:.85}
+.loan-estimate{font-size:14px;color:var(--muted);opacity:.85}
 .fin-status-subsection{display:flex;flex-direction:column;gap:6px;padding-top:12px;border-top:1px solid var(--border)}
 .fin-status-subsection:first-of-type{padding-top:0;border-top:none}
-.fin-status-label{font-size:12px;color:var(--muted)}
+.fin-status-label{font-size:15px;color:var(--muted)}
 .persona-pill{background:var(--bg);border:1px solid var(--border);border-radius:10px;
   padding:8px 14px;cursor:pointer;color:var(--muted);font-family:var(--fb);
   transition:all .2s;display:flex;flex-direction:column;align-items:flex-start;gap:2px;flex:1;min-width:100px}
@@ -109,56 +109,56 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;
 .uid-hdr{background:var(--bg);padding:10px 14px;cursor:pointer;
   display:flex;align-items:center;gap:10px;transition:background .15s;user-select:none}
 .uid-hdr:hover{background:#16222f}
-.uid-hdr-name{font-size:13px;color:var(--text);flex:1}
-.uid-hdr-amt{font-size:13px;color:var(--muted)}
-.uid-hdr-chev{color:var(--muted);font-size:11px;transition:transform .2s}
+.uid-hdr-name{font-size:16px;color:var(--text);flex:1}
+.uid-hdr-amt{font-size:16px;color:var(--muted)}
+.uid-hdr-chev{color:var(--muted);font-size:14px;transition:transform .2s}
 .uid-hdr-chev.open{transform:rotate(180deg)}
 .uid-body{display:none;border-top:1px solid var(--border)}
 .uid-body.open{display:block}
 .uid-item-row{padding:10px 14px;border-bottom:1px solid var(--border)}
 .uid-item-row:last-child{border-bottom:none}
-.uid-item-top{display:flex;justify-content:space-between;gap:8px;font-size:13px}
+.uid-item-top{display:flex;justify-content:space-between;gap:8px;font-size:16px}
 .uid-item-name{color:var(--text);font-weight:500}
 .uid-item-cost{color:var(--accent)}
-.uid-item-desc{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5}
-.uid-item-vars{font-size:11px;color:var(--muted);margin-top:4px;opacity:.75}
+.uid-item-desc{font-size:15px;color:var(--muted);margin-top:4px;line-height:1.5}
+.uid-item-vars{font-size:14px;color:var(--muted);margin-top:4px;opacity:.75}
 .var-group{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
-.var-field{display:flex;flex-direction:column;gap:3px;font-size:10px;color:var(--muted)}
+.var-field{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--muted)}
 .var-field input{width:90px;background:var(--bg);border:1px solid var(--border);
-  border-radius:6px;color:var(--text);padding:5px 7px;font-size:12px;font-family:var(--fb)}
+  border-radius:6px;color:var(--text);padding:5px 7px;font-size:15px;font-family:var(--fb)}
 .var-field input:focus{outline:none;border-color:var(--accent)}
 .uid-item-code{margin-top:6px}
 .code-select{background:var(--bg);border:1px solid var(--border);border-radius:6px;
-  color:var(--text);padding:5px 7px;font-size:11px;font-family:var(--fb)}
+  color:var(--text);padding:5px 7px;font-size:14px;font-family:var(--fb)}
 .uid-item-approach{display:inline-block;background:#1a2a3a;border-radius:10px;
-  font-size:10px;color:var(--muted);padding:2px 8px;margin-right:6px}
-.pill-nick{font-size:14px;letter-spacing:.5px}
-.pill-amt{font-size:16px;font-weight:500}
+  font-size:13px;color:var(--muted);padding:2px 8px;margin-right:6px}
+.pill-nick{font-size:17px;letter-spacing:.5px}
+.pill-amt{font-size:19px;font-weight:500}
 
 /* ── STEP 4: RESULTS ── */
 .result-hero{background:var(--panel);border-radius:16px;padding:28px;text-align:center}
-.result-persona-label{font-size:13px;color:var(--muted);margin-bottom:8px}
-.result-total{font-family:var(--fb);font-size:clamp(28px,5vw,42px);letter-spacing:-1px;font-weight:300}
-.result-total span{font-size:16px;font-weight:300;color:var(--muted);margin-left:6px}
-.result-monthly-note{font-size:13px;color:var(--muted);margin-top:8px}
+.result-persona-label{font-size:16px;color:var(--muted);margin-bottom:8px}
+.result-total{font-family:var(--fb);font-size:clamp(31px,5vw,45px);letter-spacing:-1px;font-weight:300}
+.result-total span{font-size:19px;font-weight:300;color:var(--muted);margin-left:6px}
+.result-monthly-note{font-size:16px;color:var(--muted);margin-top:8px}
 
 .result-actions{display:flex;flex-direction:column;gap:8px}
 .cat-block{border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:8px}
 .cat-hdr{background:var(--panel);padding:14px 16px;cursor:pointer;
   display:flex;align-items:center;gap:10px;transition:background .15s;user-select:none}
 .cat-hdr:hover{background:#1a2a3a}
-.cat-hdr-name{font-size:14px;font-weight:500;color:var(--accent);flex:1}
-.cat-hdr-count{font-size:13px;color:var(--text);font-weight:500}
-.cat-hdr-chev{color:var(--muted);font-size:12px;transition:transform .2s}
+.cat-hdr-name{font-size:17px;font-weight:500;color:var(--accent);flex:1}
+.cat-hdr-count{font-size:16px;color:var(--text);font-weight:500}
+.cat-hdr-chev{color:var(--muted);font-size:15px;transition:transform .2s}
 .cat-hdr.open .cat-hdr-chev{transform:rotate(180deg)}
 .cat-body{display:none;border-top:1px solid var(--border)}
 .cat-body.open{display:block}
-.cat-persona-badge{font-size:10px;padding:2px 8px;border-radius:20px;border:1px solid;letter-spacing:.3px}
+.cat-persona-badge{font-size:13px;padding:2px 8px;border-radius:20px;border:1px solid;letter-spacing:.3px}
 .cat-persona-badge.D{color:var(--cD);border-color:var(--cD)}
 .cat-persona-badge.G{color:var(--cG);border-color:var(--cG)}
 .cat-persona-badge.W{color:var(--cW);border-color:var(--cW)}
 .subcat-row{display:flex;justify-content:space-between;align-items:center;
-  padding:10px 16px;border-bottom:1px solid var(--border);font-size:13px}
+  padding:10px 16px;border-bottom:1px solid var(--border);font-size:16px}
 .subcat-row:last-child{border-bottom:none}
 .subcat-name{color:var(--text)}
 .subcat-amt{color:var(--muted)}
@@ -168,7 +168,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;
 /* ── STEP 4.1: BANK SALAD UPLOAD/COMPARE ── */
 .compare-table{display:flex;flex-direction:column;gap:2px;margin-top:12px}
 .compare-row{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:6px;
-  padding:8px 10px;font-size:12px;border-bottom:1px solid var(--border);align-items:center}
+  padding:8px 10px;font-size:15px;border-bottom:1px solid var(--border);align-items:center}
 .compare-hdr{color:var(--muted);font-weight:500}
 .compare-total{font-weight:500;color:var(--text);border-top:1px solid var(--border);margin-top:4px}
 .compare-diff.over{color:#e08080}
@@ -176,19 +176,19 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;
 .upload-label{display:flex;align-items:center;justify-content:center}
 
 /* ── STEP 5: ANALYSIS ── */
-.analysis-title{font-family:var(--fb);font-size:16px;font-weight:500;color:var(--accent);text-align:center}
+.analysis-title{font-family:var(--fb);font-size:19px;font-weight:500;color:var(--accent);text-align:center}
 .pie-grid{display:flex;gap:24px;flex-wrap:wrap;justify-content:center;margin-top:16px}
 .pie-block{display:flex;flex-direction:column;align-items:center;gap:10px;
   background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;flex:1;min-width:200px}
-.pie-block-title{font-size:13px;color:var(--muted)}
-.pie-legend{display:flex;flex-direction:column;gap:4px;font-size:12px}
+.pie-block-title{font-size:16px;color:var(--muted)}
+.pie-legend{display:flex;flex-direction:column;gap:4px;font-size:15px}
 .pie-legend-row{display:flex;align-items:center;gap:6px}
 .pie-legend-swatch{width:10px;height:10px;border-radius:3px;display:inline-block;flex-shrink:0}
 
 .bar-chart{display:flex;flex-direction:column;gap:14px;margin-top:16px;
   background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px}
 .bar-row{display:flex;align-items:center;gap:10px}
-.bar-row-label{width:56px;font-size:13px;color:var(--text);flex-shrink:0}
+.bar-row-label{width:56px;font-size:16px;color:var(--text);flex-shrink:0}
 .bar-row.is-user .bar-row-label{color:var(--cUser);font-weight:600}
 .bar-track{flex:1;background:var(--bg);border-radius:6px;overflow:hidden;height:22px}
 .bar-fill{height:100%;border-radius:6px;transition:width .3s}
@@ -196,17 +196,17 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;
 .bar-fill.G{background:var(--cG)}
 .bar-fill.W{background:var(--cW)}
 .bar-fill.U{background:var(--cUser)}
-.bar-row-amt{width:110px;text-align:right;font-size:12px;color:var(--muted);flex-shrink:0}
-.proj-mode-label{font-size:13px;color:var(--accent2);text-align:center;font-weight:500}
+.bar-row-amt{width:110px;text-align:right;font-size:15px;color:var(--muted);flex-shrink:0}
+.proj-mode-label{font-size:16px;color:var(--accent2);text-align:center;font-weight:500}
 
 /* ── STEP 6: PROJECTION ── */
 .slider-panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;
   padding:18px 20px;display:flex;flex-direction:column;gap:16px}
-.proj-target-note{font-size:13px;color:var(--muted);text-align:center;
+.proj-target-note{font-size:16px;color:var(--muted);text-align:center;
   padding-bottom:14px;border-bottom:1px solid var(--border)}
-.proj-target-note strong{color:var(--accent2);font-size:15px}
+.proj-target-note strong{color:var(--accent2);font-size:18px}
 .slider-row{display:flex;flex-direction:column;gap:6px}
-.slider-row-top{display:flex;justify-content:space-between;font-size:13px}
+.slider-row-top{display:flex;justify-content:space-between;font-size:16px}
 .slider-row-top .lbl{color:var(--muted)}
 .slider-row-top .val{color:var(--accent);font-weight:500}
 .slider-row input[type=range]{width:100%;accent-color:var(--accent)}
@@ -214,7 +214,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;
 
 .proj-btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
 .proj-btn{flex:1;min-width:120px;background:var(--bg);border:1px solid var(--border);color:var(--text);
-  border-radius:8px;font-size:12px;font-family:var(--fb);padding:8px 10px;cursor:pointer;transition:all .2s}
+  border-radius:8px;font-size:15px;font-family:var(--fb);padding:8px 10px;cursor:pointer;transition:all .2s}
 .proj-btn:hover{border-color:var(--accent);color:var(--accent)}
 .proj-btn.locked{border-color:var(--accent);color:var(--accent);background:#0f2b23}
 .proj-btn.danger{border-color:#5a2a2a;color:#e08080}
@@ -225,7 +225,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;
 .chart-flex #proj-chart{flex:1;min-width:0}
 .chart-flex #proj-chart svg{width:100%;height:auto;display:block}
 .chart-legend{width:150px;flex-shrink:0;display:flex;flex-direction:column;gap:10px}
-.legend-item{display:flex;align-items:flex-start;gap:6px;font-size:12px;color:var(--text);line-height:1.4}
+.legend-item{display:flex;align-items:flex-start;gap:6px;font-size:15px;color:var(--text);line-height:1.4}
 .legend-item.empty{color:var(--muted);opacity:.7}
 
 .trophy-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
@@ -234,32 +234,32 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;
 .trophy-card.owned{border-color:var(--accent)}
 .trophy-owned-badge{position:absolute;top:-14px;left:50%;transform:translateX(-50%);
   width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--bg);
-  display:flex;align-items:center;justify-content:center;font-size:15px;
+  display:flex;align-items:center;justify-content:center;font-size:18px;
   box-shadow:0 2px 8px rgba(0,0,0,.4)}
-.trophy-name{font-size:14px;font-weight:500;display:flex;align-items:center;gap:6px}
-.trophy-icon{font-size:16px}
-.trophy-meta{font-size:12px;color:var(--muted)}
+.trophy-name{font-size:17px;font-weight:500;display:flex;align-items:center;gap:6px}
+.trophy-icon{font-size:19px}
+.trophy-meta{font-size:15px;color:var(--muted)}
 .trophy-card.owned .trophy-meta{opacity:.6}
 .trophy-add-row{display:flex;gap:8px;align-items:center;margin-top:auto}
 .trophy-add-row input{width:60px;background:var(--bg);border:1px solid var(--border);
-  border-radius:8px;color:var(--text);padding:6px 8px;font-size:13px}
+  border-radius:8px;color:var(--text);padding:6px 8px;font-size:16px}
 .trophy-add-row input:disabled{opacity:.4}
-.trophy-add-row span{font-size:12px;color:var(--muted)}
-.trophy-unreachable{font-size:12px;color:var(--muted);font-style:italic}
+.trophy-add-row span{font-size:15px;color:var(--muted)}
+.trophy-unreachable{font-size:15px;color:var(--muted);font-style:italic}
 .trophy-add-btn{background:var(--accent);color:var(--bg);border:none;border-radius:8px;
-  padding:6px 12px;font-size:12px;cursor:pointer;transition:opacity .2s;flex:1}
+  padding:6px 12px;font-size:15px;cursor:pointer;transition:opacity .2s;flex:1}
 .trophy-add-btn:disabled{background:var(--border);color:var(--muted);cursor:not-allowed}
 .trophy-add-btn:not(:disabled):hover{opacity:.85}
 
 .trophy-stack-panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
 .trophy-stack-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.trophy-stack-hdr-title{font-size:14px;font-weight:500;color:var(--accent)}
+.trophy-stack-hdr-title{font-size:17px;font-weight:500;color:var(--accent)}
 .trophy-stack-item{display:flex;justify-content:space-between;align-items:center;
-  padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+  padding:8px 0;border-bottom:1px solid var(--border);font-size:16px}
 .trophy-stack-item:last-child{border-bottom:none}
-.trophy-stack-empty{font-size:13px;color:var(--muted);padding:8px 0}
+.trophy-stack-empty{font-size:16px;color:var(--muted);padding:8px 0}
 .trophy-cancel-btn{background:none;border:1px solid #e05050;color:#e05050;
-  border-radius:8px;font-size:11px;padding:3px 8px;cursor:pointer}
+  border-radius:8px;font-size:14px;padding:3px 8px;cursor:pointer}
 
 /* ── RESPONSIVE ── */
 @media(max-width:680px){
@@ -274,7 +274,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;
 <!-- ══ STEP 0: LOGIN/START ══ -->
 <div id="s0" class="step active">
   <div class="hero fu">
-    <h1>인생게임</h1>
+    <h1>자산 로드맵</h1>
     <p>당신은 어떤 방식으로 살고 있나요?</p>
   </div>
   <div class="login-warning fu">
@@ -290,13 +290,13 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;
 <!-- ══ STEP 1: PERSONA ══ -->
 <div id="s1" class="step">
   <div class="hero fu">
-    <h1>인생게임</h1>
+    <h1>자산 로드맵</h1>
     <p>당신은 어떤 방식으로 살고 있나요?</p>
   </div>
   <div class="persona-grid">
 
     <div class="pc D fu" style="animation-delay:.05s" onclick="selectBasePersona('설계자')">
-      <img class="pc-avatar-img" src="./인생게임/설계자_아치.png" alt="아치">
+      <img class="pc-avatar-img" src="./images/설계자_아치.png" alt="아치">
       <div class="pc-nick">the architect</div>
       <div class="pc-name">archi · 아치</div>
       <div class="pc-tagline">"어디가 core이지?"</div>
@@ -310,7 +310,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;
     </div>
 
     <div class="pc G fu" style="animation-delay:.1s" onclick="selectBasePersona('소비자')">
-      <img class="pc-avatar-img" src="./인생게임/소비자_샤이니.png" alt="샤이니">
+      <img class="pc-avatar-img" src="./images/소비자_샤이니.png" alt="샤이니">
       <div class="pc-nick">the consumer</div>
       <div class="pc-name">shiny · 샤이니</div>
       <div class="pc-tagline">"난 trendy하고, edge에 있어"</div>
@@ -324,7 +324,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;
     </div>
 
     <div class="pc W fu" style="animation-delay:.15s" onclick="selectBasePersona('노동자')">
-      <img class="pc-avatar-img" src="./인생게임/노동자_토일.png" alt="그라인드">
+      <img class="pc-avatar-img" src="./images/노동자_토일.png" alt="그라인드">
       <div class="pc-nick">the laborer</div>
       <div class="pc-name">grind · 그라인드</div>
       <div class="pc-tagline">"최저가를 찾고, 내 손으로 만든다"</div>
@@ -344,7 +344,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;
 <div id="s2" class="step">
   <nav class="nav">
     <button class="nav-back" onclick="gotoStep(1)">← 페르소나</button>
-    <span class="nav-title">인생게임</span>
+    <span class="nav-title">자산 로드맵</span>
     <span class="nav-step" id="s2-badge"></span>
   </nav>
   <div class="setup-header">가구 유형을 선택하세요</div>
@@ -356,7 +356,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;
     <button class="hh-btn" onclick="selectHousehold('가족',this)">👨‍👩‍👧 가족</button>
     <button class="hh-btn" onclick="selectHousehold('시니어',this)">👴 시니어</button>
   </div>
-  <div id="hh-warning" style="display:none;color:#e05050;font-size:13px;text-align:center;padding:4px 0">
+  <div id="hh-warning" style="display:none;color:#e05050;font-size:16px;text-align:center;padding:4px 0">
     ⚠ 가구 유형을 선택해 주세요
   </div>
 </div>
@@ -368,7 +368,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;
     <span class="nav-title">대분류별 조정</span>
     <span class="nav-step" id="s3-badge"></span>
   </nav>
-  <div class="fu" style="font-family:var(--fb);font-size:20px;font-weight:500;color:var(--accent);letter-spacing:1px">월별 지출</div>
+  <div class="fu" style="font-family:var(--fb);font-size:23px;font-weight:500;color:var(--accent);letter-spacing:1px">월별 지출</div>
   <div class="setup-header" style="margin-top:-8px">대분류별로 다른 페르소나를 적용해 보세요 (기본값: 선택한 페르소나)</div>
   <button class="proceed-btn" id="btn-confirm-total-top" onclick="gotoResults()"></button>
   <button class="cat-collapse-all-btn" id="btn-collapse-all" onclick="toggleAllCatsCollapse()"></button>
@@ -466,7 +466,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;
       <button class="proj-btn" id="btn-trophy-lock" onclick="toggleTrophyLock()">🔓 트로피 고정</button>
       <button class="proj-btn" onclick="downloadProjectionResult()">📥 결과 다운로드 (CSV)</button>
     </div>
-    <div class="login-warning" style="font-size:11px;padding:10px 14px">
+    <div class="login-warning" style="font-size:14px;padding:10px 14px">
       ⚠️ 이 결과는 브라우저에만 저장됩니다. 꼭 다운로드해서 보관하세요.
     </div>
   </div>
