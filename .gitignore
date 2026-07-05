@@ -1,4 +1,5 @@
 # trade secret
 life/
-the_architect.xlsx
-인생게임_개발계획.md
+*.xlsx
+*.md
+!README.md
