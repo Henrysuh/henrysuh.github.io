@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>엑셀 표 → HTML 변환기</title>
+    <style>
+        body { font-family: 'Apple SD Gothic Neo', sans-serif; max-width: 900px; margin: 0 auto; padding: 20px 20px 60px; background-color: #f4f4f9; }
+        h1 { text-align: center; margin-bottom: 6px; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 30px; font-size: 14px; }
+
+        .box { background: white; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px; }
+        .box h3 { margin-top: 0; }
+
+        .guide { font-size: 13px; color: #555; line-height: 1.7; }
+        .guide b { color: #c0392b; }
+
+        #pasteZone {
+            min-height: 120px;
+            border: 2px dashed #ced4da;
+            border-radius: 10px;
+            padding: 15px;
+            outline: none;
+            font-size: 14px;
+            color: #333;
+            transition: 0.2s;
+        }
+        #pasteZone:focus { border-color: #2e86de; background: #f7fbff; }
+        #pasteZone:empty:before {
+            content: attr(data-placeholder);
+            color: #adb5bd;
+        }
+
+        .status { margin-top: 12px; padding: 10px 14px; border-radius: 8px; font-size: 14px; display: none; }
+        .status.ok { background: #d4edda; color: #155724; }
+        .status.warn { background: #f8d7da; color: #721c24; }
+
+        .btn-row { display: flex; gap: 10px; margin-top: 15px; }
+        .btn { padding: 10px 20px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; color: white; background-color: #2e86de; }
+        .btn:disabled { background-color: #adb5bd; cursor: not-allowed; }
+        .btn-secondary { background-color: #636e72; }
+
+        #output { width: 100%; min-height: 200px; box-sizing: border-box; padding: 15px; border: 1px solid #ccc; border-radius: 8px; font-family: 'Consolas', monospace; font-size: 13px; white-space: pre; overflow-x: auto; resize: vertical; }
+
+        #previewWrap { overflow-x: auto; }
+        #preview table { border-collapse: collapse; }
+        #preview td, #preview th { border: 1px solid #ccc; padding: 6px 10px; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <h1>📊 엑셀 표 → HTML 변환기</h1>
+    <p class="subtitle">엑셀 / 구글시트 / 리브레오피스에서 복사한 표를 rowspan·colspan이 살아있는 순수 HTML로 변환합니다.</p>
+
+    <div class="box">
+        <h3>1. 표 붙여넣기</h3>
+        <p class="guide">
+            엑셀·구글시트·리브레오피스 등에서 셀 범위를 복사(Ctrl+C)한 뒤, 아래 박스를 클릭하고 <b>일반 붙여넣기(Ctrl+V)</b>를 사용하세요.<br>
+            우클릭 메뉴의 <b>"텍스트로 붙여넣기"</b>나 Shift+Ctrl+V는 표 구조 정보가 사라지므로 사용하면 안 됩니다.
+        </p>
+        <div id="pasteZone" contenteditable="true" data-placeholder="여기를 클릭하고 Ctrl+V로 붙여넣으세요"></div>
+        <div id="status" class="status"></div>
+    </div>
+
+    <div class="box">
+        <h3>2. 변환된 HTML (MD 문서에 그대로 붙여넣기)</h3>
+        <textarea id="output" readonly placeholder="표를 붙여넣으면 여기에 결과가 표시됩니다."></textarea>
+        <div class="btn-row">
+            <button class="btn" id="copyBtn" onclick="copyOutput()" disabled>📋 HTML 복사</button>
+            <button class="btn btn-secondary" onclick="resetAll()">🗑 초기화</button>
+        </div>
+    </div>
+
+    <div class="box">
+        <h3>3. 미리보기</h3>
+        <div id="previewWrap"><div id="preview"></div></div>
+    </div>
+
+    <script>
+        // input/output
+        // Input: 엑셀/구글시트/리브레오피스에서 복사한 클립보드의 text/html (paste 이벤트로 획득)
+        // Output: rowspan/colspan만 남기고 스타일·클래스를 모두 제거한 들여쓰기 HTML 텍스트
+
+        let lastCleanedHTML = '';
+
+        const pasteZone = document.getElementById('pasteZone');
+        const statusEl = document.getElementById('status');
+        const outputEl = document.getElementById('output');
+        const previewEl = document.getElementById('preview');
+        const copyBtn = document.getElementById('copyBtn');
+
+        window.addEventListener('load', () => pasteZone.focus());
+
+        pasteZone.addEventListener('paste', (e) => {
+            e.preventDefault(); // 브라우저가 자체적으로 붙여넣기 처리하지 못하게 막고 원본 clipboardData를 직접 다룸
+
+            const html = (e.clipboardData || window.clipboardData).getData('text/html');
+            if (!html) {
+                showStatus('⚠️ 표 데이터를 인식하지 못했습니다. "텍스트로 붙여넣기"가 아닌 일반 붙여넣기(Ctrl+V)를 사용했는지 확인해주세요.', true);
+                return;
+            }
+
+            try {
+                const doc = new DOMParser().parseFromString(html, 'text/html');
+                const table = doc.querySelector('table');
+                if (!table) {
+                    showStatus('⚠️ 클립보드 내용에서 표를 찾을 수 없습니다. 엑셀/구글시트/리브레오피스에서 셀 범위를 복사했는지 확인해주세요.', true);
+                    return;
+                }
+
+                cleanTable(table);
+                const rowCount = table.querySelectorAll('tr').length;
+
+                lastCleanedHTML = serializeTable(table, 0).trim();
+                outputEl.value = lastCleanedHTML;
+                previewEl.innerHTML = lastCleanedHTML;
+                copyBtn.disabled = false;
+
+                showStatus(`✅ ${rowCount}행짜리 표를 인식했습니다. 아래 미리보기로 확인 후 복사하세요.`, false);
+            } catch (err) {
+                showStatus('⚠️ 변환 중 오류가 발생했습니다: ' + err.message, true);
+            }
+        });
+
+        // 핵심 로직: 구조(table/tr/td/th/br)만 남기고 나머지 태그는 벗겨내며,
+        // p/div 같은 블록 래퍼가 이어질 때는 줄바꿈이 사라지지 않도록 <br>로 치환
+        function cleanTable(root) {
+            root.querySelectorAll('colgroup, col, style, script').forEach(el => el.remove());
+
+            const STRUCTURAL = ['table', 'thead', 'tbody', 'tfoot', 'tr', 'td', 'th'];
+
+            function walk(el) {
+                let prevHadContent = false;
+                Array.from(el.childNodes).forEach(child => {
+                    if (child.nodeType === Node.TEXT_NODE) {
+                        if (child.textContent.trim() !== '') prevHadContent = true;
+                        return;
+                    }
+                    if (child.nodeType !== Node.ELEMENT_NODE) { child.remove(); return; }
+
+                    const tag = child.tagName.toLowerCase();
+
+                    if (STRUCTURAL.includes(tag)) {
+                        walk(child);
+                        prevHadContent = true;
+                        return;
+                    }
+                    if (tag === 'br') { prevHadContent = false; return; }
+
+                    // p, div, span, font, o:p 등 래퍼 태그: 안을 먼저 정리한 뒤 벗겨냄
+                    walk(child);
+                    const isBlock = (tag === 'p' || tag === 'div');
+                    if (isBlock && prevHadContent) {
+                        el.insertBefore(document.createElement('br'), child);
+                    }
+                    const hadContent = child.textContent.trim() !== '';
+                    while (child.firstChild) el.insertBefore(child.firstChild, child);
+                    el.removeChild(child);
+                    if (isBlock) prevHadContent = hadContent;
+                });
+            }
+            walk(root);
+
+            // rowspan/colspan(>1일 때만)만 남기고 모든 속성 제거
+            [root, ...root.querySelectorAll('*')].forEach(el => {
+                const tag = el.tagName.toLowerCase();
+                let rowspan = null, colspan = null;
+                if (tag === 'td' || tag === 'th') {
+                    const rs = parseInt(el.getAttribute('rowspan'), 10);
+                    const cs = parseInt(el.getAttribute('colspan'), 10);
+                    if (rs > 1) rowspan = rs;
+                    if (cs > 1) colspan = cs;
+                }
+                Array.from(el.attributes).forEach(a => el.removeAttribute(a.name));
+                if (rowspan) el.setAttribute('rowspan', rowspan);
+                if (colspan) el.setAttribute('colspan', colspan);
+            });
+
+            // 빈 셀(공백/&nbsp;만 있는 셀) 정리
+            root.querySelectorAll('td, th').forEach(cell => {
+                if (!cell.querySelector('br') && cell.textContent.replace(/ /g, '').trim() === '') {
+                    cell.textContent = '';
+                }
+            });
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function serializeTable(node, depth) {
+            if (node.nodeType === Node.TEXT_NODE) return escapeHtml(node.textContent);
+
+            const tag = node.tagName.toLowerCase();
+            const indent = '  '.repeat(depth);
+
+            if (tag === 'br') return '<br>';
+
+            if (tag === 'td' || tag === 'th') {
+                const rs = node.getAttribute('rowspan');
+                const cs = node.getAttribute('colspan');
+                let attrs = '';
+                if (rs) attrs += ` rowspan="${rs}"`;
+                if (cs) attrs += ` colspan="${cs}"`;
+                const inner = Array.from(node.childNodes).map(c => serializeTable(c, 0)).join('');
+                return `${indent}<${tag}${attrs}>${inner}</${tag}>\n`;
+            }
+
+            // table/thead/tbody/tfoot/tr: 자식을 줄바꿈하여 배치
+            const inner = Array.from(node.childNodes)
+                .filter(c => c.nodeType === Node.ELEMENT_NODE)
+                .map(c => serializeTable(c, depth + 1))
+                .join('');
+            return `${indent}<${tag}>\n${inner}${indent}</${tag}>\n`;
+        }
+
+        function showStatus(msg, isWarn) {
+            statusEl.textContent = msg;
+            statusEl.style.display = 'block';
+            statusEl.className = 'status ' + (isWarn ? 'warn' : 'ok');
+        }
+
+        function copyOutput() {
+            if (!lastCleanedHTML) return;
+            navigator.clipboard.writeText(lastCleanedHTML).then(() => {
+                showStatus('📋 클립보드에 복사했습니다. MD 문서에 그대로 붙여넣으세요.', false);
+            });
+        }
+
+        function resetAll() {
+            pasteZone.textContent = '';
+            outputEl.value = '';
+            previewEl.innerHTML = '';
+            lastCleanedHTML = '';
+            copyBtn.disabled = true;
+            statusEl.style.display = 'none';
+            pasteZone.focus();
+        }
+    </script>
+</body>
+</html>
