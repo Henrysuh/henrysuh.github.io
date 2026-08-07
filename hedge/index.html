@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>니켈 Simulation 모델</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>⚖️</text></svg>">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">Ni</span>
+    <div>
+      <h1>니켈 Simulation 모델</h1>
+      <p class="brand-sub">무대응 · Forward · Future · 저가법 평가 — 파란색 입력값을 바꾸면 전체가 재계산됩니다</p>
+    </div>
+  </div>
+  <div class="topbar-actions">
+    <button id="reset-btn" class="btn" type="button">초기값 복원</button>
+    <button id="theme-btn" class="btn" type="button" title="라이트/다크 전환"></button>
+  </div>
+</header>
+
+<nav class="tabs" id="tabs" role="tablist"></nav>
+
+<main id="view" class="view"></main>
+
+<footer class="footer">
+  모든 숫자는 Simulation용 가상 값입니다.
+</footer>
+
+<script src="model.js"></script>
+<script src="xlsx.js"></script>
+<script src="charts.js"></script>
+<script src="export.js"></script>
+<script src="views.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
