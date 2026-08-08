@@ -3,3 +3,4 @@ life/
 *.xlsx
 *.md
 !README.md
+.DS_Store
