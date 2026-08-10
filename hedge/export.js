@@ -78,7 +78,8 @@ function buildOverview(wb, m) {
 /* ----------------------------- ② 거래조건 -------------------------------- */
 function buildTerms(wb, state, m) {
   const t = state.terms;
-  const sh = wb.sheet(SH_TERMS, [30, 16, 60]);
+  /* B 항목 · C 값 · D 설명 · E 구간 (기본) · F 가격 · G 내용 */
+  const sh = wb.sheet(SH_TERMS, [30, 16, 60, null, 30, 45]);
   const T = {};
   let r = 2;
 
@@ -161,7 +162,6 @@ function buildHedge(wb, state, m, T) {
   const c = m.terms;
   const hp = state.hedgeParams;
   const nBook = state.book.length;
-  const ACTION_SLOTS = Math.max(12, state.actions.length + 4);
 
   const widths = [22, 14, 16, 12, 16, 14, 14, 12, 12, 12, 12, 12, 12, 14, 12, 18];
   const sh = wb.sheet(SH_HEDGE, widths);
@@ -173,7 +173,7 @@ function buildHedge(wb, state, m, T) {
     r += 1;
   };
 
-  sh.set(`B${r}`, { v: 'Hedge 손익 — 시황 · Exposure 현황판 · Hedge 결과 · 손익 · 증거금 Cash Flow', s: S.title });
+  sh.set(`B${r}`, { v: 'Hedge 손익 — 시황 · 매출/Exposure 현황판 · Hedge 결과 · 손익 · 증거금 Cash Flow', s: S.title });
   r += 2;
 
   /* ---------- ① 시황 ---------- */
@@ -232,84 +232,134 @@ function buildHedge(wb, state, m, T) {
   const invBaseRow = r, invUnitRow = r + 1;
   r += 3;
 
-  /* ---------- ② Exposure 현황판 ---------- */
-  section('② Exposure 현황판 — 초기 가격 조건에서 출발해 조치로 옮겨간다', 16);
-  const ledHeader = ['구분', '물량 (톤)', '초기 판가조건', 'QP 이동', '판매 QP 구간',
-                     '판매 QP 평균', 'Basis Exposure'];
-  c.stageWeeks.forEach((w, i) => ledHeader.push(`${i + 1}단계 W${w} 제안`, `${i + 1}단계 W${w} 결과`));
-  ledHeader.push('Hedge 대상 (톤)', '재고 (톤)', 'Hedge');
-  sh.row(`B${r}`, ledHeader.map(v => ({ v, s: S.header }))); r += 1;
+  /* ---------- ②-1 판매 물량 (실무) ----------
+     열: B 구분 C 종류 D 총물량 E 계획 | F W2 G W4 H W6 | I 판매확정(E1) J 재고 */
+  section('②-1 판매 물량 (실무) — 재고를 언제 얼마나 팔았나', 9);
+  sh.row(`B${r}`, ['구분', '종류', '총 물량 (톤)', '계획 (톤)']
+    .concat(c.stageWeeks.map(w => `추가 판매 W${w} (톤)`))
+    .concat(['판매 확정 (E1, 톤)', '재고 (톤)']).map(v => ({ v, s: S.header })));
+  r += 1;
 
-  const LED0 = r;
-  const LED1 = r + nBook - 1;
-  /* 조치 내용 첫 데이터 행 — 현황판의 SUMIFS 가 아래쪽 조치 표를 미리 참조하므로
-     주소를 먼저 계산해 둔다. 합계(+1) · 여백(+2) · 섹션(+1) · 머리(+1) 다음이 데이터. */
-  const ACT0 = LED1 + 5;
-  const ACT1 = ACT0 + ACTION_SLOTS - 1;
-  const A_STAGE  = `$B$${ACT0}:$B$${ACT1}`;
-  const A_STATUS = `$C$${ACT0}:$C$${ACT1}`;
-  const A_TARGET = `$D$${ACT0}:$D$${ACT1}`;
-  const A_QTY    = `$E$${ACT0}:$E$${ACT1}`;
-  const A_TOCOND = `$F$${ACT0}:$F$${ACT1}`;
-
-  /* 확정 조치가 옮긴 물량 — 단계 누적 / 전환 목적지별 */
-  const movedTo = (row, stage, cond) =>
-    `SUMIFS(${A_QTY},${A_TARGET},$B${row},${A_STAGE},"<="&${stage},${A_STATUS},"확정",${A_TOCOND},"${cond}")`;
-  const movedAll = (row, stage) =>
-    `SUMIFS(${A_QTY},${A_TARGET},$B${row},${A_STAGE},"<="&${stage},${A_STATUS},"확정")`;
-  /* 해당 단계 시점의 조건별 잔량 */
-  const qtyAvg   = (row, stage) =>
-    `(${movedTo(row, stage, '평균')}+IF($D${row}="평균",$C${row}-${movedAll(row, stage)},0))`;
-  const qtyStock = (row, stage) => `IF($D${row}="재고",$C${row}-${movedAll(row, stage)},0)`;
-  const qtyPass  = (row, stage) =>
-    `(${movedTo(row, stage, '전가')}+IF($D${row}="전가",$C${row}-${movedAll(row, stage)},0))`;
-  const lastStage = c.stageWeeks.length;
+  const SAL0 = r;
+  const SAL1 = r + nBook - 1;
+  const STOCK_LABEL = ROW_KINDS.stock;
+  /* 단계별 입력을 앞 단계부터 상한까지만 인정한다 — 웹의 clampStages 와 같은 규칙.
+     cols = 단계 3칸의 열 이름, cap = 상한 셀 */
+  const stageClamp = (cols, cap, row) => [
+    `MIN($${cols[0]}${row},${cap})`,
+    `MIN($${cols[1]}${row},MAX(0,${cap}-$${cols[0]}${row}))`,
+    `MIN($${cols[2]}${row},MAX(0,${cap}-$${cols[0]}${row}-$${cols[1]}${row}))`
+  ];
+  const ADD_COLS = ['F', 'G', 'H'];
+  const addStage = row => stageClamp(ADD_COLS, `$D${row}`, row);
 
   state.book.forEach(row => {
-    const cells = [
+    const add = addStage(r);
+    sh.row(`B${r}`, [
       { v: row.name, s: S.bold },
+      { v: ROW_KINDS[row.kind] || ROW_KINDS.contract, s: S.inputText },
       { v: row.qty, s: S.inputNum },
-      { v: row.cond, s: S.inputText },
-      { v: row.qpShift, s: S.inputNum },
-      { f: `"W"&(${SH_TERMS}!${T.shipStart}+$E${r})&" ~ W"&(${SH_TERMS}!${T.shipEnd}+$E${r})` },
-      { f: `IF($D${r}="전가",${BUY},${PX_AVG(`${SH_TERMS}!${T.shipStart}+$E${r}`, `${SH_TERMS}!${T.shipEnd}+$E${r}`)})`, s: S.num2 },
-      { f: `IF($D${r}="전가",0,$C${r})`, s: S.num }
-    ];
-    c.stageWeeks.forEach((_, i) => {
-      const stage = i + 1;
-      cells.push({ f: `SUMIFS(${A_QTY},${A_TARGET},$B${r},${A_STAGE},${stage})`, s: S.num });
-      cells.push({ f: `${qtyAvg(r, stage)}+${qtyStock(r, stage)}`, s: S.num });
-    });
-    cells.push({ f: qtyAvg(r, lastStage), s: S.num });      // Hedge 대상
-    cells.push({ f: qtyStock(r, lastStage), s: S.num });    // 재고
-    cells.push({ v: HEDGE_KINDS[row.hedge].label, s: S.inputText });
-    sh.row(`B${r}`, cells);
+      /* 계약 행은 물량 전부가 판매 계획, 재고 행은 추가로 판 만큼만 판매된다 */
+      { f: `IF($C${r}="${STOCK_LABEL}",0,$D${r})`, s: S.num },
+      ...[0, 1, 2].map(i => ({
+        v: row.kind === 'stock' ? ((row.addAt || [])[i] || 0) : 0, s: S.inputNum
+      })),
+      { f: `$E${r}+IF($C${r}="${STOCK_LABEL}",${add.join('+')},0)`, s: S.num },
+      { f: `$D${r}-$I${r}`, s: S.num }
+    ]);
     r += 1;
   });
-
-  const nStage = c.stageWeeks.length;
-  const HEDGEQ_COL = C_(9 + nStage * 2);       // Hedge 대상 열
-  const STOCKQ_COL = C_(10 + nStage * 2);      // 재고 열
-  const HEDGE_COL  = C_(11 + nStage * 2);      // Hedge 대책 열
-  sh.row(`B${r}`, [
-    { v: '합계', s: S.bold },
-    { f: `SUM(C${LED0}:C${LED1})`, s: S.totalNum },
-    null, null, null, null,
-    { f: `SUM(H${LED0}:H${LED1})`, s: S.totalNum }
-  ]);
-  c.stageWeeks.forEach((_, i) => {
-    const p = C_(9 + i * 2), q = C_(10 + i * 2);
-    sh.set(`${p}${r}`, { f: `SUM(${p}${LED0}:${p}${LED1})`, s: S.totalNum });
-    sh.set(`${q}${r}`, { f: `SUM(${q}${LED0}:${q}${LED1})`, s: S.totalNum });
-  });
-  [HEDGEQ_COL, STOCKQ_COL].forEach(col =>
-    sh.set(`${col}${r}`, { f: `SUM(${col}${LED0}:${col}${LED1})`, s: S.totalNum }));
-  const LED_TOTAL = r;
+  sh.set(`B${r}`, { v: '합계', s: S.bold });
+  ['D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach(col =>
+    sh.set(`${col}${r}`, { f: `SUM(${col}${SAL0}:${col}${SAL1})`, s: S.totalNum }));
+  const SAL_TOTAL = r;
   r += 2;
+
+  const SOLDQ_COL  = 'I';                      // 판매 물량 표의 E1 열
+  const STOCKQ_COL = 'J';                      // 판매 물량 표의 재고 열
+  const sal = i => SAL0 + i;                   // 책 i 번째 행의 판매 물량 표 주소
+
+  /* ---------- ②-2 Hedge 조치 (실무) ----------
+     열: B 구분 C H1 D 조치대상 E QP이동 F 판매QP G 판매QP평균 | H W2 I W4 J W6 | K 수단 L E2 */
+  section('②-2 Hedge 조치 (실무) — 무엇을 언제 얼마나 막았나', 11);
+  sh.row(`B${r}`, ['구분', 'Natural Hedge (H1, 톤)', '내용', 'Exposure (E1, 톤)',
+    'QP 이동', '판매 QP 구간', '판매 QP 평균']
+    .concat(c.stageWeeks.map(w => `Hedge 조치 W${w} (톤)`))
+    .concat(['조치 수단', '잔여 Exposure (E2, 톤)']).map(v => ({ v, s: S.header })));
+  r += 1;
+
+  const HED0 = r;
+  const HED1 = r + nBook - 1;
+  const HED_COLS = ['I', 'J', 'K'];
+  const hed = i => HED0 + i;                   // 책 i 번째 행의 Hedge 조치 표 주소
+  /* 조치 상한은 E1 에서 재고를 뺀 물량 — 판매 미확정 재고에는 헤지를 걸지 않는다.
+     수단이 무대응이면 어느 단계도 인정하지 않는다. */
+  const hedCap = i => `MAX(0,$E${hed(i)}-$${STOCKQ_COL}${sal(i)})`;
+  const hedStage = i => stageClamp(HED_COLS, hedCap(i), hed(i))
+    .map(f => `IF($L${hed(i)}="무대응",0,${f})`);
+  const HEDGED = i => hedStage(i).join('+');
+
+  state.book.forEach((row, i) => {
+    sh.row(`B${r}`, [
+      { f: `$B${sal(i)}` },
+      /* H1 — 계약 시점에 고객 전가로 넘긴 물량 */
+      { f: `IF($D${r}="전가",$${SOLDQ_COL}${sal(i)},0)`, s: S.num },
+      { v: row.cond, s: S.inputText },
+      /* E1 = 판매 확정 − H1 + 재고 */
+      { f: `$${SOLDQ_COL}${sal(i)}-$C${r}+$${STOCKQ_COL}${sal(i)}`, s: S.num },
+      { v: row.qpShift, s: S.inputNum },
+      /* 전가 물량의 QP 는 매입가가 정해지는 구간 자체다 */
+      { f: `IF($D${r}="전가",IF(${SH_TERMS}!${T.buyMode}="평균","W0 ~ W"&${SH_TERMS}!${T.lead},"W0"),` +
+           `"W"&(${SH_TERMS}!${T.shipStart}+$F${r})&" ~ W"&(${SH_TERMS}!${T.shipEnd}+$F${r}))` },
+      /* 전가는 매입가를 그대로 얹으므로 참조가가 매입가다 */
+      { f: `IF($D${r}="전가",${BUY},${PX_AVG(`${SH_TERMS}!${T.shipStart}+$F${r}`, `${SH_TERMS}!${T.shipEnd}+$F${r}`)})`, s: S.num2 },
+      ...[0, 1, 2].map(k => ({ v: (row.hedgeAt || [])[k] || 0, s: S.inputNum })),
+      { v: HEDGE_KINDS[row.hedge].label, s: S.inputText },
+      { f: `$E${r}-(${HEDGED(i)})`, s: S.num }
+    ]);
+    r += 1;
+  });
+  sh.set(`B${r}`, { v: '합계', s: S.bold });
+  ['C', 'E', 'I', 'J', 'K', 'M'].forEach(col =>
+    sh.set(`${col}${r}`, { f: `SUM(${col}${HED0}:${col}${HED1})`, s: S.totalNum }));
+  const HED_TOTAL = r;
+  r += 2;
+
+  const SALEREF_COL = 'H';                     // Hedge 조치 표의 판매 참조가 열
+  /* 출고월 평균 물량 — E1 에서 재고를 뺀 것. what-if 벤치마크로 쓴다 */
+  const AVGQ = i => hedCap(i);
+  const AVG_TOTAL = `$E$${HED_TOTAL}-$${STOCKQ_COL}$${SAL_TOTAL}`;
+
+  /* ---------- ②-3 요약 (경영층 보고) — 위 두 표를 합친 한 줄기 ---------- */
+  section('②-3 매출/Exposure 현황판 요약 (경영층 보고) — 판매 확정(S) → Natural Hedge(H1) → Exposure(E1) → Hedge 조치(H2) → 잔여(E2)', 13);
+  sh.row(`B${r}`, ['구분', '종류', '총 물량 (톤)', '계획 (톤)', '추가 (톤)',
+    '판매 확정 (S, 톤)', '재고 (톤)', 'Natural Hedge (H1, 톤)', '내용', 'Exposure (E1, 톤)',
+    'Hedge 조치 (H2, 톤)', '조치 수단', '잔여 Exposure (E2, 톤)'].map(v => ({ v, s: S.header })));
+  r += 1;
+  const SUM0 = r;
+  state.book.forEach((_, i) => {
+    sh.row(`B${r}`, [
+      { f: `$B${sal(i)}` }, { f: `$C${sal(i)}` }, { f: `$D${sal(i)}`, s: S.num },
+      { f: `$E${sal(i)}`, s: S.num }, { f: `$${SOLDQ_COL}${sal(i)}-$E${sal(i)}`, s: S.num },
+      { f: `$${SOLDQ_COL}${sal(i)}`, s: S.num }, { f: `$${STOCKQ_COL}${sal(i)}`, s: S.num },
+      { f: `$C${hed(i)}`, s: S.num }, { f: `$D${hed(i)}` }, { f: `$E${hed(i)}`, s: S.num },
+      { f: `${HEDGED(i)}`, s: S.num }, { f: `$L${hed(i)}` },
+      { f: `$M${hed(i)}`, s: S.num }
+    ]);
+    r += 1;
+  });
+  sh.set(`B${r}`, { v: '합계', s: S.bold });
+  ['D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'N'].forEach(col =>
+    sh.set(`${col}${r}`, { f: `SUM(${col}${SUM0}:${col}${SUM0 + nBook - 1})`, s: S.totalNum }));
+  r += 1;
+  /* 화면에서 현황판 아래에 적은 Lead message 를 같은 자리로 옮긴다 */
+  const boardLead = ((state.notes && state.notes.boardLead) || '').trim();
+  if (boardLead) { sh.set(`B${r}`, { v: boardLead, s: S.bold }); r += 1; }
+  r += 1;
 
   /* 재고 단가 — 현황판 주소가 확정된 뒤에 채운다 */
   sh.row(`B${invBaseRow}`, [{ v: '기초 재고 물량 (톤)' },
-    { f: `SUMIF($D$${LED0}:$D$${LED1},"재고",$C$${LED0}:$C$${LED1})`, s: S.num },
+    { f: `SUMIF($C$${SAL0}:$C$${SAL1},"${STOCK_LABEL}",$D$${SAL0}:$D$${SAL1})`, s: S.num },
     { v: '거래조건 시트의 재고 단가 입력과 함께 저가법 기준 원가를 만든다', s: S.muted }]);
   sh.row(`B${invUnitRow}`, [{ v: '재고 단가 — 이동평균 ($/t)' },
     { f: `IF($C$${invBaseRow}+${SH_TERMS}!${T.invAdd}=0,${SH_TERMS}!${T.invPrev},` +
@@ -318,27 +368,8 @@ function buildHedge(wb, state, m, T) {
     { v: '(기초 물량 × 전월 단가 + 편입 물량 × 매입가) ÷ 합계', s: S.muted }]);
   const INV_UNIT = `$C$${invUnitRow}`;
 
-  /* ---------- ③ 조치 내용 ---------- */
-  section('③ 조치 내용 — Rolling: 추가 판매 · 가격 조건 협상', 7);
-  sh.row(`B${r}`, ['단계 (1~3)', '상태 (제안/확정)', '대상', '물량 (톤)',
-                   '전환 후 가격 조건 (전가/평균)', '조치 · 비고'].map(v => ({ v, s: S.header })));
-  r += 1;
-  /* 어긋나면 SUMIFS 범위가 조치 행을 놓쳐 조용히 틀린 값이 나온다 — 그 전에 멈춘다 */
-  if (r !== ACT0) throw new Error(`조치 내용 시작행 불일치 (예상 ${ACT0}, 실제 ${r})`);
-  for (let i = 0; i < ACTION_SLOTS; i++) {
-    const a = state.actions[i];
-    /* 칸이 짧아 좌(문자)·우(숫자)로 흩어지면 읽기 나쁘다 — 이 표만 가로·세로 가운데로 맞춘다 */
-    sh.row(`B${ACT0 + i}`, a
-      ? [{ v: a.stage, s: S.inputNumC }, { v: a.status, s: S.inputTextC },
-         { v: a.target, s: S.inputTextC }, { v: a.qty, s: S.inputNumC },
-         { v: a.toCond || '전가', s: S.inputTextC }, { v: a.note, s: S.wrapC }]
-      : [{ v: '', s: S.inputNumC }, { v: '', s: S.inputTextC }, { v: '', s: S.inputTextC },
-         { v: '', s: S.inputNumC }, { v: '', s: S.inputTextC }, { v: '', s: S.wrapC }]);
-  }
-  r = ACT1 + 2;
-
-  /* ---------- ④ Hedge 결과 ---------- */
-  section('④ Hedge 결과 — 파라미터', 4);
+  /* ---------- ③ Hedge 결과 ---------- */
+  section('③ Hedge 결과 — 파라미터', 4);
   const RATE    = input('연 이자율 (%)', hp.ratePct, S.inputNum);
   const STORAGE = input('창고 · 보험료 ($/t, 기간 합계)', hp.storage, S.inputNum);
   const CY      = input('적기공급 프리미엄 ($/t)', hp.convenienceYield, S.inputNum, '백워데이션에서 > 0');
@@ -360,36 +391,49 @@ function buildHedge(wb, state, m, T) {
     'MIN(0, 정산일 가격 − 재고 단가) — 손실만 인식');
   r += 1;
 
-  /* ⓐ~ⓕ 는 $/t. Hedge 대상 물량을 곱해야 금액이 된다.
-     재고 저가법은 헤지가 한 일이 아니라 ⑤ 손익에서만 계상한다. */
-  sh.row(`B${r}`, ['구분', '판가조건', 'Hedge', '판매 참조가',
-    `ⓐ 미헤지 W0~W${c.decisionWeek} ($/t)`, 'ⓑ 헤지 구간 노출 ($/t)', 'ⓒ QP 미스매치 ($/t)',
+  /* ⓐ~ⓕ 는 $/t. 그 조각의 물량을 곱해야 금액이 된다.
+     한 계약이라도 단계마다 진입가가 다르고 미헤지분은 단가 구조가 달라 조각(leg)으로 나눈다.
+     ⓐ 는 진입 주차까지의 구간이므로 이른 단계에 걸수록 짧다.
+     재고 저가법은 헤지가 한 일이 아니라 ④ 손익에서만 계상한다.
+     열: B 구분 C 처리 D 진입주차 E 판매참조가 F~J 단가 K 소계 L 물량 M 손익 N 무대응 O 차이 P Operation */
+  sh.row(`B${r}`, ['구분', '처리', '진입 (주차)', '판매 참조가',
+    'ⓐ 미헤지 W0~진입 ($/t)', 'ⓑ 헤지 구간 노출 ($/t)', 'ⓒ QP 미스매치 ($/t)',
     'ⓓ Forward spread ($/t)', 'ⓕ 브로커 수수료 ($/t)',
-    '소계 ($/t)', '× Hedge 대상 (톤)',
+    '소계 ($/t)', '× 물량 (톤)',
     '= Hedge 손익', '무대응 손익', 'Hedge − 무대응',
     'Operation 비용 (ⓓ+ⓕ)'].map(v => ({ v, s: S.header })));
   r += 1;
   const RES0 = r;
+  const LEGS_PER_ROW = c.stageWeeks.length + 1;
+  const STAGE_REF = [T.stage1, T.stage2, T.stage3];
+  /* 행 수가 늘 고정이라 입력을 바꿔도 주소가 흔들리지 않는다 — 안 쓰는 줄은 물량이 0이 된다.
+     마지막 줄이 미헤지분이고, 진입이 없으므로 Rolling 종료(W6)를 기준선으로 쓴다. */
   state.book.forEach((_, i) => {
-    const lr = LED0 + i;                       // 대응하는 현황판 행
-    sh.row(`B${r}`, [
-      { f: `$B${lr}` },
-      { f: `$D${lr}` },
-      { f: `$${HEDGE_COL}${lr}` },
-      { f: `$G${lr}`, s: S.num2 },
-      { f: `${ENTRY}-${BUY}`, s: S.signed },
-      { f: `IF($D${r}="무대응",$E${r}-${ENTRY},0)`, s: S.signed },
-      { f: `IF($D${r}="Future 매도",$E${r}-${SETTLE},0)`, s: S.signed },
-      { f: `IF($D${r}="Forward 매도",${CARRY_UNIT},0)`, s: S.signed },
-      { f: `IF($D${r}="Forward 매도",-${FEE_F},IF($D${r}="Future 매도",-${FEE_U},0))`, s: S.signed },
-      { f: `SUM(F${r}:J${r})`, s: S.signed },
-      { f: `$${HEDGEQ_COL}${lr}`, s: S.num },
-      { f: `K${r}*L${r}`, s: S.signed },
-      { f: `($E${r}-${BUY})*L${r}`, s: S.signed },
-      { f: `M${r}-N${r}`, s: S.signed },
-      { f: `(I${r}+J${r})*L${r}`, s: S.signed }
-    ]);
-    r += 1;
+    const hr = hed(i);                         // 대응하는 Hedge 조치 행
+    const stages = hedStage(i);
+    for (let s = 0; s <= c.stageWeeks.length; s++) {
+      const isHedged = s < c.stageWeeks.length;
+      const entry = `INDEX(${PX_RANGE},1,$D${r}+1)`;
+      sh.row(`B${r}`, [
+        { f: `$B${hr}` },
+        isHedged ? { f: `IF(${stages[s]}=0,"–",$L${hr})` } : { v: '무대응' },
+        { f: `${SH_TERMS}!${isHedged ? STAGE_REF[s] : T.decision}`, s: S.num },
+        { f: `$${SALEREF_COL}${hr}`, s: S.num2 },
+        /* 고객 전가는 판가조건이 매입가 연동으로 바뀌므로 ⓐ 구간까지 사라진다 */
+        { f: `IF($C${r}="고객 전가",0,${entry}-${BUY})`, s: S.signed },
+        { f: `IF($C${r}="무대응",$E${r}-${entry},0)`, s: S.signed },
+        { f: `IF($C${r}="Future 매도",$E${r}-${SETTLE},0)`, s: S.signed },
+        { f: `IF($C${r}="Forward 매도",${CARRY_UNIT},0)`, s: S.signed },
+        { f: `IF($C${r}="Forward 매도",-${FEE_F},IF($C${r}="Future 매도",-${FEE_U},0))`, s: S.signed },
+        { f: `SUM(F${r}:J${r})`, s: S.signed },
+        { f: isHedged ? stages[s] : `${AVGQ(i)}-(${HEDGED(i)})`, s: S.num },
+        { f: `K${r}*L${r}`, s: S.signed },
+        { f: `($E${r}-${BUY})*L${r}`, s: S.signed },
+        { f: `M${r}-N${r}`, s: S.signed },
+        { f: `(I${r}+J${r})*L${r}`, s: S.signed }
+      ]);
+      r += 1;
+    }
   });
   const RES1 = r - 1;
   sh.set(`B${r}`, { v: '합계', s: S.bold });
@@ -399,12 +443,12 @@ function buildHedge(wb, state, m, T) {
   });
   const RES_TOTAL = r;
   r += 2;
-  sh.set(`B${r}`, { v: 'ⓐ~ⓕ 는 모두 $/t. 소계 × Hedge 대상 = Hedge 손익. ⓓ+ⓕ 만 헤지를 실행한 비용이고 ⓐⓑⓒ 는 가격이 움직여서 생긴 마진변동손익이다.', s: S.muted }); r += 1;
-  sh.set(`B${r}`, { v: 'ⓓ Forward spread — Forward 를 고른 대가로 A 가 실제로 깎이는 금액. 이론 선도가격 = 진입 시점 현물 + 금융이자 + 창고·보험료 − 적기공급 프리미엄이고 여기서 브로커 스프레드를 뺀 값이 A 가 받는 고정가다. 이 중 금융이자 + 창고·보험료는 A 가 물건을 들고 있으면서 어차피 부담하는 보유비용이고 선도가는 딱 그만큼을 얹어 보상해 주는 것이라 순효과가 0이며, 네 수단 모두에 똑같이 발생해 수단을 가르지 못한다. 따라서 ⓓ = −(적기공급 프리미엄 + 브로커 스프레드) 로 항상 0 이하다.', s: S.muted }); r += 1;
-  sh.set(`B${r}`, { v: `ⓐ는 네 수단이 모두 같다 — W0~W${c.decisionWeek}는 Rolling 종료 전이라 아직 헤지하지 않았다. 수단 선택이 아니라 의사결정 시점을 앞당겨야 줄어든다.`, s: S.muted }); r += 2;
+  sh.set(`B${r}`, { v: 'ⓐ~ⓕ 는 모두 $/t. 소계 × 물량 = Hedge 손익. ⓓ+ⓕ 만 헤지를 실행한 비용이고 ⓐⓑⓒ 는 가격이 움직여서 생긴 마진변동손익이다. 계약마다 단계별 조치 줄 + 미헤지 줄로 나뉘며, 해당 없는 줄은 물량이 0이 된다.', s: S.muted }); r += 1;
+  sh.set(`B${r}`, { v: 'ⓓ Forward spread — Forward 를 고른 대가로 A 가 실제로 깎이는 금액. 이론 선도가격 = 진입 시점 현물 + 금융이자 + 창고·보험료 − 적기공급 프리미엄이고 여기서 브로커 스프레드를 뺀 값이 A 가 받는 고정가다. 이 중 금융이자 + 창고·보험료는 A 가 물건을 들고 있으면서 어차피 부담하는 보유비용이고 선도가는 딱 그만큼을 얹어 보상해 주는 것이라 순효과가 0이며, 파생 수단 모두에 똑같이 발생해 수단을 가르지 못한다. 따라서 ⓓ = −(적기공급 프리미엄 + 브로커 스프레드) 로 항상 0 이하다.', s: S.muted }); r += 1;
+  sh.set(`B${r}`, { v: `ⓐ는 언제 걸었느냐로 갈린다 — W0~진입은 아직 헤지하지 않은 채 지나간 구간이다. 같은 시점이면 파생 수단끼리 값이 같고 시점을 앞당기면 짧아진다. 수단 선택이 아니라 의사결정 시점의 문제다. 고객 전가만 예외로, 판가조건 자체가 매입가 연동으로 바뀌므로 이 구간까지 사라진다.`, s: S.muted }); r += 2;
 
-  /* ---------- ⑤ 손익 ---------- */
-  section('⑤ 손익 (USD)', 3 + nBook);
+  /* ---------- ④ 손익 ---------- */
+  section('④ 손익 (USD)', 3 + nBook);
   /* 화면에서 적은 Lead message 를 표 바로 위에 같은 자리로 옮긴다 */
   const lead = (state.notes && state.notes.pnlLead || '').trim();
   if (lead) { sh.set(`B${r}`, { v: lead, s: S.bold }); r += 1; }
@@ -420,73 +464,80 @@ function buildHedge(wb, state, m, T) {
     sh.set(`${C_(3 + nBook)}${r}`, { f: `SUM(${a}${r}:${b}${r})`, s: S.totalSigned });
     return r++;
   };
-  const lr = i => LED0 + i;                       // 현황판 행
-  const rr = i => RES0 + i;                       // Hedge 결과 행
-  const passOf = i => qtyPass(lr(i), lastStage);  // 고객 전가로 판매된 물량
+  /* Hedge 결과의 그 계약 조각들 — 단계별 헤지분 + 미헤지분이 붙어 있다 */
+  const leg0 = i => RES0 + i * LEGS_PER_ROW;
+  const leg1 = i => RES0 + (i + 1) * LEGS_PER_ROW - 1;
+  const legSum = (col, i) => `SUM(${col}${leg0(i)}:${col}${leg1(i)})`;
+  const legProd = (col, i) => `SUMPRODUCT(${col}${leg0(i)}:${col}${leg1(i)},L${leg0(i)}:L${leg1(i)})`;
+  /* 전가 행은 참조가가 매입가라 두 조건을 한 줄로 쓸 수 있다 */
+  const soldOf = i => `$${SOLDQ_COL}${sal(i)}`;
+  const refOf  = i => `$${SALEREF_COL}${hed(i)}`;
 
-  plRow('매출액', i =>
-    `${passOf(i)}*(${BUY}+${SH_TERMS}!${T.procMargin})+$${HEDGEQ_COL}${lr(i)}*($G${lr(i)}+${SH_TERMS}!${T.procMargin})`);
-  plRow('재료비', i => `-(${passOf(i)}+$${HEDGEQ_COL}${lr(i)})*${BUY}`);
+  plRow('매출액', i => `${soldOf(i)}*(${refOf(i)}+${SH_TERMS}!${T.procMargin})`);
+  plRow('재료비', i => `-${soldOf(i)}*${BUY}`);
   const rowMargin = plRow('마진 (매출 + 재료비)', i => `${C_(3 + i)}${r - 2}+${C_(3 + i)}${r - 1}`);
-  plRow('　└ 가공마진 (상수)', i => `(${passOf(i)}+$${HEDGEQ_COL}${lr(i)})*${SH_TERMS}!${T.procMargin}`);
-  plRow('　└ 가격변동마진 (변수)', i => `$${HEDGEQ_COL}${lr(i)}*($G${lr(i)}-${BUY})`);
+  plRow('　└ 가공마진 (상수)', i => `${soldOf(i)}*${SH_TERMS}!${T.procMargin}`);
+  plRow('　└ 가격변동마진 (변수)', i => `${AVGQ(i)}*(${refOf(i)}-${BUY})`);
   /* 재고 저가법 — 헤지 선택과 무관하게 발생하므로 무대응·Hedge 양쪽에 똑같이 들어간다 */
-  const rowLcm = plRow('재고 평가손실 (저가법)', i => `${LCM_UNIT}*$${STOCKQ_COL}${lr(i)}`);
+  const rowLcm = plRow('재고 평가손실 (저가법)', i => `${LCM_UNIT}*$${STOCKQ_COL}${sal(i)}`);
   const rowNoHedge = plRow('손익 — 무대응',
     i => `${C_(3 + i)}${rowMargin}+${C_(3 + i)}${rowLcm}`);
   /* Hedge 결과 시트 열: O = Hedge − 무대응, P = Operation 비용(ⓓ+ⓕ),
      I×L = 보유비용·스프레드 금액, J×L = 브로커 수수료 금액 */
-  const rowEffect = plRow('Hedge 효과 (가격 상쇄)', i => `O${rr(i)}-P${rr(i)}`);
-  const rowOp = plRow('Hedge Operation 비용', i => `P${rr(i)}`);
-  plRow('　└ Forward spread (가격에 내재)', i => `I${rr(i)}*L${rr(i)}`);
-  plRow('　└ 브로커 수수료 (명시 청구)', i => `J${rr(i)}*L${rr(i)}`);
+  const rowEffect = plRow('Hedge 효과 (가격 상쇄)', i => `${legSum('O', i)}-${legSum('P', i)}`);
+  const rowOp = plRow('Hedge Operation 비용', i => legSum('P', i));
+  plRow('　└ Forward spread (가격에 내재)', i => legProd('I', i));
+  plRow('　└ 브로커 수수료 (명시 청구)', i => legProd('J', i));
   const rowHedged = plRow('손익 — Hedge',
     i => `${C_(3 + i)}${rowNoHedge}+${C_(3 + i)}${rowEffect}+${C_(3 + i)}${rowOp}`, S.totalSigned);
   const rowDelta = plRow('차이 (Hedge − 무대응)',
     i => `${C_(3 + i)}${rowHedged}-${C_(3 + i)}${rowNoHedge}`);
   r += 1;
 
-  /* 메모 — 실현 판매단가 ($/t). 단위가 달라 손익표와 줄을 나눈다. */
-  sh.set(`B${r}`, { v: '메모 — 실현 판매단가 ($/t, 읽기 전용)', s: S.bold }); r += 1;
+  /* 메모 — 실현 판매단가 ($/ton). 단위가 달라 손익표와 줄을 나눈다. */
+  sh.set(`B${r}`, { v: '메모 — 실현 판매단가 ($/ton)', s: S.bold }); r += 1;
   /* 단가 메모는 딱 떨어지면 소수점을 감춘다 (#,##0.##) — 웹 화면과 같은 규칙 */
   const memoRow = (label, fn, style = S.numTrim) => {
     sh.set(`B${r}`, { v: label, s: S.muted });
     state.book.forEach((_, i) => sh.set(`${C_(3 + i)}${r}`, { f: fn(i), s: style }));
     return r++;
   };
-  const qtyCol = i => `$${HEDGEQ_COL}${lr(i)}`;
-  const rowMemoQty = memoRow('Hedge 대상 물량 (톤)', i => qtyCol(i), S.num);
-  memoRow('기준 판매단가 — 출고월 평균', i => `IF(${qtyCol(i)}=0,"",$G${lr(i)})`);
+  const qtyCol = i => AVGQ(i);
+  const rowMemoQty = memoRow('출고월 평균 물량 (톤)', i => qtyCol(i), S.num);
+  memoRow('기준 판매단가 — 출고월 평균', i => `IF(${qtyCol(i)}=0,"",${refOf(i)})`);
   const rowMemoHedge = memoRow('헤지가 바꾼 단가',
     i => `IF(${qtyCol(i)}=0,"",${C_(3 + i)}${rowDelta}/${qtyCol(i)})`);
   memoRow('실현 판매단가 (헤지 後)',
-    i => `IF(${qtyCol(i)}=0,"",$G${lr(i)}+${C_(3 + i)}${rowMemoHedge})`);
+    i => `IF(${qtyCol(i)}=0,"",${refOf(i)}+${C_(3 + i)}${rowMemoHedge})`);
   r += 1;
-  sh.set(`B${r}`, { v: `가격이 걸려 있던 Hedge 대상 물량에 대해서만 뜻이 있다 (전가·재고 물량 제외). 실현 단가 = 출고월 평균 + (Hedge − 무대응) ÷ Hedge 대상 이므로 위 손익표와 정확히 맞물린다. Forward 의 경우 브로커가 실제 지급하는 고정가는 'A가 받는 고정가' 행이지만, 여기서는 ④와 같은 기준으로 보유비용 보상분을 상계한 뒤의 값을 쓴다.`, s: S.muted });
+  sh.set(`B${r}`, { v: `가격이 걸려 있던 출고월 평균 물량에 대해서만 뜻이 있다 (전가·재고 물량 제외). 실현 단가 = 출고월 평균 + (Hedge − 무대응) ÷ 출고월 평균 물량 이므로 위 손익표와 정확히 맞물린다. Forward 의 경우 브로커가 실제 지급하는 고정가는 'A가 받는 고정가' 행이지만, 여기서는 ③과 같은 기준으로 보유비용 보상분을 상계한 뒤의 값을 쓴다.`, s: S.muted });
   void rowMemoQty;
   r += 1;
   sh.set(`B${r}`, { v: '매출 · 재료비는 판매 확정된 물량(고객 전가 + 출고월 평균)만 계상한다. 재고 평가손실은 헤지 선택과 무관하게 발생하므로 손익 — 무대응 위에 두고, 차이 행에는 헤지가 실제로 만든 값만 남긴다.', s: S.muted });
   r += 2;
 
-  /* ---------- ⑥ Exposure 대응 일원화 시 ---------- */
-  section('⑥ Exposure 대응 일원화 시 (what-if)', 9);
-  const BENCH = calc('Hedge 대상 물량 (톤)', `$${HEDGEQ_COL}${LED_TOTAL}`, S.num,
+  /* ---------- ⑤ Exposure 대응 일원화 시 ---------- */
+  section('⑤ Exposure 대응 일원화 시 (what-if)', 9);
+  const BENCH = calc('출고월 평균 물량 (톤)', AVG_TOTAL, S.num,
     '이 물량 전부를 한 가지 수단으로 몰았다면');
   r += 1;
   sh.row(`B${r}`, ['케이스', 'ⓐ 미헤지', 'ⓑ 노출', 'ⓒ 미스매치', 'ⓓ Forward spread',
                    'ⓕ 수수료', 'Operation 비용 (ⓓ+ⓕ)', '합계'].map(v => ({ v, s: S.header })));
   r += 1;
-  /* 현재 설정은 ④ 합계행에서 그대로 가져와 나머지 세 케이스의 기준점으로 둔다 */
+  /* 현재 설정은 ③ 합계행에서 그대로 가져와 나머지 세 케이스의 기준점으로 둔다 */
   const CMP = [
     ['무대응', `(${ENTRY}-${BUY})*${BENCH}`, `(${SALEAVG}-${ENTRY})*${BENCH}`, '0', '0', '0'],
     null,
+    /* 운영 해법 — 판가조건을 통째로 매입가 연동으로 돌리면 가격 손익 자체가 사라진다 */
+    ['고객 전가', '0', '0', '0', '0', '0'],
     ['Forward 매도', `(${ENTRY}-${BUY})*${BENCH}`, '0', '0', `${CARRY_UNIT}*${BENCH}`, `-${FEE_F}*${BENCH}`],
     ['Future 매도', `(${ENTRY}-${BUY})*${BENCH}`, '0', `(${SALEAVG}-${SETTLE})*${BENCH}`, '0', `-${FEE_U}*${BENCH}`]
   ];
   CMP.forEach(row => {
     if (row === null) {
+      /* null 4개 = ⓐ~ⓒ 와 ⓕ 자리를 비워 Operation 비용을 H, 합계를 I 열에 맞춘다 */
       sh.row(`B${r}`, [{ v: 'Hedge (현재 설정)', s: S.bold },
-        { v: '②에서 고른 조합', s: S.muted }, null, null, null,
+        { v: '②에서 고른 조합', s: S.muted }, null, null, null, null,
         { f: `$P$${RES_TOTAL}`, s: S.signed },
         { f: `$M$${RES_TOTAL}`, s: S.totalSigned }]);
     } else {
@@ -499,32 +550,42 @@ function buildHedge(wb, state, m, T) {
   });
   r += 1;
 
-  /* ---------- ⑦ 증거금 Cash Flow ---------- */
-  section('⑦ 증거금 Cash Flow — 주간 시가평가', 8);
+  /* ---------- ⑥ 증거금 Cash Flow ----------
+     Future 는 단계별로 나눠 들어갈 수 있다. 주간 손익은 '그 주 시작 시점에 이미 열려 있던
+     물량'에만 걸리므로, 진입 주차가 그 전인 조각만 SUMIFS 로 골라 곱한다. */
+  section('⑥ 증거금 Cash Flow — 주간 시가평가', 8);
+  const F_KIND = `$C$${RES0}:$C$${RES1}`;
+  const F_WEEK = `$D$${RES0}:$D$${RES1}`;
+  const F_QTY  = `$L$${RES0}:$L$${RES1}`;
+  const FOPEN = wk => `SUMIFS(${F_QTY},${F_KIND},"Future 매도",${F_WEEK},"<="&${wk})`;
   const FQTY = calc('Future 매도 물량 (톤)',
-    `SUMIF($D$${RES0}:$D$${RES1},"Future 매도",$L$${RES0}:$L$${RES1})`, S.num);
-  calc('개시증거금 ($)', `${ENTRY}*${FQTY}*${IM_PCT}/100`, S.num);
+    `SUMIF(${F_KIND},"Future 매도",${F_QTY})`, S.num);
+  calc('개시증거금 ($)',
+    `SUMPRODUCT((${F_KIND}="Future 매도")*${F_QTY}*INDEX(${PX_RANGE},1,${F_WEEK}+1))*${IM_PCT}/100`,
+    S.num, '조각마다 진입가가 달라 물량 × 진입가를 각각 더한다');
   r += 1;
 
-  sh.row(`B${r}`, ['주차', '주차 번호', 'LME 가격 ($/t)', '주간 선물 손익 (− 납부 / + 환급)',
+  sh.row(`B${r}`, ['주차', '주차 번호', 'LME 가격 ($/t)', '보유 물량 (톤)',
+    '주간 선물 손익 (− 납부 / + 환급)',
     '누적 선물 손익 (= 누적 순현금흐름)', '누적 납부 필요액'].map(v => ({ v, s: S.header })));
   r += 1;
   const MTM0 = r;
   m.future.rows.forEach((mr, i) => {
     const prev = r - 1;
     sh.row(`B${r}`, [
-      { f: `"W"&C${r}${i === 0 ? '&" (진입)"' : i === m.future.rows.length - 1 ? '&" (청산)"' : ''}` },
-      i === 0 ? { f: `${SH_TERMS}!${T.decision}`, s: S.num } : { f: `C${prev}+1`, s: S.num },
+      { f: `"W"&C${r}${i === m.future.rows.length - 1 ? '&" (청산)"' : ''}` },
+      { v: mr.week, s: S.num },
       { f: PX(`C${r}`), s: S.num },
-      i === 0 ? { v: 0, s: S.signed } : { f: `(D${prev}-D${r})*${FQTY}`, s: S.signed },
-      i === 0 ? { v: 0, s: S.signed } : { f: `F${prev}+E${r}`, s: S.signed },
-      { f: `MAX(0,-F${r})`, s: S.num }
+      { f: FOPEN(`C${r}`), s: S.num },
+      i === 0 ? { v: 0, s: S.signed } : { f: `(D${prev}-D${r})*E${prev}`, s: S.signed },
+      i === 0 ? { v: 0, s: S.signed } : { f: `G${prev}+F${r}`, s: S.signed },
+      { f: `MAX(0,-G${r})`, s: S.num }
     ]);
     r += 1;
   });
   const MTM1 = r - 1;
   r += 1;
-  const MAXNEED = calc('누적 납부 필요액 최대 ($)', `MAX(G${MTM0}:G${MTM1})`, S.num);
+  const MAXNEED = calc('누적 납부 필요액 최대 ($)', `MAX(H${MTM0}:H${MTM1})`, S.num);
   calc('현금 한도 초과 여부', `IF(${MAXNEED}>${CASH},"초과 → 강제청산","버팀")`, S.base);
   calc('여유 ($)', `${CASH}-${MAXNEED}`, S.signed);
   r += 1;

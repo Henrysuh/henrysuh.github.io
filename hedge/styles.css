@@ -356,13 +356,44 @@ tr.tl-row-roll td   { background: color-mix(in srgb, var(--c4) 8%, transparent);
 table.timeline-table { font-size: 15.6px; }
 table.timeline-table th.tl-week,
 table.timeline-table td.tl-week { width: 1%; white-space: nowrap; padding-right: 22px; }
-td.mono { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 13.3px; color: var(--text-secondary); }
+/* 용어집의 Full Name 열 — 코드가 아니라 영문 용어라 본문 글꼴을 그대로 쓴다.
+   monospace 로 두면 같은 행의 다른 칸과 글자 모양이 어긋나 읽기 나쁘다. */
+td.mono { font-size: 13.3px; color: var(--text-secondary); }
+
+/* 문단 안의 수식 — 글꼴·크기는 본문 그대로 두고 옅은 배경으로만 구분한다.
+   monospace 로 두면 한 문단 안에서 글자 모양이 튀어 이질적으로 읽힌다. */
+code {
+  font-family: inherit; font-size: inherit; font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  background: color-mix(in srgb, var(--text-primary) 7%, transparent);
+  border-radius: 5px; padding: 1px 6px;
+  /* 한 덩어리로 넘긴다 — 중간에서 끊기면 배경이 두 조각으로 갈라져 지저분하다.
+     좁은 화면에서는 넘침이 더 나쁘므로 아래 미디어 쿼리에서 푼다. */
+  white-space: nowrap;
+}
+
+/* Exposure 현황판 — 물량·가격·Hedge 세 블록이라 열이 많다.
+   width:100% 로 두면 칸마다 글자가 세로로 쪼개지므로, 내용 폭을 지키고 가로로 스크롤한다. */
+table.board { width: max-content; min-width: 100%; }
+table.board th, table.board td { white-space: nowrap; padding: 6px 7px; }
+table.board input.cell { width: 58px; }
+table.board select { padding: 3px 5px; font-size: 13.3px; }
+/* 기법 칸의 최소폭을 풀어 E2 열이 화면 안에 들어오게 한다 — 경고는 아래로 흐른다 */
+table.board /* 행 추가 · 삭제 열 — 요약 현황판 오른쪽 끝에서만 행 구성을 만진다 */
+th.row-ctl, td.row-ctl { width: 1%; padding-left: 4px; padding-right: 4px; text-align: center; }
+td.row-ctl .btn { padding: 2px 7px; line-height: 1.2; }
+
+td.hedge-cell { min-width: 0; }
+table.board .warn-inline { white-space: normal; max-width: 150px; }
+table.board td.wide { white-space: normal; }
+table.board td.wide input[type="text"] { min-width: 150px; width: 100%; }
 
 td.hedge-cell { min-width: 170px; }
 .warn-inline { margin-top: 3px; font-size: 12.3px; color: var(--status-warning); max-width: 210px; }
 
 /* ------------------------- 대응 수단 배지 색상 --------------------------- */
 .hk-none    { color: var(--text-muted); }
+.hk-pass    { color: var(--c4); }
 .hk-forward { color: var(--c3); }
 .hk-future  { color: var(--c2); }
 .hk-lcm     { color: var(--c5); }
@@ -504,4 +535,6 @@ input[type="text"].lead-input:hover { border-color: color-mix(in srgb, var(--inp
   .card { padding: 14px; }
   .hero .timeline-bar { flex-direction: column; }
   .card-head { flex-direction: column; }
+  /* 좁은 화면에서는 수식이 통째로 넘치느니 줄바꿈되는 편이 낫다 */
+  code { white-space: normal; }
 }

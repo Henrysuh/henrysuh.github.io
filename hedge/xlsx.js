@@ -153,9 +153,10 @@ class Sheet {
       return `<row r="${r}">${cs}</row>`;
     }).join('');
 
+    /* widths[0] = B열. 중간 열의 기본 너비를 그대로 두고 싶으면 null 을 넣는다. */
     const cols = this.widths.length
-      ? `<cols>${this.widths.map((w, i) =>
-          `<col min="${i + 2}" max="${i + 2}" width="${w}" customWidth="1"/>`).join('')}</cols>`
+      ? `<cols>${this.widths.map((w, i) => (w == null ? ''
+          : `<col min="${i + 2}" max="${i + 2}" width="${w}" customWidth="1"/>`)).join('')}</cols>`
       : '';
     const merges = this.merges.length
       ? `<mergeCells count="${this.merges.length}">${this.merges.map(m =>

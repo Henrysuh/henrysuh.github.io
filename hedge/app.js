@@ -2,8 +2,9 @@
    app.js — 상태 보관, 렌더 루프, 입력 바인딩
    =========================================================================== */
 
-/* 상태 구조가 v10 단순화(4탭)로 바뀌었으므로 저장 키도 올린다 — 옛 저장값은 무시된다 */
-const STORAGE_KEY = 'nickel-hedge-model-v2';
+/* 현황판이 물량 · 가격 · Hedge 세 블록으로 갈리면서 book 행 구조가 바뀌었다 —
+   저장 키를 올려 옛 저장값(조치 원장 시절)은 통째로 버린다 */
+const STORAGE_KEY = 'nickel-hedge-model-v3';
 const THEME_KEY = 'nickel-hedge-theme';
 
 let state = loadState();
@@ -22,8 +23,15 @@ function loadState() {
 /* 저장된 값이 예전 선택지를 들고 있을 수 있다 — 지금 고를 수 있는 값으로 맞춘다.
    '저가법 평가'는 Hedge 대책에서 빠지고 판매 미확정 재고에 자동 적용되는 회계 처리가 됐다. */
 function migrate(s) {
-  s.book.forEach(r => { if (!HEDGE_ORDER.includes(r.hedge)) r.hedge = 'none'; });
-  s.actions.forEach(a => { if (!CONVERT_TARGETS.includes(a.toCond)) a.toCond = '전가'; });
+  s.book.forEach(r => {
+    if (!HEDGE_ORDER.includes(r.hedge)) r.hedge = 'none';
+    if (!ROW_KINDS[r.kind]) r.kind = 'contract';
+    if (!PRICE_CONDS[r.cond]) r.cond = '평균';
+    /* 단계별 입력으로 바뀌기 전 저장값 — 마지막 단계에 몰아넣는다 */
+    if (!Array.isArray(r.addAt))   r.addAt   = [0, 0, Number(r.addQty)   || 0];
+    if (!Array.isArray(r.hedgeAt)) r.hedgeAt = [0, 0, Number(r.hedgeQty) || 0];
+    delete r.addQty; delete r.hedgeQty;
+  });
   return s;
 }
 
@@ -146,9 +154,7 @@ document.addEventListener('keydown', ev => {
 document.addEventListener('change', ev => {
   const el = ev.target;
   if (!el.dataset || !el.dataset.bind || el.tagName !== 'SELECT') return;
-  /* 단계처럼 숫자로 비교되는 값은 숫자로 되돌린다 (select 값은 항상 문자열) */
-  const raw = el.value;
-  setByPath(el.dataset.bind, /\.stage$/.test(el.dataset.bind) ? Number(raw) : raw);
+  setByPath(el.dataset.bind, el.value);
   saveState();
   rerender();
 });
@@ -174,12 +180,12 @@ document.addEventListener('click', ev => {
   const actBtn = ev.target.closest('[data-act]');
   if (actBtn) {
     const act = actBtn.dataset.act;
-    if (act === 'add-action') {
-      state.actions.push({
-        stage: 1, status: '제안', target: state.book[0].name, qty: 0, toCond: '전가', note: ''
-      });
-    } else if (act === 'del-action') {
-      state.actions.splice(Number(actBtn.dataset.i), 1);
+    if (act === 'add-row') {
+      const n = state.book.length + 1;
+      state.book.push({ name: `계약 C${n}`, kind: 'contract', qty: 0, addAt: [0, 0, 0],
+                        cond: '평균', qpShift: 0, hedgeAt: [0, 0, 0], hedge: 'none' });
+    } else if (act === 'del-row') {
+      state.book.splice(Number(actBtn.dataset.i), 1);
     } else if (act === 'export-xlsx') {
       downloadXlsx();
       return;

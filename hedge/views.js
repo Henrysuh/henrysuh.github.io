@@ -24,7 +24,6 @@ const dash = (v, f) => (v === 0 ? '<span class="muted">–</span>' : f(v));
 const inp = (path, value, klass = 'cell', step = 'any') =>
   `<input type="text" inputmode="decimal" autocomplete="off" class="${klass}" ` +
   `data-bind="${path}" data-num data-step="${step}" value="${value}">`;
-const txt = (path, value) => `<input type="text" data-bind="${path}" value="${esc(value)}">`;
 const sel = (path, value, options) =>
   `<select data-bind="${path}">${options.map(o => {
     const [v, label] = Array.isArray(o) ? o : [o, o];
@@ -83,7 +82,7 @@ function renderOverview(state) {
   ];
   const tabs = [
     ['거래조건', '물량·기간·가공마진 입력 → 구매·운송 / 생산 / 출고준비 / 출고월 타임라인이 자동으로 재구성된다'],
-    ['Hedge 손익', '시황 → Exposure 현황판 → 조치 내용 → Hedge 결과 → 손익, 그리고 what-if 두 개(대응 일원화 · 증거금 Cash Flow). 엑셀의 Exposure·손익계산서·케이스 4시트를 하나로 합쳤다'],
+    ['Hedge 손익', '시황 → 매출/Exposure 현황판(물량 · 가격 · Hedge) → Hedge 결과 → 손익, 그리고 what-if 두 개(대응 일원화 · 증거금 Cash Flow). 엑셀의 Exposure·손익계산서·케이스 4시트를 하나로 합쳤다'],
     ['참고', '단위 환산(니켈 금속 ↔ 황산니켈), 니켈 원료 수송 기간, 용어집']
   ];
 
@@ -182,10 +181,10 @@ function renderTerms(state) {
         </div>
       </div>
       <div class="card">
-        <h2>익스포저 요약</h2>
+        <h2>구매 요약</h2>
         <p class="card-sub">매입가 확정(W0) ~ 출고월 정산(W${c.shipEnd}) 사이의 가격변동마진에 노출된다.</p>
         <div class="stat-row">
-          ${stat('익스포저 물량', n0(c.qty) + ' t')}
+          ${stat('구매 물량', n0(c.qty) + ' t')}
           ${stat('익스포저 기간', c.exposureWeeks + ' 주', `리드타임 ${c.leadWeeks}주 + 출고월 ${t.shipWeeks}주`)}
         </div>
         <div class="stat-row">
@@ -244,10 +243,9 @@ function renderHedge(state) {
   const m = computeModel(state);
   const c = m.terms;
   const hp = state.hedgeParams;
-  const names = state.book.map(r => r.name);
   const hedgeOpts = HEDGE_ORDER.map(k => [k, HEDGE_KINDS[k].label]);
-  const condOpts = PRICE_CONDITIONS.map(v => [v, COND_LABEL[v]]);
-  const convertOpts = CONVERT_TARGETS.map(v => [v, COND_LABEL[v]]);
+  const kindOpts = Object.entries(ROW_KIND_SHORT);
+  const condOpts = Object.entries(PRICE_CONDS);
 
   /* ---------- ① 시황 ---------- */
   const weekCols = m.px.map((_, i) => i);
@@ -281,108 +279,201 @@ function renderHedge(state) {
     aria: '시나리오별 니켈 가격 경로'
   });
 
-  /* ---------- ② Exposure 현황판 ---------- */
-  const boardRows = m.rows.map((r, i) => {
-    const h = m.hedged[i];
-    return `<tr>
+  /* ---------- ② 매출/Exposure 현황판 ----------
+     같은 원장을 두 가지 눈높이로 낸다.
+       요약 (경영층 보고) — 읽기 전용. E1 → H1 → H2 → E2 한 줄기만 본다.
+       실무 표 두 개      — 입력칸. 판매 물량과 Hedge 조치를 단계(W)별로 적는다. */
+  const dim = v => (v ? n0(v) : '<span class="muted">–</span>');
+  const L = m.ledger;
+  const SW = c.stageWeeks;
+  /* 열 이름 뒤에 코드를 붙여 한 줄기로 읽는다 */
+  const code = (id, label) => `${label} (${id})`;
+
+  /* --- 요약 (경영층 보고) — 숫자만, 고칠 것은 아래 실무 표에서.
+         조치(H)와 잔여(E)가 번갈아 나오도록 S → H1 → E1 → H2 → E2 로 세운다. --- */
+  const sumRows = m.rows.map((r, i) => `<tr>
       <td class="name">${esc(r.name)}</td>
-      <td class="num">${inp(`book.${i}.qty`, r.qty, 'cell', '5')}</td>
-      <td>${sel(`book.${i}.cond`, r.cond, condOpts)}</td>
-      <td class="num">${inp(`book.${i}.qpShift`, r.qpShift, 'cell mini', '1')}</td>
-      <td class="num">${esc(r.qpRange)}</td>
-      <td class="num">${n0(r.saleQPAvg)}</td>
-      <td class="num sep">${n0(r.basisQty)}</td>
-      ${r.stages.map(s => `
-        <td class="num sub">${s.proposed ? n0(s.proposed) : '<span class="muted">–</span>'}</td>
-        <td class="num">${n0(s.result)}</td>`).join('')}
-      <td class="num sep strong">${n0(r.hedgeQty)}</td>
-      <td class="num">${r.stockQty ? n0(r.stockQty) : '<span class="muted">–</span>'}</td>
-      <td class="hedge-cell">${sel(`book.${i}.hedge`, r.hedge, hedgeOpts)}
-        ${h.warn ? `<div class="warn-inline">⚠ ${esc(h.warn)}</div>` : ''}</td>
-    </tr>`;
-  }).join('');
+      <td class="muted">${esc(ROW_KIND_SHORT[r.kind] || r.kind)}</td>
+      <td class="num">${n0(r.qty)}</td>
+      <td class="num sep">${dim(r.planQty)}</td>
+      <td class="num">${dim(r.addQty)}</td>
+      <td class="num strong">${dim(r.soldQty)}</td>
+      <td class="num">${dim(r.stockQty)}</td>
+      <td class="num sep">${dim(r.passQty)}</td>
+      <td class="muted">${esc(r.condLabel)}</td>
+      <td class="num sep strong">${dim(r.exp1Qty)}</td>
+      <td class="num sep">${dim(r.hedgeQty)}</td>
+      <td class="muted">${r.hedgeQty ? esc(HEDGE_KINDS[r.hedge].label) : '–'}</td>
+      <td class="num sep strong">${dim(r.exposureQty)}</td>
+      <td class="row-ctl"><button class="btn btn-sm btn-ghost" type="button"
+        data-act="del-row" data-i="${i}"
+        title="이 행 삭제" aria-label="${esc(r.name)} 행 삭제">✕</button></td>
+    </tr>`).join('');
 
   const boardTable = `
     <div class="table-scroll"><table>
+      <thead><tr>
+        <th>구분</th><th>종류</th><th class="num">총 물량</th>
+        <th class="num sep">계획</th><th class="num">추가</th>
+        <th class="num">${code('S', '판매 확정')}</th><th class="num">재고</th>
+        <th class="num sep">${code('H1', 'Natural Hedge')}</th><th>내용</th>
+        <th class="num sep">${code('E1', 'Exposure')}</th>
+        <th class="num sep">${code('H2', 'Hedge 조치')}</th><th>수단</th>
+        <th class="num sep">${code('E2', '잔여 Exposure')}</th>
+        <th class="row-ctl"></th>
+      </tr></thead>
+      <tbody>${sumRows}</tbody>
+      <tfoot><tr class="row-total">
+        <td class="name">합계</td><td></td>
+        <td class="num">${n0(L.qty)}</td>
+        <td class="num sep">${n0(L.planQty)}</td>
+        <td class="num">${n0(L.addQty)}</td>
+        <td class="num strong">${n0(L.soldQty)}</td>
+        <td class="num">${n0(L.stockQty)}</td>
+        <td class="num sep">${n0(L.passQty)}</td><td></td>
+        <td class="num sep strong">${n0(L.exp1Qty)}</td>
+        <td class="num sep">${n0(L.hedgeQty)}</td><td></td>
+        <td class="num sep strong">${n0(L.exposureQty)}</td>
+        <!-- 행은 표 끝에 붙으므로 + 도 합계행 끝에 둔다 -->
+        <td class="row-ctl"><button class="btn btn-sm btn-ghost" type="button"
+          data-act="add-row" title="행 추가" aria-label="행 추가">＋</button></td>
+      </tr></tfoot>
+    </table></div>`;
+
+  /* --- 실무 ① 판매 물량 — 재고를 언제 얼마나 팔았나 --- */
+  const saleRows = m.rows.map((r, i) => {
+    const b = state.book[i];
+    const isStock = r.kind === 'stock';
+    return `<tr>
+      <td class="name">${esc(r.name)}</td>
+      <td>${sel(`book.${i}.kind`, r.kind, kindOpts)}</td>
+      <td class="num">${inp(`book.${i}.qty`, b.qty, 'cell', '5')}</td>
+      <td class="num sep">${dim(r.planQty)}</td>
+      ${SW.map((w, s) => `<td class="num">${isStock
+        ? inp(`book.${i}.addAt.${s}`, (b.addAt || [])[s] || 0, 'cell mini', '5')
+        : '<span class="muted">–</span>'}</td>`).join('')}
+      <td class="num sep strong">${dim(r.soldQty)}</td>
+      <td class="num">${dim(r.stockQty)}</td>
+    </tr>`;
+  }).join('');
+
+  const saleTable = `
+    <div class="table-scroll"><table class="board">
       <thead>
         <tr>
-          <th rowspan="2">구분</th><th rowspan="2" class="num">물량<br>(톤)</th>
-          <th rowspan="2">초기 판가조건</th><th rowspan="2" class="num">QP 이동<br>(−4~+4)</th>
-          <th rowspan="2" class="num">판매 QP</th><th rowspan="2" class="num">판매 QP<br>평균</th>
-          <th rowspan="2" class="num sep">Basis<br>Exposure</th>
-          ${c.stageWeeks.map(w => `<th colspan="2" class="num grp">W${w} 조치</th>`).join('')}
-          <th rowspan="2" class="num sep">Hedge 대상<br>(톤)</th>
-          <th rowspan="2" class="num">재고<br>(톤)</th>
-          <th rowspan="2">Hedge</th>
+          <th rowspan="2">구분</th><th rowspan="2">종류</th>
+          <th rowspan="2" class="num">총 물량</th>
+          <th rowspan="2" class="num sep">계획</th>
+          <th colspan="${SW.length}" class="num grp">추가 판매 — 단계별 (톤)</th>
+          <th rowspan="2" class="num sep">${code('S', '판매 확정')}</th>
+          <th rowspan="2" class="num">재고</th>
         </tr>
-        <tr>${c.stageWeeks.map(() => `<th class="num sub">제안</th><th class="num">결과</th>`).join('')}</tr>
+        <tr>${SW.map(w => `<th class="num sub">W${w}</th>`).join('')}</tr>
       </thead>
-      <tbody>${boardRows}</tbody>
+      <tbody>${saleRows}</tbody>
+      <tfoot><tr class="row-total">
+        <td class="name">합계</td><td></td>
+        <td class="num">${n0(L.qty)}</td>
+        <td class="num sep">${n0(L.planQty)}</td>
+        ${SW.map((w, s) => `<td class="num">${dim(sum(m.rows.map(r => r.addStages[s])))}</td>`).join('')}
+        <td class="num sep strong">${n0(L.soldQty)}</td>
+        <td class="num">${n0(L.stockQty)}</td>
+      </tr></tfoot>
+    </table></div>`;
+
+  /* --- 실무 ② Hedge 조치 — 무엇을 언제 얼마나 막았나. 요약과 같은 H1 → E1 → H2 → E2 순서 --- */
+  const actRows = m.rows.map((r, i) => {
+    const b = state.book[i];
+    const open = r.cond === '평균';
+    return `<tr>
+      <td class="name">${esc(r.name)}</td>
+      <td class="num sep">${dim(r.passQty)}</td>
+      <td>${sel(`book.${i}.cond`, r.cond, condOpts)}</td>
+      <td class="num sep strong">${dim(r.exp1Qty)}</td>
+      <td class="num">${inp(`book.${i}.qpShift`, b.qpShift, 'cell mini', '1')}</td>
+      <td class="num">${esc(r.qpRange)}</td>
+      <td class="num">${n0(r.saleQPAvg)}</td>
+      ${SW.map((w, s) => `<td class="num${s === 0 ? ' sep' : ''}">${open
+        ? inp(`book.${i}.hedgeAt.${s}`, (b.hedgeAt || [])[s] || 0, 'cell mini', '5')
+        : '<span class="muted">–</span>'}</td>`).join('')}
+      <td class="hedge-cell">${sel(`book.${i}.hedge`, r.hedge, hedgeOpts)}
+        ${r.warn ? `<div class="warn-inline">⚠ ${esc(r.warn)}</div>` : ''}</td>
+      <td class="num sep strong">${dim(r.exposureQty)}</td>
+    </tr>`;
+  }).join('');
+
+  const actTable = `
+    <div class="table-scroll"><table class="board">
+      <thead>
+        <tr>
+          <th rowspan="2">구분</th>
+          <th rowspan="2" class="num sep">${code('H1', 'Natural Hedge')}</th>
+          <th rowspan="2">내용</th>
+          <th rowspan="2" class="num sep">${code('E1', 'Exposure')}</th>
+          <th rowspan="2" class="num">QP 이동</th>
+          <th rowspan="2" class="num">판매 QP</th>
+          <th rowspan="2" class="num">판매 QP 평균</th>
+          <th colspan="${SW.length}" class="num grp sep">${code('H2', 'Hedge 조치')} — 단계별 (톤)</th>
+          <th rowspan="2">수단</th>
+          <th rowspan="2" class="num sep">${code('E2', '잔여 Exposure')}</th>
+        </tr>
+        <tr>${SW.map(w => `<th class="num sub${w === SW[0] ? ' sep' : ''}">W${w}</th>`).join('')}</tr>
+      </thead>
+      <tbody>${actRows}</tbody>
       <tfoot><tr class="row-total">
         <td class="name">합계</td>
-        <td class="num">${n0(sum(m.rows.map(r => r.qty)))}</td>
-        <td colspan="4"></td>
-        <td class="num sep">${n0(m.ledger.basis)}</td>
-        ${m.ledger.stages.map(s => `<td class="num sub">${s.proposed ? n0(s.proposed) : '–'}</td>
-          <td class="num">${n0(s.result)}</td>`).join('')}
-        <td class="num sep strong">${n0(m.ledger.hedgeTargetQty)}</td>
-        <td class="num">${n0(m.ledger.stockQty)}</td>
+        <td class="num sep">${n0(L.passQty)}</td><td></td>
+        <td class="num sep strong">${n0(L.exp1Qty)}</td>
+        <td colspan="3"></td>
+        ${SW.map((w, s) => `<td class="num${s === 0 ? ' sep' : ''}">${
+          dim(sum(m.rows.map(r => r.hedgeStages[s])))}</td>`).join('')}
         <td></td>
+        <td class="num sep strong">${n0(L.exposureQty)}</td>
       </tr></tfoot>
-    </table></div>
-    ${!m.ledger.qpShiftOk ? '<div class="alert">QP 이동이 ±4주를 넘었습니다.</div>' : ''}
-    ${!m.ledger.noNegative ? '<div class="alert">조치 물량이 해당 계약의 초기 물량을 넘었습니다.</div>' : ''}`;
+    </table></div>`;
 
-  /* ---------- ③ 조치 내용 ---------- */
-  const stageOpts = c.stageWeeks.map((w, i) => [String(i + 1), `${i + 1}단계 (W${w})`]);
-  const actionRows = state.actions.map((a, i) => `<tr>
-      <td>${sel(`actions.${i}.stage`, String(a.stage), stageOpts)}</td>
-      <td>${sel(`actions.${i}.status`, a.status, ['제안', '확정'])}</td>
-      <td>${sel(`actions.${i}.target`, a.target, names)}</td>
-      <td class="num">${inp(`actions.${i}.qty`, a.qty, 'cell', '5')}</td>
-      <td>${sel(`actions.${i}.toCond`, a.toCond || '전가', convertOpts)}</td>
-      <td class="wide">${txt(`actions.${i}.note`, a.note)}</td>
-      <td><button class="btn btn-sm btn-ghost" type="button" data-act="del-action" data-i="${i}">삭제</button></td>
-    </tr>`).join('');
-
-  /* ---------- ④ Hedge 결과 — ⓐ~ⓕ 는 $/t, 물량을 곱해 금액이 된다 ---------- */
+  /* ---------- ③ Hedge 결과 — ⓐ~ⓕ 는 $/t, 물량을 곱해 금액이 된다.
+       한 계약이라도 헤지분과 미헤지분은 단가 구조가 달라 줄을 나눈다. ---------- */
   const u = v => (v === 0 ? '<span class="muted">–</span>'
                           : `<span class="${cls(v)}">${(v < 0 ? '−' : '') + n2(Math.abs(v))}</span>`);
   const legTable = `
     <div class="table-scroll"><table>
       <thead><tr>
-        <th>구분</th><th>판가조건</th><th>Hedge</th>
-        <th class="num">ⓐ 미헤지 구간<br>W0~W${c.decisionWeek}</th>
+        <th>구분</th><th>처리</th><th class="num">진입</th>
+        <th class="num">ⓐ 미헤지 구간<br>W0~진입</th>
         <th class="num">ⓑ 헤지 구간 노출<br>W${c.decisionWeek}~W${c.shipEnd}</th>
         <th class="num">ⓒ QP 미스매치<br>출고월평균 − W${c.shipEnd}</th>
         <th class="num">ⓓ Forward spread</th>
         <th class="num">ⓕ 브로커 수수료</th>
         <th class="num sep">소계<br>($/t)</th>
-        <th class="num">× Hedge 대상<br>(톤)</th>
+        <th class="num">× 물량<br>(톤)</th>
         <th class="num sep">= Hedge 손익</th>
         <th class="num">무대응 손익</th>
         <th class="num">Hedge − 무대응</th>
       </tr></thead>
-      <tbody>${m.hedged.map(h => `<tr>
+      <tbody>${m.hedgeLegs.length ? m.hedgeLegs.map(h => `<tr>
         <td class="name">${esc(h.name)}</td>
-        <td class="muted">${esc(h.condLabel)}</td>
-        <td>${badge(HEDGE_KINDS[h.hedge].short, 'hk-' + h.hedge)}</td>
+        <td>${badge(h.kindShort, 'hk-' + h.kind)}</td>
+        <td class="num">${h.kind === 'none'
+          ? '<span class="muted">–</span>'
+          : `W${h.entryWeek}<span class="cell-sub">${n0(h.entryPrice)}</span>`}</td>
         <td class="num">${u(h.unit.unhedged)}</td>
         <td class="num">${u(h.unit.open)}</td>
         <td class="num">${u(h.unit.mismatch)}</td>
         <td class="num">${u(h.unit.carry)}</td>
         <td class="num">${u(h.unit.fee)}</td>
         <td class="num sep strong">${u(h.subtotalUnit)}</td>
-        <td class="num">${n0(h.hedgeQty)}</td>
+        <td class="num">${n0(h.qty)}</td>
         <td class="num sep strong">${signed(h.total)}</td>
         <td class="num">${signed(h.noHedge)}</td>
         <td class="num">${signed(h.diff)}</td>
-      </tr>`).join('')}</tbody>
+      </tr>`).join('')
+      : '<tr><td colspan="13" class="muted">출고월 평균 조건 물량이 없어 가격에 걸린 것이 없다</td></tr>'}</tbody>
       <tfoot><tr class="row-total">
         <td class="name">합계</td>
-        <!-- 판가조건 ~ 소계: 단가 열이라 합산하지 않는다 (8칸) -->
+        <!-- 처리 ~ 소계: 단가 열이라 합산하지 않는다 (8칸) -->
         <td colspan="8" class="muted">단가는 행마다 다르므로 합산하지 않는다</td>
-        <td class="num">${n0(m.hedgedTotals.hedgeQty)}</td>
+        <td class="num">${n0(m.hedgedTotals.avgQty)}</td>
         <td class="num sep strong">${signed(m.hedgedTotals.total)}</td>
         <td class="num">${signed(m.hedgedTotals.noHedge)}</td>
         <td class="num">${signed(m.hedgedTotals.diff)}</td>
@@ -390,7 +481,7 @@ function renderHedge(state) {
     </table></div>
     <div class="stat-row">
       ${stat('Hedge Operation 비용', usd(m.hedgedTotals.opCost),
-        `ⓓ + ⓕ — 헤지를 실행하는 데 든 값 (⑤ 손익에 같은 값으로 내려간다)`,
+        'ⓓ + ⓕ — 헤지를 실행하는 데 든 값 (④ 손익에 같은 값으로 내려간다)',
         cls(m.hedgedTotals.opCost))}
       ${stat('마진변동손익', usd(m.hedgedTotals.total - m.hedgedTotals.opCost),
         'ⓐ + ⓑ + ⓒ — 가격이 움직여서 생긴 값',
@@ -405,13 +496,13 @@ function renderHedge(state) {
       여기서 브로커 스프레드를 뺀 값이 A가 받는 고정가다.
       이 중 <b>금융이자 + 창고·보험료</b>는 A가 물건을 W${c.decisionWeek}~W${c.shipEnd} 들고 있으면서
       어차피 부담하는 보유비용이고, 선도가는 딱 그만큼을 얹어 <i>보상</i>해 주는 것이라 순효과가 0이다.
-      게다가 이 비용은 네 수단 모두에 똑같이 발생하므로 수단을 가르지 못한다.
+      게다가 이 비용은 파생 수단 모두에 똑같이 발생하므로 수단을 가르지 못한다.
       따라서 ⓓ에는 실제로 A가 넘겨주는 두 가지만 남긴다 —
       <code>ⓓ = −(적기공급 프리미엄 ${unit(hp.convenienceYield)} + 브로커 스프레드 ${unit(hp.ibSpread)}) = ${unit(m.carryPerTon)}</code>.
       <b>항상 0 이하</b>이며, 백워데이션(적기공급 프리미엄 &gt; 0)에서 크게 벌어진다.
     </div>`;
 
-  /* ---------- ⑤ 손익 ---------- */
+  /* ---------- ④ 손익 ---------- */
   const plLine = (label, key, klass = '') => `<tr class="${klass}">
     <td class="name">${esc(label)}</td>
     ${m.pnl.map(r => `<td class="num">${dash(r[key], signed)}</td>`).join('')}
@@ -425,36 +516,36 @@ function renderHedge(state) {
     <td class="num sep strong">${m.pnlTotal[key] == null
       ? '<span class="muted">–</span>' : fmt(m.pnlTotal[key])}</td></tr>`;
   const memoTable = `
-    <details class="fold"><summary>메모 — 실현 판매단가 ($/t, 읽기 전용)</summary>
+    <details class="fold"><summary>메모 — 실현 판매단가 ($/ton)</summary>
       <div class="table-scroll"><table class="memo">
         <thead><tr><th>항목</th>${m.pnl.map(r =>
           `<th class="num">${esc(r.name)}</th>`).join('')}
           <th class="num sep">가중평균</th></tr></thead>
         <tbody>
-          ${memoLine('Hedge 대상 물량 (톤)', 'hedgeQty', v => n0(v), 'row-dim')}
+          ${memoLine('출고월 평균 물량 (톤)', 'avgQty', v => n0(v), 'row-dim')}
           ${memoLine('기준 판매단가 — 출고월 평균', 'refUnit', v => unitTrim(v))}
           ${memoLine('헤지가 바꾼 단가', 'hedgeUnit', v => `<span class="${cls(v)}">${unitTrim(v)}</span>`)}
           ${memoLine('실현 판매단가 (헤지 後)', 'realizedUnit', v => unitTrim(v), 'row-key')}
         </tbody>
       </table></div>
       <p class="chart-foot">
-        가격이 걸려 있던 <b>Hedge 대상 물량</b>에 대해서만 뜻이 있다 (전가·재고 물량은 제외).
-        <code>실현 단가 = 출고월 평균 + (Hedge − 무대응) ÷ Hedge 대상</code> 이므로 위 손익표와 정확히 맞물린다.
+        가격이 걸려 있던 <b>출고월 평균 물량</b>에 대해서만 뜻이 있다 (전가·재고 물량은 제외).
+        <code>실현 단가 = 출고월 평균 + (Hedge − 무대응) ÷ 출고월 평균 물량</code> 이므로 위 손익표와 정확히 맞물린다.
         Forward의 경우 브로커가 실제 지급하는 고정가는 ${unit(m.fwdFixed)} 이지만,
-        여기서는 ④와 같은 기준으로 보유비용 보상분을 상계한 뒤의 값을 쓴다.
+        여기서는 ③과 같은 기준으로 보유비용 보상분을 상계한 뒤의 값을 쓴다.
       </p>
     </details>`;
 
-  /* ---------- ⑥ Exposure 대응 일원화 시 ---------- */
+  /* ---------- ⑤ Exposure 대응 일원화 시 ---------- */
   const cmpChart = barChart({
     id: 'ch-compare', height: 260, labelAtZero: true,
     groups: m.compare.map(x => x.label),
-    series: [{ name: `Hedge 대상 ${n0(m.benchQty)}톤 손익`, color: 'var(--c1)',
+    series: [{ name: `출고월 평균 ${n0(m.benchQty)}톤 손익`, color: 'var(--c1)',
                values: m.compare.map(x => x.total) }],
     aria: '대응 수단별 손익 비교'
   });
 
-  /* ---------- ⑦ 증거금 Cash Flow ---------- */
+  /* ---------- ⑥ 증거금 Cash Flow ---------- */
   const limitInScale = m.future.breached || m.future.maxNeed >= hp.cashLimit * 0.4;
   const mtmChart = lineChart({
     id: 'ch-mtm', height: 230,
@@ -471,12 +562,11 @@ function renderHedge(state) {
 
   const secs = [
     ['sec-market',  '① 시황'],
-    ['sec-board',   '② Exposure 현황판'],
-    ['sec-action',  '③ 조치 내용'],
-    ['sec-result',  '④ Hedge 결과'],
-    ['sec-pnl',     '⑤ 손익'],
-    ['sec-compare', '⑥ 대응 일원화'],
-    ['sec-margin',  '⑦ 증거금 Cash Flow']
+    ['sec-board',   '② 매출/Exposure 현황판'],
+    ['sec-result',  '③ Hedge 결과'],
+    ['sec-pnl',     '④ 손익'],
+    ['sec-compare', '⑤ 대응 일원화'],
+    ['sec-margin',  '⑥ 증거금 Cash Flow']
   ];
 
   return `
@@ -523,49 +613,47 @@ function renderHedge(state) {
     </div>
 
     <div class="card" id="sec-board">
-      <h2>② Exposure 현황판</h2>
+      <h2>② 매출/Exposure 현황판</h2>
       <p class="card-sub">
-        각 계약은 <b>초기 가격 조건</b>으로 시작하고, W${c.stageWeeks.join(' · W')} 조치가 그 물량 일부를
-        다른 가격 조건으로 옮긴다. <b>제안</b>은 <b>확정</b>하여야 반영된다.
+        <b>판매 확정(S) → Natural Hedge(H1) → Exposure(E1) → Hedge 조치(H2) → 잔여(E2)</b> 로 구분.
+        <code>E1 = S − H1 + 재고</code>, <code>E2 = E1 − H2</code>.
       </p>
       ${boardTable}
+      ${leadBlock('notes.boardLead', state.notes.boardLead,
+        '현황판 바로 아래에 실릴 한 줄 — 여기 적은 문장이 엑셀 ②-3 요약 시트에도 같이 실린다')}
       <div class="stat-row">
-        ${stat('Basis 합계', n0(m.ledger.basis) + ' t', '초기 가격 조건 기준 Exposure')}
-        ${stat('운영을 통한 Exposure 제거', n0(m.ledger.removedByOps) + ' t', '고객 전가로 전환된 물량')}
-        ${stat('Hedge 대상', n0(m.ledger.hedgeTargetQty) + ' t', `W${c.decisionWeek} 시점 판매 확정 잔여`)}
+        ${stat('판매 확정 (S)', n0(L.soldQty) + ' t', `계획 ${n0(L.planQty)}t + 추가 ${n0(L.addQty)}t`)}
+        ${stat('Natural Hedge (H1)', n0(L.passQty) + ' t', '계약 구조로 상쇄 — 고객 전가')}
+        ${stat('Exposure (E1)', n0(L.exp1Qty) + ' t',
+          `미전가 ${n0(L.avgQty)}t + 재고 ${n0(L.stockQty)}t`)}
+        ${stat('Hedge 조치 (H2)', n0(L.hedgeQty) + ' t',
+          `전가 전환 ${n0(L.passShift)}t + 파생 ${n0(L.derivQty)}t`)}
+        ${stat('잔여 Exposure (E2)', n0(L.exposureQty) + ' t',
+          `미헤지 ${n0(L.openQty)}t + 재고 ${n0(L.stockQty)}t`)}
       </div>
-      <div class="note">
-        <b>재고는 Hedge 대상이 아니다</b> — 판매가 확정되지 않은 재고는
-        Exposure에는 남아 있지만 Hedge하지 않는다. 헤지는 변수를 상수로 막는 것이지,
-        0을 상수로 막는 것은 의미가 없다. 재고는 저가법 평가 대상이다.
-      </div>
-    </div>
+      <div class="note">재고는 팔지 않아도 Exposure(E1)에 들어간다.</div>
 
-    <div class="card" id="sec-action">
-      <div class="card-head">
-        <div><h2>③ 조치 내용</h2>
-        <p class="card-sub">Rolling — 추가 판매와 가격 조건 협상으로 Exposure를 줄인다.</p></div>
-        <button class="btn btn-sm" type="button" data-act="add-action">행 추가</button>
-      </div>
-      <div class="table-scroll"><table>
-        <thead><tr><th>단계</th><th>상태</th><th>대상</th><th class="num">물량 (톤)</th>
-          <th>전환 후 가격 조건</th><th>조치 · 비고</th><th></th></tr></thead>
-        <tbody>${actionRows || '<tr><td colspan="7" class="muted">조치 없음</td></tr>'}</tbody>
-      </table></div>
-      <div class="note">
-        <b>미결 과제</b> — 출고월(W${c.shipStart}~W${c.shipEnd}) 진입 이후 발생하는 물량 변동 요구는
-        아직 이 표에서 다루지 않는다. 명목상 3개월 전 확정이지만 실무에서는 자주 발생하는 상황이라
-        별도 처리 방안이 필요하다.
-      </div>
+      <details class="fold" open><summary>판매 물량 — 단계별 입력 (W${SW.join(' · W')})</summary>
+        ${saleTable}
+        <div class="note">계약 물량은 W0에 이미 판매 확정이라 <b>계획</b>으로 잡힌다.</div>
+      </details>
+      <details class="fold" open><summary>Hedge 조치 — 단계별 입력 (W${SW.join(' · W')})</summary>
+        ${actTable}
+        <div class="note">
+          <b>시점이 손익을 가른다</b> — 조치 물량을 W${SW[0]} 칸에 적으면 ⓐ 미헤지 구간이
+          W0~W${SW[0]} 로 짧아지고, W${SW[SW.length - 1]} 에 적으면 W0~W${SW[SW.length - 1]} 까지 늘어난다.
+        </div>
+      </details>
     </div>
 
     <div class="card" id="sec-result">
-      <h2>④ Hedge 결과</h2>
+      <h2>③ Hedge 결과</h2>
       <p class="card-sub">
         Hedge 손익 = (ⓐ 미헤지 구간 + ⓑ 헤지 구간 노출 + ⓒ QP 미스매치 + ⓓ Forward spread
-        + ⓕ 브로커 수수료) × Hedge 대상 물량. 어느 칸에 숫자가 남는지가 곧 그 수단의 속성이다.
+        + ⓕ 브로커 수수료) × 그 물량. 어느 칸에 숫자가 남는지가 곧 그 수단의 속성이다.
+        같은 계약이라도 <b>헤지한 물량과 남긴 물량은 단가 구조가 달라</b> 줄을 나눴다.
         <b>ⓓ + ⓕ 만 헤지를 실행한 비용</b>이고 ⓐⓑⓒ는 가격이 움직여서 생긴 마진변동손익이다.
-        재고 저가법은 헤지가 한 일이 아니므로 여기 넣지 않고 ⑤ 손익에서 계상한다.
+        재고 저가법은 헤지가 한 일이 아니므로 여기 넣지 않고 ④ 손익에서 계상한다.
       </p>
       ${legTable}
       <div class="grid-2">
@@ -576,8 +664,10 @@ function renderHedge(state) {
           Forward는 QP를 협상해 이 구간을 맞출 수 있어 ⓒ가 0이다.
         </div>
         <div class="note">
-          <b>ⓐ는 네 수단이 모두 같다</b> — W0~W${c.decisionWeek} 구간은 Rolling이 끝나기 전이라
-          아직 헤지하지 않았다. 수단 선택으로는 줄일 수 없고, <i>의사결정을 앞당겨야</i> 줄어든다.
+          <b>ⓐ는 언제 걸었느냐로 갈린다</b> — W0~진입은 아직 헤지하지 않은 채 지나간 구간이다.
+          같은 시점이면 파생 수단끼리 값이 같고, <i>시점을 앞당기면 짧아진다</i> —
+          수단 선택이 아니라 의사결정 시점의 문제다.
+          <b>고객 전가만 예외</b>로 판가조건 자체를 매입가 연동으로 돌리므로 이 구간까지 사라진다.
         </div>
       </div>
       <h3 class="sub-head">Hedge 파라미터</h3>
@@ -604,12 +694,12 @@ function renderHedge(state) {
     </div>
 
     <div class="card" id="sec-pnl">
-      <h2>⑤ 손익 (USD)</h2>
+      <h2>④ 손익 (USD)</h2>
       <p class="card-sub">
-        ④를 행과 열만 바꿔 회계 형태로 옮긴 것이다. 매출·재료비는 판매 확정된 물량만 계상한다.
+        ③을 행과 열만 바꿔 회계 형태로 옮긴 것이다. 매출·재료비는 판매 확정된 물량만 계상한다.
       </p>
       ${leadBlock('notes.pnlLead', state.notes.pnlLead,
-        '표 위에 실릴 한 줄 — 여기 적은 문장이 엑셀 ⑤ 손익 시트에도 같이 실린다')}
+        '표 위에 실릴 한 줄 — 여기 적은 문장이 엑셀 ④ 손익 시트에도 같이 실린다')}
       <div class="table-scroll"><table>
         <thead><tr><th>항목</th>${m.pnl.map(r =>
           `<th class="num">${esc(r.name)}<br><span class="th-sub">${esc(HEDGE_KINDS[r.hedge].short)}</span></th>`).join('')}
@@ -644,7 +734,7 @@ function renderHedge(state) {
           <b>비용과 가격 상쇄를 갈라 놓았다</b> — 브로커가 가져가는 몫은
           <b>가격에 내재된 스프레드 ${usd(-m.pnlTotal.carryCost)}</b> 와
           <b>청구서에 찍히는 수수료 ${usd(-m.pnlTotal.ibFee)}</b> 둘인데, 성격이 같으므로 나란히 세웠다.
-          둘의 합 <b>${usd(-m.pnlTotal.opCost)}</b> 은 ④의 <i>Hedge Operation 비용</i>과 같은 값이다.
+          둘의 합 <b>${usd(-m.pnlTotal.opCost)}</b> 은 ③의 <i>Hedge Operation 비용</i>과 같은 값이다.
           남는 <b>Hedge 효과 (가격 상쇄)</b> 는 순수하게 가격 변동을 얼마나 바꿨는지만 담는다.
         </div>
       </div>
@@ -654,10 +744,10 @@ function renderHedge(state) {
     </div>
 
     <div class="card" id="sec-compare">
-      <h2>⑥ Exposure 대응 일원화 시</h2>
+      <h2>⑤ Exposure 대응 일원화 시</h2>
       <p class="card-sub">
-        What-if — Hedge 대상 ${n0(m.benchQty)}톤 전부를 한 가지 수단으로 몰았다면.
-        재고 저가법은 헤지와 무관하므로 여기서도 빼고 ⑤ 손익에서만 다룬다.
+        What-if — 출고월 평균 ${n0(m.benchQty)}톤 전부를 한 가지 수단으로 몰았다면.
+        재고 저가법은 헤지와 무관하므로 여기서도 빼고 ④ 손익에서만 다룬다.
       </p>
       ${cmpChart}
       <div class="table-scroll"><table>
@@ -681,13 +771,14 @@ function renderHedge(state) {
     </div>
 
     <div class="card" id="sec-margin">
-      <h2>⑦ 증거금 Cash Flow</h2>
+      <h2>⑥ 증거금 Cash Flow</h2>
       <p class="card-sub">
         What-if — Forward와 Future의 최종 손익 차이는 미스매치뿐이지만, <b>가는 길</b>이 다르다.
-        Future는 매주 정산되어 현금이 오간다. W${c.decisionWeek} 진입 ~ W${c.shipEnd} 청산.
+        Future는 매주 정산되어 현금이 오간다. W${m.future.startWeek} 진입 ~ W${c.shipEnd} 청산.
       </p>
       <div class="stat-row">
-        ${stat('숏 물량', n0(m.future.qty) + ' t', m.future.qty ? `진입 ${unit(m.future.entry)} → 청산 ${unit(m.future.exit)}` : '')}
+        ${stat('숏 물량', n0(m.future.qty) + ' t', m.future.qty
+          ? `가중평균 진입 ${unit(m.future.entry)} → 청산 ${unit(m.future.exit)}` : '')}
         ${stat('개시증거금', usd(m.future.initialMargin), `진입가 × 물량 × ${n1(hp.imRatePct)}%`)}
         ${stat('누적 납부 필요액 최대', usd(m.future.maxNeed), `W${m.future.peakWeek} 시점`, m.future.maxNeed > 0 ? 'neg' : '')}
         ${stat('현금 한도 대비', m.future.breached ? '초과 → 강제청산' : '버팀',
@@ -702,14 +793,15 @@ function renderHedge(state) {
         현금 한도 ${usd(hp.cashLimit)} 는 축 밖이라 표시하지 않았습니다 —
         최대 납부액 ${usd(m.future.maxNeed)} 는 한도의 ${(m.future.maxNeed / hp.cashLimit * 100).toFixed(1)}% 입니다.
       </p>` : ''}
-      <details class="fold"><summary>주간 시가평가 상세 (W${c.decisionWeek} ~ W${c.shipEnd})</summary>
+      <details class="fold"><summary>주간 시가평가 상세 (W${m.future.startWeek} ~ W${c.shipEnd})</summary>
         <div class="table-scroll"><table>
-          <thead><tr><th>주차</th><th class="num">LME 가격 ($/t)</th>
+          <thead><tr><th>주차</th><th class="num">보유 물량 (톤)</th><th class="num">LME 가격 ($/t)</th>
             <th class="num">주간 선물 손익<br>(− 납부 / + 환급)</th>
             <th class="num">누적 선물 손익<br>(= 누적 순현금흐름)</th>
             <th class="num">누적 납부 필요액</th></tr></thead>
           <tbody>${m.future.rows.map(r => `<tr>
             <td class="name">${esc(r.label)}</td>
+            <td class="num">${n0(r.qty)}</td>
             <td class="num">${n0(r.price)}</td>
             <td class="num">${dash(r.weekly, signed)}</td>
             <td class="num">${dash(r.cum, signed)}</td>
