@@ -311,9 +311,13 @@
           </div>
         </div>
 
-        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+        <div style="display: flex; gap: 12px; justify-content: flex-end; align-items: center;">
+          <select id="videoOutFormat" style="background: #0d1520; border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 6px; font-size: 13px;">
+            <option value="mp4" selected>MP4 비디오 (.mp4)</option>
+            <option value="webm">WebM 비디오 (.webm)</option>
+          </select>
           <button class="btn btn-secondary" onclick="previewSegment()">👁️ 선택 구간 미리보기</button>
-          <button class="btn" id="btnCut" onclick="exportWebClip()">✂️ 선택 구간 클립 생성 (WebM)</button>
+          <button class="btn" id="btnCut" onclick="exportWebClip()">✂️ 선택 구간 클립 생성 (MP4)</button>
         </div>
 
         <!-- 결과 다운로드 -->
@@ -473,6 +477,7 @@
         return;
       }
 
+      const requestedFormat = document.getElementById('videoOutFormat').value;
       const btn = document.getElementById('btnCut');
       btn.disabled = true;
       btn.textContent = `⏳ 클립 생성 중 (${clipDuration.toFixed(1)}초)...`;
@@ -481,16 +486,42 @@
       if (!stream) {
         alert('이 브라우저는 웹 비디오 레코딩을 지원하지 않습니다.');
         btn.disabled = false;
-        btn.textContent = '✂️ 선택 구간 클립 생성 (WebM)';
+        btn.textContent = '✂️ 선택 구간 클립 생성';
         return;
       }
 
-      let mimeType = 'video/webm;codecs=vp9,opus';
-      if (!MediaRecorder.isTypeSupported(mimeType)) {
-        mimeType = 'video/webm';
+      // Check supported MIME types
+      let chosenMime = '';
+      let outExt = 'mp4';
+
+      if (requestedFormat === 'mp4') {
+        const mp4Candidates = [
+          'video/mp4;codecs=avc1,mp4a.40.2',
+          'video/mp4;codecs=avc1',
+          'video/mp4;codecs=h264',
+          'video/mp4'
+        ];
+        for (const type of mp4Candidates) {
+          if (MediaRecorder.isTypeSupported(type)) {
+            chosenMime = type;
+            outExt = 'mp4';
+            break;
+          }
+        }
+        if (!chosenMime) {
+          // If browser does not support native MP4 recorder, fallback to webm
+          chosenMime = 'video/webm;codecs=vp9,opus';
+          if (!MediaRecorder.isTypeSupported(chosenMime)) chosenMime = 'video/webm';
+          outExt = 'webm';
+          alert('현재 브라우저에서 직접 MP4 녹화가 지원되지 않아 WebM으로 생성됩니다.\n(Chrome, Edge, Safari 최신 버전에서는 MP4가 바로 지원됩니다.)');
+        }
+      } else {
+        chosenMime = 'video/webm;codecs=vp9,opus';
+        if (!MediaRecorder.isTypeSupported(chosenMime)) chosenMime = 'video/webm';
+        outExt = 'webm';
       }
 
-      const recorder = new MediaRecorder(stream, { mimeType });
+      const recorder = new MediaRecorder(stream, chosenMime ? { mimeType: chosenMime } : {});
       const chunks = [];
 
       recorder.ondataavailable = (e) => {
@@ -498,10 +529,10 @@
       };
 
       recorder.onstop = () => {
-        const blob = new Blob(chunks, { type: mimeType });
+        const blob = new Blob(chunks, { type: chosenMime || 'video/mp4' });
         const url = URL.createObjectURL(blob);
         const baseName = loadedFile.name.replace(/\.[^/.]+$/, "");
-        const outName = `${baseName}_cut_${start.toFixed(0)}s-${end.toFixed(0)}s.webm`;
+        const outName = `${baseName}_cut_${start.toFixed(0)}s-${end.toFixed(0)}s.${outExt}`;
 
         const clipPlayer = document.getElementById('clipPlayer');
         clipPlayer.src = url;
@@ -510,11 +541,11 @@
         dlBtn.download = outName;
         dlBtn.textContent = `💾 ${outName} 다운로드`;
 
-        document.getElementById('clipMeta').textContent = `${formatSize(blob.size)} · ${clipDuration.toFixed(1)}초`;
+        document.getElementById('clipMeta').textContent = `${formatSize(blob.size)} · ${clipDuration.toFixed(1)}초 (${outExt.toUpperCase()})`;
         document.getElementById('resultBox').style.display = 'flex';
 
         btn.disabled = false;
-        btn.textContent = '✂️ 선택 구간 클립 생성 (WebM)';
+        btn.textContent = `✂️ 선택 구간 클립 생성 (${outExt.toUpperCase()})`;
         videoPlayer.currentTime = start;
       };
 
