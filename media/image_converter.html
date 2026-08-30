@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🖼️ 이미지 포맷 변환 & 리사이저</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f1923;
+      --panel: #162130;
+      --card-bg: #1c2b3d;
+      --border: #22374e;
+      --accent: #4fc3a1;
+      --accent2: #f0a500;
+      --text: #e8edf2;
+      --muted: #889fb5;
+      --danger: #e74c3c;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans KR', sans-serif;
+      min-height: 100vh;
+      padding: 30px 20px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .nav-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-link {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+    .nav-link:hover { color: var(--accent); }
+
+    header { text-align: center; }
+    h1 { font-size: 28px; color: var(--accent); margin-bottom: 8px; }
+    .subtitle { color: var(--muted); font-size: 14px; }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .dropzone {
+      border: 2px dashed var(--border);
+      background: #121c28;
+      border-radius: 10px;
+      padding: 35px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--accent);
+      background: rgba(79, 195, 161, 0.05);
+    }
+
+    .dropzone-icon { font-size: 40px; margin-bottom: 10px; }
+    .dropzone-title { font-size: 16px; font-weight: 500; margin-bottom: 4px; }
+    .dropzone-desc { font-size: 13px; color: var(--muted); }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      background: #121c28;
+      padding: 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    select, input[type="number"], input[type="range"] {
+      width: 100%;
+      background: #0d1520;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    .range-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .range-val {
+      font-size: 13px;
+      color: var(--accent);
+      font-weight: bold;
+      min-width: 40px;
+    }
+
+    .btn {
+      background: var(--accent);
+      color: #0f1923;
+      font-weight: 700;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: opacity 0.2s, transform 0.1s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      text-decoration: none;
+    }
+
+    .btn:hover { opacity: 0.9; }
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-secondary {
+      background: #253950;
+      color: var(--text);
+    }
+    .btn-secondary:hover { background: #2f4866; }
+
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+
+    .item-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .item-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .preview-box {
+      height: 160px;
+      background: #090e14;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .preview-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .item-body {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+      justify-content: space-between;
+    }
+
+    .item-title {
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-stats {
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .saved-tag {
+      color: var(--accent);
+      font-weight: bold;
+    }
+
+    .heic-badge {
+      background: #e67e22;
+      color: white;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="nav-bar">
+      <a href="index.html" class="nav-link">← Media Center</a>
+      <a href="../tool.html" class="nav-link">🛠️ Tool Center</a>
+    </div>
+
+    <header>
+      <h1>🖼️ 이미지 포맷 변환 & 리사이저</h1>
+      <p class="subtitle">JPG, PNG, WebP, HEIC 사진을 원하는 포맷과 해상도로 일괄 변환 및 용량 최적화합니다.</p>
+    </header>
+
+    <div class="panel">
+      <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+        <div class="dropzone-icon">📥</div>
+        <div class="dropzone-title">이미지 파일들을 여기에 드래그하거나 클릭하세요</div>
+        <div class="dropzone-desc">JPG, PNG, WebP, GIF, BMP, HEIC (아이폰 사진) 지원 · 다중 선택 가능</div>
+        <input type="file" id="fileInput" accept="image/*,.heic,.HEIC" multiple style="display: none;" />
+      </div>
+
+      <!-- 변환 설정 -->
+      <div class="settings-grid">
+        <div class="form-group">
+          <label for="outFormat">출력 포맷</label>
+          <select id="outFormat" onchange="toggleQualitySlider()">
+            <option value="image/jpeg" selected>JPG (호환성 최고)</option>
+            <option value="image/png">PNG (무손실 투명도)</option>
+            <option value="image/webp">WebP (차세대 고압축)</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="qualityGroup">
+          <label>품질 (Quality)</label>
+          <div class="range-wrap">
+            <input type="range" id="qualityRange" min="10" max="100" value="85" oninput="updateQuality(this.value)" />
+            <span id="qualityVal" class="range-val">85%</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="resizeMode">리사이즈 (크기 조절)</label>
+          <select id="resizeMode" onchange="toggleResizeInput()">
+            <option value="orig" selected>원본 크기 유지</option>
+            <option value="scale75">75% 축소</option>
+            <option value="scale50">50% 축소</option>
+            <option value="scale25">25% 축소</option>
+            <option value="max1920">최대 너비 1920px (FHD)</option>
+            <option value="max1280">최대 너비 1280px (HD)</option>
+            <option value="max800">최대 너비 800px (블로그용)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="action-bar" id="actionBar" style="display: none;">
+        <div id="fileCount" style="font-size: 14px; color: var(--accent);">0개 파일 변환 완료</div>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-secondary" onclick="clearAll()">🗑️ 전체 비우기</button>
+          <button class="btn" id="zipBtn" onclick="downloadAllZip()">📦 전체 ZIP 다운로드</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 결과 리스트 -->
+    <div id="itemList" class="item-list"></div>
+  </div>
+
+  <script>
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const itemList = document.getElementById('itemList');
+    const actionBar = document.getElementById('actionBar');
+    const fileCount = document.getElementById('fileCount');
+
+    let processedItems = [];
+
+    ['dragenter', 'dragover'].forEach(name => {
+      dropzone.addEventListener(name, (e) => {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(name => {
+      dropzone.addEventListener(name, (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+      });
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      const files = Array.from(e.dataTransfer.files);
+      if (files.length > 0) processFiles(files);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      const files = Array.from(e.target.files);
+      if (files.length > 0) processFiles(files);
+      fileInput.value = '';
+    });
+
+    function updateQuality(val) {
+      document.getElementById('qualityVal').textContent = val + '%';
+    }
+
+    function toggleQualitySlider() {
+      const format = document.getElementById('outFormat').value;
+      document.getElementById('qualityGroup').style.display = (format === 'image/png') ? 'none' : 'flex';
+    }
+
+    function toggleResizeInput() {}
+
+    async function processFiles(files) {
+      const format = document.getElementById('outFormat').value;
+      const quality = parseInt(document.getElementById('qualityRange').value, 10) / 100;
+      const resize = document.getElementById('resizeMode').value;
+
+      for (const file of files) {
+        try {
+          let imageSource = file;
+
+          // HEIC support via heic2any
+          if (file.name.toLowerCase().endsWith('.heic')) {
+            if (typeof heic2any !== 'undefined') {
+              const convertedBlob = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.95 });
+              imageSource = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+            } else {
+              throw new Error('HEIC 디코더를 로드할 수 없습니다.');
+            }
+          }
+
+          const item = await convertSingleImage(imageSource, file.name, format, quality, resize, file.size);
+          processedItems.push(item);
+          renderItemCard(item);
+        } catch (err) {
+          console.error(err);
+          alert(`[${file.name}] 변환 실패: ` + err.message);
+        }
+      }
+      updateUI();
+    }
+
+    function convertSingleImage(sourceBlob, originalName, targetFormat, quality, resizeMode, originalSizeBytes) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            let width = img.naturalWidth;
+            let height = img.naturalHeight;
+
+            // Calculate new dimensions
+            if (resizeMode === 'scale75') {
+              width = Math.round(width * 0.75);
+              height = Math.round(height * 0.75);
+            } else if (resizeMode === 'scale50') {
+              width = Math.round(width * 0.5);
+              height = Math.round(height * 0.5);
+            } else if (resizeMode === 'scale25') {
+              width = Math.round(width * 0.25);
+              height = Math.round(height * 0.25);
+            } else if (resizeMode.startsWith('max')) {
+              const maxVal = parseInt(resizeMode.replace('max', ''), 10);
+              if (width > maxVal || height > maxVal) {
+                if (width >= height) {
+                  height = Math.round((height * maxVal) / width);
+                  width = maxVal;
+                } else {
+                  width = Math.round((width * maxVal) / height);
+                  height = maxVal;
+                }
+              }
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+
+            // If converting to JPEG, fill white background to handle transparency
+            if (targetFormat === 'image/jpeg') {
+              ctx.fillStyle = '#FFFFFF';
+              ctx.fillRect(0, 0, width, height);
+            }
+
+            ctx.drawImage(img, 0, 0, width, height);
+
+            canvas.toBlob((blob) => {
+              if (!blob) {
+                reject(new Error('변환 생성 실패'));
+                return;
+              }
+
+              let ext = '.jpg';
+              if (targetFormat === 'image/png') ext = '.png';
+              else if (targetFormat === 'image/webp') ext = '.webp';
+
+              const baseName = originalName.replace(/\.[^/.]+$/, "");
+              const outName = `${baseName}_converted${ext}`;
+              const url = URL.createObjectURL(blob);
+
+              resolve({
+                id: Math.random().toString(36).substring(2, 9),
+                originalName: originalName,
+                outName: outName,
+                origDim: `${img.naturalWidth}×${img.naturalHeight}`,
+                newDim: `${width}×${height}`,
+                origSize: formatSize(originalSizeBytes),
+                newSize: formatSize(blob.size),
+                reduction: originalSizeBytes > 0 ? Math.round((1 - blob.size / originalSizeBytes) * 100) : 0,
+                blob: blob,
+                url: url
+              });
+            }, targetFormat, quality);
+          };
+          img.onerror = () => reject(new Error('이미지 로딩 실패'));
+          img.src = e.target.result;
+        };
+        reader.onerror = () => reject(new Error('파일 읽기 실패'));
+        reader.readAsDataURL(sourceBlob);
+      });
+    }
+
+    function renderItemCard(item) {
+      const card = document.createElement('div');
+      card.className = 'item-card';
+      card.innerHTML = `
+        <div class="preview-box">
+          <img src="${item.url}" alt="${item.outName}" />
+        </div>
+        <div class="item-body">
+          <div>
+            <div class="item-title" title="${item.originalName}">📄 ${item.outName}</div>
+            <div class="item-stats" style="margin-top: 6px;">
+              <div class="stat-row">
+                <span>해상도:</span>
+                <span>${item.origDim} → <b>${item.newDim}</b></span>
+              </div>
+              <div class="stat-row">
+                <span>용량:</span>
+                <span>${item.origSize} → <b style="color: var(--accent);">${item.newSize}</b> 
+                  ${item.reduction > 0 ? `<span class="saved-tag">(-${item.reduction}%)</span>` : ''}
+                </span>
+              </div>
+            </div>
+          </div>
+          <a class="btn" href="${item.url}" download="${item.outName}" style="width: 100%; margin-top: 6px;">💾 다운로드</a>
+        </div>
+      `;
+      itemList.appendChild(card);
+    }
+
+    function updateUI() {
+      if (processedItems.length > 0) {
+        actionBar.style.display = 'flex';
+        fileCount.textContent = `총 ${processedItems.length}개 파일 처리 완료`;
+      } else {
+        actionBar.style.display = 'none';
+      }
+    }
+
+    function clearAll() {
+      processedItems.forEach(item => URL.revokeObjectURL(item.url));
+      processedItems = [];
+      itemList.innerHTML = '';
+      updateUI();
+    }
+
+    async function downloadAllZip() {
+      if (processedItems.length === 0) return;
+      const zipBtn = document.getElementById('zipBtn');
+      const origText = zipBtn.textContent;
+      zipBtn.textContent = '⏳ ZIP 생성 중...';
+      zipBtn.disabled = true;
+
+      try {
+        const zip = new JSZip();
+        processedItems.forEach(item => {
+          zip.file(item.outName, item.blob);
+        });
+
+        const content = await zip.generateAsync({ type: "blob" });
+        const zipUrl = URL.createObjectURL(content);
+        const a = document.createElement('a');
+        a.href = zipUrl;
+        a.download = `Images_Converted_${new Date().toISOString().slice(0,10)}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(zipUrl);
+      } catch (err) {
+        alert('ZIP 생성 중 오류: ' + err.message);
+      } finally {
+        zipBtn.textContent = origText;
+        zipBtn.disabled = false;
+      }
+    }
+
+    function formatSize(bytes) {
+      if (!bytes || bytes === 0) return '0 B';
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+  </script>
+</body>
+</html>

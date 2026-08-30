@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎬 Media Center - Henrysuh</title>
+  <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0f1923;
+      --panel: #162130;
+      --card-bg: #1c2b3d;
+      --border: #22374e;
+      --accent: #4fc3a1;
+      --accent2: #f0a500;
+      --text: #e8edf2;
+      --muted: #889fb5;
+      --font-display: 'Black Han Sans', sans-serif;
+      --font-body: 'Noto Sans KR', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.25;
+      pointer-events: none;
+    }
+
+    .container {
+      position: relative;
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-link {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+    .nav-link:hover { color: var(--accent); }
+
+    header {
+      text-align: center;
+    }
+
+    .site-title {
+      font-family: var(--font-display);
+      font-size: clamp(28px, 5vw, 36px);
+      color: var(--accent);
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .site-title span { color: var(--accent2); }
+
+    .site-desc {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent2);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      text-decoration: none;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--border);
+      transition: background 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+      box-shadow: 0 10px 24px rgba(79, 195, 161, 0.15);
+      background: #192636;
+    }
+
+    .card:hover::before {
+      background: var(--accent);
+    }
+
+    .card-icon {
+      font-size: 38px;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .card-desc {
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.5;
+      flex: 1;
+    }
+
+    .card-badge {
+      align-self: flex-start;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: #111a24;
+      color: var(--accent);
+      border: 1px solid var(--border);
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="top-nav">
+      <a href="../index.html" class="nav-link">← 메인 홈으로</a>
+      <a href="../tool.html" class="nav-link">🛠️ Tool Center</a>
+    </div>
+
+    <header>
+      <div class="site-title">🎬 Media <span>Center</span></div>
+      <div class="site-desc">서버 전송 없이 브라우저 내에서 안전하고 빠르게 미디어를 변환 및 편집합니다</div>
+    </header>
+
+    <div>
+      <div class="section-title">📷 사진 & 이미지 도구</div>
+      <div class="grid">
+        <a href="raf_to_jpg.html" class="card">
+          <div class="card-icon">📸</div>
+          <div class="card-title">Fuji RAF → JPG 추출기</div>
+          <div class="card-desc">후지필름 RAW 파일 속 풀사이즈 JPEG를 0.05초 만에 추출 (필름 시뮬레이션 색감 100% 유지)</div>
+          <div class="card-badge">초고속 바닐라 JS</div>
+        </a>
+
+        <a href="jpg_to_svg.html" class="card">
+          <div class="card-icon">🎨</div>
+          <div class="card-title">이미지 → SVG 변환기</div>
+          <div class="card-desc">파워포인트 도형 변환용 벡터 트레이싱 및 고품질 Base64 임베딩 SVG 생성</div>
+          <div class="card-badge">벡터 Tracing & PPT 호환</div>
+        </a>
+
+        <a href="image_converter.html" class="card">
+          <div class="card-icon">🖼️</div>
+          <div class="card-title">포맷 변환 & 리사이저</div>
+          <div class="card-desc">JPG, PNG, WebP, HEIC(아이폰 사진) 상호 변환 및 용량 압축/해상도 조절</div>
+          <div class="card-badge">HEIC · 다중 일괄 변환</div>
+        </a>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">🎵 오디오 & 비디오 도구</div>
+      <div class="grid">
+        <a href="audio_tool.html" class="card">
+          <div class="card-icon">🎵</div>
+          <div class="card-title">음악 자르기 & MP3 변환기</div>
+          <div class="card-desc">FLAC, M4A, WAV, MP3 음원 파형 시각화, 구간 자르기 및 최고 320kbps MP3 인코딩</div>
+          <div class="card-badge">Web Audio API + LAME</div>
+        </a>
+
+        <a href="video_cutter.html" class="card">
+          <div class="card-icon">✂️</div>
+          <div class="card-title">비디오 버퍼 컷 (러프 컷)</div>
+          <div class="card-desc">시작/끝 지점 여유 버퍼(±3초) 러프 컷팅 및 LosslessCut/FFmpeg 로컬 연계 가이드</div>
+          <div class="card-badge">키프레임 버퍼 컷</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="footer">
+      © 2026 Henrysuh · GitHub Pages Client-side Media Center
+    </div>
+  </div>
+
+</body>
+</html>

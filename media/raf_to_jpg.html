@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📸 Fuji RAF → JPG 내장 추출기</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f1923;
+      --panel: #162130;
+      --card-bg: #1c2b3d;
+      --border: #22374e;
+      --accent: #4fc3a1;
+      --accent2: #f0a500;
+      --text: #e8edf2;
+      --muted: #889fb5;
+      --danger: #e74c3c;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans KR', sans-serif;
+      min-height: 100vh;
+      padding: 30px 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .nav-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-link {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+
+    .nav-link:hover { color: var(--accent); }
+
+    header {
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 28px;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .guide-box {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      padding: 16px 20px;
+      font-size: 13.5px;
+      line-height: 1.6;
+      color: #c0d1e0;
+    }
+
+    .guide-box strong { color: var(--accent); }
+    .guide-box code { background: #0c141d; padding: 2px 6px; border-radius: 4px; color: var(--accent2); }
+
+    .dropzone {
+      border: 2px dashed var(--border);
+      background: var(--panel);
+      border-radius: 12px;
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--accent);
+      background: rgba(79, 195, 161, 0.05);
+    }
+
+    .dropzone-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .dropzone-title {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .dropzone-desc {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .btn {
+      background: var(--accent);
+      color: #0f1923;
+      font-weight: 700;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: opacity 0.2s, transform 0.1s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+    }
+
+    .btn:hover { opacity: 0.9; }
+    .btn:active { transform: scale(0.98); }
+
+    .btn-secondary {
+      background: #253950;
+      color: var(--text);
+    }
+
+    .btn-secondary:hover { background: #2f4866; }
+
+    .result-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 18px;
+    }
+
+    .item-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .preview-box {
+      width: 100%;
+      height: 180px;
+      background: #090e14;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .preview-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .preview-box img:hover {
+      transform: scale(1.03);
+    }
+
+    .item-info {
+      padding: 14px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .file-name {
+      font-weight: 500;
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-meta {
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .download-btn {
+      width: 100%;
+      text-align: center;
+      justify-content: center;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      padding: 20px;
+    }
+
+    .modal img {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: 8px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: white;
+      font-size: 28px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="nav-bar">
+      <a href="index.html" class="nav-link">← Media Center</a>
+      <a href="../tool.html" class="nav-link">🛠️ Tool Center</a>
+    </div>
+
+    <header>
+      <h1>📸 후지 RAF → JPG 내장 추출기</h1>
+      <p class="subtitle">후지필름 RAW(RAF) 파일 속 내장된 최고화질 풀사이즈 JPEG를 0.05초 만에 추출합니다.</p>
+    </header>
+
+    <div class="guide-box">
+      <strong>⚡ 내장 JPEG 추출 방식이란?</strong><br>
+      Fuji RAF 파일 내부에는 촬영 시 적용된 <b>필름 시뮬레이션 색감</b>과 화이트밸런스가 100% 그대로 반영된 고화질 풀사이즈 JPEG가 저장되어 있습니다.<br>
+      복잡한 외부 프로그램 없이 브라우저 내에서 바이너리를 파싱하여 <b>색감 손실 없이 원본 카메라 색 그대로</b> 초고속 추출합니다.
+    </div>
+
+    <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+      <div class="dropzone-icon">📥</div>
+      <div class="dropzone-title">Fuji RAF 파일(.RAF)을 드래그하거나 클릭하여 선택하세요</div>
+      <div class="dropzone-desc">여러 파일 동시 선택 가능 · 파일은 서버로 전송되지 않고 브라우저에서 안전하게 처리됩니다</div>
+      <input type="file" id="fileInput" accept=".raf,.RAF" multiple style="display: none;" />
+    </div>
+
+    <div class="action-bar" id="actionBar" style="display: none;">
+      <div id="statusCount" style="font-size: 14px; color: var(--accent);">0개 추출 완료</div>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn-secondary" onclick="clearAll()">🗑️ 목록 비우기</button>
+        <button class="btn" id="zipDownloadBtn" onclick="downloadAllZip()">📦 전체 ZIP 다운로드</button>
+      </div>
+    </div>
+
+    <div id="results" class="result-list"></div>
+  </div>
+
+  <div class="modal" id="imageModal" onclick="closeModal()">
+    <span class="modal-close">&times;</span>
+    <img id="modalImg" src="" alt="Full Preview" />
+  </div>
+
+  <script>
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const results = document.getElementById('results');
+    const actionBar = document.getElementById('actionBar');
+    const statusCount = document.getElementById('statusCount');
+
+    let extractedItems = [];
+
+    // Drag & Drop
+    ['dragenter', 'dragover'].forEach(name => {
+      dropzone.addEventListener(name, (e) => {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(name => {
+      dropzone.addEventListener(name, (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+      });
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      const files = Array.from(e.dataTransfer.files).filter(f => f.name.toLowerCase().endsWith('.raf'));
+      if (files.length === 0) {
+        alert('RAF 파일(.raf)을 선택해 주세요.');
+        return;
+      }
+      processFiles(files);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      const files = Array.from(e.target.files);
+      if (files.length > 0) processFiles(files);
+      fileInput.value = '';
+    });
+
+    async function processFiles(files) {
+      for (const file of files) {
+        try {
+          const item = await extractJpgFromRaf(file);
+          if (item) {
+            extractedItems.push(item);
+            renderCard(item);
+          }
+        } catch (err) {
+          console.error(err);
+          alert(`[${file.name}] 추출 실패: ` + err.message);
+        }
+      }
+      updateUI();
+    }
+
+    /**
+     * 바이너리 검색으로 RAF 내 가장 큰 JPEG 스트림 추출
+     */
+    function extractJpgFromRaf(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const buffer = e.target.result;
+          const bytes = new Uint8Array(buffer);
+          const len = bytes.length;
+
+          // Find all JPEG segments: SOI (FF D8 FF) to EOI (FF D9)
+          let jpegSegments = [];
+          for (let i = 0; i < len - 4; i++) {
+            if (bytes[i] === 0xFF && bytes[i+1] === 0xD8 && bytes[i+2] === 0xFF) {
+              const start = i;
+              let end = -1;
+              for (let j = start + 2; j < len - 1; j++) {
+                if (bytes[j] === 0xFF && bytes[j+1] === 0xD9) {
+                  end = j + 2;
+                  break;
+                }
+              }
+              if (end > start) {
+                const segSize = end - start;
+                // Only consider substantial JPEGs (ignore tiny thumbnails < 20KB)
+                if (segSize > 20000) {
+                  jpegSegments.push({ start, end, size: segSize });
+                }
+                i = end;
+              }
+            }
+          }
+
+          if (jpegSegments.length === 0) {
+            // Fallback: search SOI to the last EOI in file
+            let start = -1;
+            let end = -1;
+            for (let i = 0; i < len - 3; i++) {
+              if (bytes[i] === 0xFF && bytes[i+1] === 0xD8 && bytes[i+2] === 0xFF) {
+                start = i;
+                break;
+              }
+            }
+            for (let i = len - 2; i >= 0; i--) {
+              if (bytes[i] === 0xFF && bytes[i+1] === 0xD9) {
+                end = i + 2;
+                break;
+              }
+            }
+            if (start !== -1 && end !== -1 && end > start) {
+              jpegSegments.push({ start, end, size: end - start });
+            }
+          }
+
+          if (jpegSegments.length === 0) {
+            reject(new Error('RAF 파일 내에 내장된 JPEG를 찾을 수 없습니다.'));
+            return;
+          }
+
+          // Pick the largest JPEG segment (the full preview)
+          jpegSegments.sort((a, b) => b.size - a.size);
+          const best = jpegSegments[0];
+
+          const jpegBytes = bytes.slice(best.start, best.end);
+          const blob = new Blob([jpegBytes], { type: 'image/jpeg' });
+          const url = URL.createObjectURL(blob);
+          const outName = file.name.replace(/\.[^/.]+$/, "") + ".jpg";
+
+          resolve({
+            id: Math.random().toString(36).substring(2, 9),
+            originalName: file.name,
+            outName: outName,
+            rafSize: formatSize(file.size),
+            jpgSize: formatSize(blob.size),
+            blob: blob,
+            url: url
+          });
+        };
+        reader.onerror = () => reject(new Error('파일 읽기 실패'));
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    function renderCard(item) {
+      const card = document.createElement('div');
+      card.className = 'item-card';
+      card.id = `card-${item.id}`;
+      card.innerHTML = `
+        <div class="preview-box">
+          <img src="${item.url}" alt="${item.outName}" onclick="openModal('${item.url}')" title="클릭하여 확대 보기" />
+        </div>
+        <div class="item-info">
+          <div>
+            <div class="file-name" title="${item.originalName}">📄 ${item.originalName}</div>
+            <div class="file-meta" style="margin-top: 4px;">
+              <span>RAF: ${item.rafSize}</span>
+              <span style="color: var(--accent);">JPG: ${item.jpgSize}</span>
+            </div>
+          </div>
+          <a class="btn download-btn" href="${item.url}" download="${item.outName}">💾 JPG 다운로드</a>
+        </div>
+      `;
+      results.appendChild(card);
+    }
+
+    function updateUI() {
+      if (extractedItems.length > 0) {
+        actionBar.style.display = 'flex';
+        statusCount.textContent = `총 ${extractedItems.length}개 파일 추출 완료`;
+      } else {
+        actionBar.style.display = 'none';
+      }
+    }
+
+    function clearAll() {
+      extractedItems.forEach(item => URL.revokeObjectURL(item.url));
+      extractedItems = [];
+      results.innerHTML = '';
+      updateUI();
+    }
+
+    async function downloadAllZip() {
+      if (extractedItems.length === 0) return;
+      const zipBtn = document.getElementById('zipDownloadBtn');
+      const origText = zipBtn.textContent;
+      zipBtn.textContent = '⏳ ZIP 압축 중...';
+      zipBtn.disabled = true;
+
+      try {
+        const zip = new JSZip();
+        extractedItems.forEach(item => {
+          zip.file(item.outName, item.blob);
+        });
+
+        const content = await zip.generateAsync({ type: "blob" });
+        const zipUrl = URL.createObjectURL(content);
+        const a = document.createElement('a');
+        a.href = zipUrl;
+        a.download = `Fuji_RAF_Extracted_${new Date().toISOString().slice(0,10)}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(zipUrl);
+      } catch (err) {
+        alert('ZIP 생성 중 오류 발생: ' + err.message);
+      } finally {
+        zipBtn.textContent = origText;
+        zipBtn.disabled = false;
+      }
+    }
+
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function openModal(url) {
+      document.getElementById('modalImg').src = url;
+      document.getElementById('imageModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('imageModal').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
