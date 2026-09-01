@@ -356,10 +356,25 @@
   let allMarkers = {}; // { category: [{marker, data}] }
 
   function loadKakaoScript() {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(new Error('카카오 지도 스크립트 로드 시간 초과 (네트워크 또는 도메인 미등록)'));
+      }, 5000);
+
       const s = document.createElement('script');
       s.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&autoload=false`;
-      s.onload = () => kakao.maps.load(resolve);
+      s.onload = () => {
+        clearTimeout(timer);
+        if (window.kakao && window.kakao.maps) {
+          kakao.maps.load(resolve);
+        } else {
+          reject(new Error('카카오 지도 객체(kakao.maps)를 찾을 수 없습니다.'));
+        }
+      };
+      s.onerror = (e) => {
+        clearTimeout(timer);
+        reject(new Error('카카오 지도 스크립트를 불러올 수 없습니다. 도메인 허용 목록을 확인해주세요.'));
+      };
       document.head.appendChild(s);
     });
   }
@@ -487,25 +502,48 @@
   }
 
   async function init() {
-    await loadKakaoScript();
+    try {
+      await loadKakaoScript();
 
-    map = new kakao.maps.Map(document.getElementById('map'), {
-      center: new kakao.maps.LatLng(36.5, 127.8),
-      level: 13,
-    });
+      map = new kakao.maps.Map(document.getElementById('map'), {
+        center: new kakao.maps.LatLng(36.5, 127.8),
+        level: 13,
+      });
 
-    const results = await Promise.all(
-      Object.entries(CSV_FILES).map(([cat, file]) => loadCSV(cat, file))
-    );
+      const results = await Promise.all(
+        Object.entries(CSV_FILES).map(([cat, file]) => loadCSV(cat, file))
+      );
 
-    results.forEach(({ cat, rows }) => {
-      allMarkers[cat] = createMarkers(cat, rows);
-    });
+      results.forEach(({ cat, rows }) => {
+        allMarkers[cat] = createMarkers(cat, rows);
+      });
 
-    document.getElementById('loading').style.display = 'none';
+      document.getElementById('loading').style.display = 'none';
 
-    // 지도 클릭 시 팝업 닫기
-    kakao.maps.event.addListener(map, 'click', closePopup);
+      // 지도 클릭 시 팝업 닫기
+      kakao.maps.event.addListener(map, 'click', closePopup);
+    } catch (err) {
+      console.error(err);
+      const loadingEl = document.getElementById('loading');
+      if (loadingEl) {
+        loadingEl.innerHTML = `
+          <div class="logo-big" style="margin-bottom:16px;">차박<span>지도</span></div>
+          <div style="background:#162130; padding:20px; border-radius:12px; max-width:90%; color:#e8edf2; text-align:center; line-height:1.6; border:1px solid #e07b54;">
+            <p style="font-weight:bold; color:#e07b54; margin-bottom:8px;">⚠️ 카카오 지도 로드 실패</p>
+            <p style="font-size:13px; color:#c0c9d2; margin-bottom:12px;">
+              카카오 개발자 콘솔의 <b>[플랫폼 &gt; Web 사이트 도메인]</b>에 현재 도메인(<code>${location.origin}</code>)이 등록되어 있는지 확인해주세요.
+            </p>
+            <div style="font-size:12px; color:#8ba0b5; margin-bottom:14px; text-align:left; background:#0f1923; padding:10px; border-radius:6px;">
+              <b>등록 필요 도메인:</b><br/>
+              • https://git.henrysuh.com<br/>
+              • http://git.henrysuh.com<br/>
+              • https://henrysuh.github.io
+            </div>
+            <a href="../index.html" style="display:inline-block; padding:8px 16px; background:#4fc3a1; color:#0f1923; text-decoration:none; border-radius:6px; font-weight:bold; font-size:13px;">홈으로 돌아가기</a>
+          </div>
+        `;
+      }
+    }
   }
 
   // 필터 버튼
