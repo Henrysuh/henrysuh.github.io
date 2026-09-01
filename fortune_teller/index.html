@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" class="dark">
+<html lang="ko">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,19 +8,15 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
-      darkMode: 'class',
       theme: {
         extend: {
           colors: {
             brand: {
-              50: '#f5f7ff',
-              100: '#ebf0fe',
-              500: '#4f46e5',
-              600: '#4338ca',
-              700: '#3730a3',
-              800: '#312e81',
-              900: '#1e1b4b',
-              950: '#0f0e26'
+              50: '#f8f5ff',
+              100: '#f0eaff',
+              200: '#e4d8ff',
+              navy: '#1C3563',
+              navyHover: '#15284b'
             }
           },
           fontFamily: {
@@ -34,57 +30,67 @@
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <style>
+    body {
+      background-color: #F4EFFF;
+      color: #1e293b;
+    }
     @media print {
       body { background: white !important; color: black !important; }
       .no-print { display: none !important; }
       .print-only { display: block !important; }
-      .print-card { border: 1px solid #ddd !important; box-shadow: none !important; background: white !important; color: black !important; }
+      .print-card { border: 1px solid #cbd5e1 !important; box-shadow: none !important; background: white !important; color: black !important; }
     }
     .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: rgba(30, 27, 75, 0.4); border-radius: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.5); border-radius: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.8); }
+    .custom-scrollbar::-webkit-scrollbar-track { background: rgba(226, 232, 240, 0.6); border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(28, 53, 99, 0.35); border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(28, 53, 99, 0.65); }
     .glass-card {
-      background: rgba(30, 27, 75, 0.65);
+      background: rgba(255, 255, 255, 0.9);
       backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(28, 53, 99, 0.12);
+      box-shadow: 0 4px 20px -2px rgba(28, 53, 99, 0.06);
     }
     .glass-input {
-      background: rgba(15, 14, 38, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      color: #1e293b;
+    }
+    .glass-input:focus {
+      border-color: #1C3563;
+      outline: none;
     }
   </style>
 </head>
-<body class="bg-brand-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-indigo-500 selection:text-white flex flex-col justify-between">
+<body class="min-h-screen font-sans antialiased selection:bg-[#1C3563] selection:text-white flex flex-col justify-between">
 
   <!-- Toast Notification -->
-  <div id="toast" class="fixed top-5 right-5 z-50 transform transition-all duration-300 opacity-0 translate-y-[-20px] pointer-events-none flex items-center gap-3 bg-indigo-600 text-white px-5 py-3.5 rounded-xl shadow-2xl border border-indigo-400/30">
-    <i class="fa-solid fa-circle-check text-xl text-indigo-200"></i>
+  <div id="toast" class="fixed top-5 right-5 z-50 transform transition-all duration-300 opacity-0 translate-y-[-20px] pointer-events-none flex items-center gap-3 bg-[#1C3563] text-white px-5 py-3.5 rounded-xl shadow-xl border border-[#1C3563]/40">
+    <i class="fa-solid fa-circle-check text-xl text-slate-200"></i>
     <span id="toast-msg" class="font-semibold text-base">복사되었습니다!</span>
   </div>
 
   <!-- Header & Navbar -->
-  <header class="border-b border-white/10 bg-brand-950/90 sticky top-0 z-40 backdrop-blur-md no-print">
+  <header class="border-b border-purple-200/70 bg-[#F4EFFF]/90 sticky top-0 z-40 backdrop-blur-md no-print shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <a href="../index.html" style="border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 4px 10px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: bold; background: rgba(255,255,255,0.08);" title="홈으로 이동">HOME</a>
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/25">
+        <a href="../index.html" style="border: 1.5px solid #1C3563; color: #1C3563; padding: 4px 10px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: bold; background: rgba(28, 53, 99, 0.08);" title="홈으로 이동">HOME</a>
+        <div class="w-10 h-10 rounded-xl bg-[#1C3563] flex items-center justify-center shadow-md shadow-[#1C3563]/25">
           <i class="fa-solid fa-yin-yang text-xl text-white"></i>
         </div>
-        <h1 class="font-bold text-base sm:text-xl text-transparent bg-clip-text bg-gradient-to-r from-indigo-200 via-purple-200 to-pink-200 truncate">
+        <h1 class="font-black text-base sm:text-xl text-[#1C3563] tracking-tight truncate">
           AI 사주 만세력 & 마스터 프롬프트
         </h1>
       </div>
       
       <!-- Nav Tabs (3 Tabs) -->
-      <nav class="flex items-center gap-1.5 bg-brand-900/80 p-1 rounded-xl border border-white/10 text-xs sm:text-sm">
-        <button id="tab-btn-app" onclick="switchTab('app')" class="px-3.5 py-2 rounded-lg font-semibold transition-all bg-indigo-600 text-white shadow-md">
+      <nav class="flex items-center gap-1.5 bg-white/90 p-1 rounded-xl border border-purple-200/80 shadow-sm text-xs sm:text-sm">
+        <button id="tab-btn-app" onclick="switchTab('app')" class="px-3.5 py-2 rounded-lg font-semibold transition-all bg-[#1C3563] text-white shadow-sm">
           <i class="fa-solid fa-wand-magic-sparkles mr-1.5"></i> 사주 연산 & 프롬프트
         </button>
-        <button id="tab-btn-terms" onclick="switchTab('terms')" class="px-3.5 py-2 rounded-lg font-semibold transition-all text-slate-300 hover:text-white hover:bg-white/5">
+        <button id="tab-btn-terms" onclick="switchTab('terms')" class="px-3.5 py-2 rounded-lg font-semibold transition-all text-slate-600 hover:text-[#1C3563] hover:bg-[#1C3563]/10">
           <i class="fa-solid fa-book-open-reader mr-1.5"></i> 사주 용어 & 결과 해설
         </button>
-        <button id="tab-btn-guide" onclick="switchTab('guide')" class="px-3.5 py-2 rounded-lg font-semibold transition-all text-slate-300 hover:text-white hover:bg-white/5">
+        <button id="tab-btn-guide" onclick="switchTab('guide')" class="px-3.5 py-2 rounded-lg font-semibold transition-all text-slate-600 hover:text-[#1C3563] hover:bg-[#1C3563]/10">
           <i class="fa-solid fa-laptop-code mr-1.5"></i> LLM 활용 가이드
         </button>
       </nav>
@@ -100,12 +106,12 @@
     <div id="view-app" class="space-y-6">
       
       <!-- Compact Header Banner -->
-      <div class="glass-card rounded-2xl p-5 shadow-lg border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div class="glass-card rounded-2xl p-5 shadow-sm border border-purple-200/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">
+          <h2 class="text-xl sm:text-2xl font-black text-[#1C3563] tracking-tight">
             정밀 만세력으로 사주 분석 및 AI 프롬프트 작성
           </h2>
-          <p class="text-sm text-slate-300 mt-1">
+          <p class="text-sm text-slate-600 mt-1">
             생년월일시를 입력하면 사주 8글자, 십신, 신살, 대운과 함께 LLM에 바로 붙여넣는 마스터 프롬프트를 생성합니다.
           </p>
         </div>
@@ -116,33 +122,33 @@
         
         <!-- Left: Input Form Card (5 cols) -->
         <div class="lg:col-span-4 space-y-6 no-print">
-          <div class="glass-card rounded-2xl p-6 shadow-xl border border-white/10">
-            <div class="flex items-center gap-2 pb-3 mb-4 border-b border-white/10">
-              <i class="fa-solid fa-user-pen text-indigo-400 text-base"></i>
-              <h3 class="font-bold text-lg text-white">생년월일시 입력</h3>
+          <div class="glass-card rounded-2xl p-6 shadow-md border border-purple-200/80">
+            <div class="flex items-center gap-2 pb-3 mb-4 border-b border-purple-100">
+              <i class="fa-solid fa-user-pen text-[#1C3563] text-base"></i>
+              <h3 class="font-bold text-lg text-[#1C3563]">생년월일시 입력</h3>
             </div>
 
             <form id="saju-form" onsubmit="event.preventDefault(); calculateSaju();" class="space-y-4">
               <!-- Name / Label -->
               <div>
-                <label class="block text-sm font-semibold text-slate-200 mb-1.5">이름 또는 대상 (선택)</label>
-                <input type="text" id="in-name" placeholder="예: 홍길동" value="홍길동" class="glass-input w-full px-3.5 py-2.5 rounded-xl text-base text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                <label class="block text-sm font-semibold text-slate-800 mb-1.5">이름 또는 대상 (선택)</label>
+                <input type="text" id="in-name" placeholder="예: 홍길동" value="홍길동" class="glass-input w-full px-3.5 py-2.5 rounded-xl text-base text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1C3563] transition">
               </div>
 
               <!-- Gender Selection -->
               <div>
-                <label class="block text-sm font-semibold text-slate-200 mb-1.5">성별 <span class="text-pink-400">*</span></label>
+                <label class="block text-sm font-semibold text-slate-800 mb-1.5">성별 <span class="text-rose-600">*</span></label>
                 <div class="grid grid-cols-2 gap-2">
                   <label class="cursor-pointer">
                     <input type="radio" name="gender" value="male" checked class="peer sr-only">
-                    <div class="text-center py-2.5 rounded-xl border border-white/10 text-sm font-medium transition peer-checked:bg-indigo-600 peer-checked:border-indigo-500 peer-checked:text-white hover:bg-white/5">
-                      <i class="fa-solid fa-mars mr-1 text-blue-400"></i> 남성
+                    <div class="text-center py-2.5 rounded-xl border border-purple-200 bg-white text-sm font-semibold text-slate-700 transition peer-checked:bg-[#1C3563] peer-checked:border-[#1C3563] peer-checked:text-white hover:bg-purple-50/60 shadow-sm">
+                      <i class="fa-solid fa-mars mr-1 text-[#1C3563] peer-checked:text-white"></i> 남성
                     </div>
                   </label>
                   <label class="cursor-pointer">
                     <input type="radio" name="gender" value="female" class="peer sr-only">
-                    <div class="text-center py-2.5 rounded-xl border border-white/10 text-sm font-medium transition peer-checked:bg-pink-600 peer-checked:border-pink-500 peer-checked:text-white hover:bg-white/5">
-                      <i class="fa-solid fa-venus mr-1 text-pink-400"></i> 여성
+                    <div class="text-center py-2.5 rounded-xl border border-purple-200 bg-white text-sm font-semibold text-slate-700 transition peer-checked:bg-[#1C3563] peer-checked:border-[#1C3563] peer-checked:text-white hover:bg-purple-50/60 shadow-sm">
+                      <i class="fa-solid fa-venus mr-1 text-pink-500 peer-checked:text-white"></i> 여성
                     </div>
                   </label>
                 </div>
@@ -150,24 +156,24 @@
 
               <!-- Calendar Type -->
               <div>
-                <label class="block text-sm font-semibold text-slate-200 mb-1.5">양력 / 음력 구분 <span class="text-pink-400">*</span></label>
+                <label class="block text-sm font-semibold text-slate-800 mb-1.5">양력 / 음력 구분 <span class="text-rose-600">*</span></label>
                 <div class="grid grid-cols-3 gap-2">
                   <label class="cursor-pointer">
                     <input type="radio" name="calendarType" value="solar" checked class="peer sr-only">
-                    <div class="text-center py-2 rounded-xl border border-white/10 text-sm font-medium transition peer-checked:bg-indigo-600 peer-checked:border-indigo-500 peer-checked:text-white hover:bg-white/5">
+                    <div class="text-center py-2 rounded-xl border border-purple-200 bg-white text-sm font-semibold text-slate-700 transition peer-checked:bg-[#1C3563] peer-checked:border-[#1C3563] peer-checked:text-white hover:bg-purple-50/60 shadow-sm">
                       양력
                     </div>
                   </label>
                   <label class="cursor-pointer">
                     <input type="radio" name="calendarType" value="lunar" class="peer sr-only">
-                    <div class="text-center py-2 rounded-xl border border-white/10 text-sm font-medium transition peer-checked:bg-indigo-600 peer-checked:border-indigo-500 peer-checked:text-white hover:bg-white/5">
-                      음력 (평달)
+                    <div class="text-center py-2 rounded-xl border border-purple-200 bg-white text-sm font-semibold text-slate-700 transition peer-checked:bg-[#1C3563] peer-checked:border-[#1C3563] peer-checked:text-white hover:bg-purple-50/60 shadow-sm">
+                      음력(평달)
                     </div>
                   </label>
                   <label class="cursor-pointer">
                     <input type="radio" name="calendarType" value="leap" class="peer sr-only">
-                    <div class="text-center py-2 rounded-xl border border-white/10 text-sm font-medium transition peer-checked:bg-indigo-600 peer-checked:border-indigo-500 peer-checked:text-white hover:bg-white/5">
-                      음력 (윤달)
+                    <div class="text-center py-2 rounded-xl border border-purple-200 bg-white text-sm font-semibold text-slate-700 transition peer-checked:bg-[#1C3563] peer-checked:border-[#1C3563] peer-checked:text-white hover:bg-purple-50/60 shadow-sm">
+                      음력(윤달)
                     </div>
                   </label>
                 </div>
@@ -175,16 +181,16 @@
 
               <!-- Birth Date -->
               <div>
-                <label class="block text-sm font-semibold text-slate-200 mb-1.5">생년월일 <span class="text-pink-400">*</span></label>
-                <input type="date" id="in-date" value="1995-05-15" required class="glass-input w-full px-3.5 py-2.5 rounded-xl text-base text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                <label class="block text-sm font-semibold text-slate-800 mb-1.5">생년월일 <span class="text-rose-600">*</span></label>
+                <input type="date" id="in-date" value="1995-05-15" required class="glass-input w-full px-3.5 py-2.5 rounded-xl text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1C3563] transition">
               </div>
 
               <!-- Birth Time: 24-Hour Select UI -->
               <div>
                 <div class="flex items-center justify-between mb-1.5">
-                  <label class="text-sm font-semibold text-slate-200">출생 시간 (24시간제)</label>
-                  <label class="flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer">
-                    <input type="checkbox" id="in-unknown-time" onchange="toggleTimeInput(this)" class="rounded bg-brand-900 border-white/20 text-indigo-600 focus:ring-indigo-500">
+                  <label class="text-sm font-semibold text-slate-800">출생 시간 (24시간제)</label>
+                  <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
+                    <input type="checkbox" id="in-unknown-time" onchange="toggleTimeInput(this)" class="rounded bg-white border-purple-300 text-[#1C3563] focus:ring-[#1C3563]">
                     <span>시간 모름</span>
                   </label>
                 </div>
@@ -192,14 +198,14 @@
                 <div id="time-select-container" class="grid grid-cols-2 gap-2">
                   <!-- 24-Hour Dropdown -->
                   <div class="relative">
-                    <select id="in-hour" class="glass-input w-full px-3 py-2.5 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition cursor-pointer appearance-none">
+                    <select id="in-hour" class="glass-input w-full px-3 py-2.5 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1C3563] transition cursor-pointer appearance-none">
                       <!-- 00시 ~ 23시 generated dynamically -->
                     </select>
                     <i class="fa-solid fa-chevron-down absolute right-3.5 top-3.5 text-xs text-slate-400 pointer-events-none"></i>
                   </div>
                   <!-- Minute Dropdown -->
                   <div class="relative">
-                    <select id="in-minute" class="glass-input w-full px-3 py-2.5 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition cursor-pointer appearance-none">
+                    <select id="in-minute" class="glass-input w-full px-3 py-2.5 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1C3563] transition cursor-pointer appearance-none">
                       <option value="00">00분</option>
                       <option value="15">15분</option>
                       <option value="30" selected>30분</option>
@@ -212,17 +218,17 @@
 
               <!-- Korea Time Adjustment Option -->
               <div class="pt-1">
-                <label class="flex items-start gap-2.5 text-xs text-slate-300 cursor-pointer bg-brand-900/60 p-3 rounded-xl border border-white/10">
-                  <input type="checkbox" id="in-kst-correction" checked class="mt-0.5 rounded bg-brand-900 border-white/20 text-indigo-600 focus:ring-indigo-500">
+                <label class="flex items-start gap-2.5 text-xs text-slate-700 cursor-pointer bg-purple-50/60 p-3 rounded-xl border border-purple-200/80">
+                  <input type="checkbox" id="in-kst-correction" checked class="mt-0.5 rounded bg-white border-purple-300 text-[#1C3563] focus:ring-[#1C3563]">
                   <span>
-                    <strong class="text-slate-200 text-sm block mb-0.5">한국 표준시 시차 보정 (-30분) 적용</strong>
-                    <span class="text-xs text-slate-400 leading-relaxed">한국 표준시(동경 135도)와 서울 실제 태양시(동경 127.5도)의 30분 차이를 보정합니다.</span>
+                    <strong class="text-[#1C3563] text-sm block mb-0.5">한국 표준시 시차 보정 (-30분) 적용</strong>
+                    <span class="text-xs text-slate-500 leading-relaxed">한국 표준시(동경 135도)와 서울 실제 태양시(동경 127.5도)의 30분 차이를 보정합니다.</span>
                   </span>
                 </label>
               </div>
 
               <!-- Submit Button -->
-              <button type="submit" class="w-full mt-2 py-3.5 px-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white font-bold text-base rounded-xl shadow-lg shadow-indigo-600/30 transition duration-200 transform active:scale-[0.98] flex items-center justify-center gap-2">
+              <button type="submit" class="w-full mt-2 py-3.5 px-4 bg-[#1C3563] hover:bg-[#15284b] text-white font-bold text-base rounded-xl shadow-md shadow-[#1C3563]/20 transition duration-200 transform active:scale-[0.98] flex items-center justify-center gap-2">
                 <i class="fa-solid fa-wand-magic-sparkles"></i> 사주 원국 & 마스터 프롬프트 생성
               </button>
             </form>
@@ -233,27 +239,27 @@
         <div class="lg:col-span-8 space-y-6">
           
           <!-- Saju 4 Pillars Card -->
-          <div class="glass-card rounded-2xl p-6 sm:p-7 shadow-xl border border-white/10 print-card">
-            <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-5 border-b border-white/10">
+          <div class="glass-card rounded-2xl p-6 sm:p-7 shadow-md border border-purple-200/80 print-card">
+            <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-5 border-b border-purple-100">
               <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
+                <div class="w-10 h-10 rounded-xl bg-[#1C3563]/10 text-[#1C3563] flex items-center justify-center font-bold">
                   <i class="fa-solid fa-table-cells text-xl"></i>
                 </div>
                 <div>
-                  <h3 class="font-bold text-lg sm:text-xl text-white" id="out-target-title">홍길동 님의 사주 원국 (四柱原局)</h3>
-                  <p class="text-sm text-slate-300" id="out-target-meta">1995년 5월 15일 14:30 (양력 / 남성)</p>
+                  <h3 class="font-black text-lg sm:text-xl text-[#1C3563]" id="out-target-title">홍길동 님의 사주 원국 (四柱原局)</h3>
+                  <p class="text-sm text-slate-600" id="out-target-meta">1995년 5월 15일 14:30 (양력 / 남성)</p>
                 </div>
               </div>
 
               <!-- Action Buttons -->
               <div class="flex items-center gap-2 no-print">
-                <button onclick="copyMasterPrompt()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-sm font-semibold text-white shadow-md transition flex items-center gap-1.5">
+                <button onclick="copyMasterPrompt()" class="px-3.5 py-2 rounded-xl bg-[#1C3563] hover:bg-[#15284b] text-sm font-semibold text-white shadow-sm transition flex items-center gap-1.5">
                   <i class="fa-regular fa-copy"></i> 프롬프트 복사
                 </button>
-                <button onclick="downloadReport('md')" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-sm font-semibold text-slate-200 transition flex items-center gap-1.5">
+                <button onclick="downloadReport('md')" class="px-3.5 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-sm font-semibold text-[#1C3563] border border-purple-200 transition flex items-center gap-1.5">
                   <i class="fa-solid fa-download"></i> 리포트 다운로드
                 </button>
-                <button onclick="window.print()" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-sm font-semibold text-slate-200 transition flex items-center gap-1.5">
+                <button onclick="window.print()" class="px-3 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-sm font-semibold text-[#1C3563] border border-purple-200 transition flex items-center gap-1.5">
                   <i class="fa-solid fa-print"></i> 인쇄
                 </button>
               </div>
@@ -262,99 +268,99 @@
             <!-- 4 Pillars Grid (Hour, Day, Month, Year) -->
             <div class="grid grid-cols-4 gap-2 sm:gap-4 text-center mb-6">
               <!-- Pillar Header Labels -->
-              <div class="text-sm font-bold text-slate-300 bg-white/5 py-1.5 rounded-lg">시주 (時柱)</div>
-              <div class="text-sm font-bold text-indigo-200 bg-indigo-500/20 border border-indigo-500/40 py-1.5 rounded-lg">일주 (日柱·본원)</div>
-              <div class="text-sm font-bold text-slate-300 bg-white/5 py-1.5 rounded-lg">월주 (月柱)</div>
-              <div class="text-sm font-bold text-slate-300 bg-white/5 py-1.5 rounded-lg">년주 (年柱)</div>
+              <div class="text-sm font-bold text-slate-700 bg-slate-100 py-1.5 rounded-lg border border-slate-200">시주 (時柱)</div>
+              <div class="text-sm font-bold text-white bg-[#1C3563] py-1.5 rounded-lg shadow-sm">일주 (日柱·본원)</div>
+              <div class="text-sm font-bold text-slate-700 bg-slate-100 py-1.5 rounded-lg border border-slate-200">월주 (月柱)</div>
+              <div class="text-sm font-bold text-slate-700 bg-slate-100 py-1.5 rounded-lg border border-slate-200">년주 (年柱)</div>
 
               <!-- 1. Ten Gods (Stems) -->
-              <div id="p-hour-stem-god" class="text-xs sm:text-sm text-slate-300 font-medium">-</div>
-              <div id="p-day-stem-god" class="text-xs sm:text-sm text-indigo-300 font-bold">일간 (본인)</div>
-              <div id="p-month-stem-god" class="text-xs sm:text-sm text-slate-300 font-medium">-</div>
-              <div id="p-year-stem-god" class="text-xs sm:text-sm text-slate-300 font-medium">-</div>
+              <div id="p-hour-stem-god" class="text-xs sm:text-sm text-slate-700 font-semibold">-</div>
+              <div id="p-day-stem-god" class="text-xs sm:text-sm text-[#1C3563] font-black">일간 (본인)</div>
+              <div id="p-month-stem-god" class="text-xs sm:text-sm text-slate-700 font-semibold">-</div>
+              <div id="p-year-stem-god" class="text-xs sm:text-sm text-slate-700 font-semibold">-</div>
 
               <!-- 2. Heavenly Stems (천간 4글자) -->
-              <div id="box-hour-stem" class="p-3 sm:p-4 rounded-xl border border-white/10 transition flex flex-col items-center justify-center">
+              <div id="box-hour-stem" class="p-3 sm:p-4 rounded-xl border border-slate-200 shadow-sm transition flex flex-col items-center justify-center">
                 <span id="p-hour-stem-char" class="text-2xl sm:text-4xl font-black mb-1">-</span>
-                <span id="p-hour-stem-hangul" class="text-xs sm:text-sm text-slate-300">-</span>
+                <span id="p-hour-stem-hangul" class="text-xs sm:text-sm text-slate-600 font-medium">-</span>
               </div>
-              <div id="box-day-stem" class="p-3 sm:p-4 rounded-xl border-2 border-indigo-500/60 shadow-lg shadow-indigo-500/20 transition flex flex-col items-center justify-center">
+              <div id="box-day-stem" class="p-3 sm:p-4 rounded-xl border-2 border-[#1C3563] shadow-sm transition flex flex-col items-center justify-center">
                 <span id="p-day-stem-char" class="text-2xl sm:text-4xl font-black mb-1">-</span>
-                <span id="p-day-stem-hangul" class="text-xs sm:text-sm text-indigo-300 font-bold">-</span>
+                <span id="p-day-stem-hangul" class="text-xs sm:text-sm text-[#1C3563] font-bold">-</span>
               </div>
-              <div id="box-month-stem" class="p-3 sm:p-4 rounded-xl border border-white/10 transition flex flex-col items-center justify-center">
+              <div id="box-month-stem" class="p-3 sm:p-4 rounded-xl border border-slate-200 shadow-sm transition flex flex-col items-center justify-center">
                 <span id="p-month-stem-char" class="text-2xl sm:text-4xl font-black mb-1">-</span>
-                <span id="p-month-stem-hangul" class="text-xs sm:text-sm text-slate-300">-</span>
+                <span id="p-month-stem-hangul" class="text-xs sm:text-sm text-slate-600 font-medium">-</span>
               </div>
-              <div id="box-year-stem" class="p-3 sm:p-4 rounded-xl border border-white/10 transition flex flex-col items-center justify-center">
+              <div id="box-year-stem" class="p-3 sm:p-4 rounded-xl border border-slate-200 shadow-sm transition flex flex-col items-center justify-center">
                 <span id="p-year-stem-char" class="text-2xl sm:text-4xl font-black mb-1">-</span>
-                <span id="p-year-stem-hangul" class="text-xs sm:text-sm text-slate-300">-</span>
+                <span id="p-year-stem-hangul" class="text-xs sm:text-sm text-slate-600 font-medium">-</span>
               </div>
 
               <!-- 3. Earthly Branches (지지 4글자) -->
-              <div id="box-hour-branch" class="p-3 sm:p-4 rounded-xl border border-white/10 transition flex flex-col items-center justify-center">
+              <div id="box-hour-branch" class="p-3 sm:p-4 rounded-xl border border-slate-200 shadow-sm transition flex flex-col items-center justify-center">
                 <span id="p-hour-branch-char" class="text-2xl sm:text-4xl font-black mb-1">-</span>
-                <span id="p-hour-branch-hangul" class="text-xs sm:text-sm text-slate-300">-</span>
+                <span id="p-hour-branch-hangul" class="text-xs sm:text-sm text-slate-600 font-medium">-</span>
               </div>
-              <div id="box-day-branch" class="p-3 sm:p-4 rounded-xl border-2 border-indigo-500/60 shadow-lg shadow-indigo-500/20 transition flex flex-col items-center justify-center">
+              <div id="box-day-branch" class="p-3 sm:p-4 rounded-xl border-2 border-[#1C3563] shadow-sm transition flex flex-col items-center justify-center">
                 <span id="p-day-branch-char" class="text-2xl sm:text-4xl font-black mb-1">-</span>
-                <span id="p-day-branch-hangul" class="text-xs sm:text-sm text-indigo-300 font-bold">-</span>
+                <span id="p-day-branch-hangul" class="text-xs sm:text-sm text-[#1C3563] font-bold">-</span>
               </div>
-              <div id="box-month-branch" class="p-3 sm:p-4 rounded-xl border border-white/10 transition flex flex-col items-center justify-center">
+              <div id="box-month-branch" class="p-3 sm:p-4 rounded-xl border border-slate-200 shadow-sm transition flex flex-col items-center justify-center">
                 <span id="p-month-branch-char" class="text-2xl sm:text-4xl font-black mb-1">-</span>
-                <span id="p-month-branch-hangul" class="text-xs sm:text-sm text-slate-300">-</span>
+                <span id="p-month-branch-hangul" class="text-xs sm:text-sm text-slate-600 font-medium">-</span>
               </div>
-              <div id="box-year-branch" class="p-3 sm:p-4 rounded-xl border border-white/10 transition flex flex-col items-center justify-center">
+              <div id="box-year-branch" class="p-3 sm:p-4 rounded-xl border border-slate-200 shadow-sm transition flex flex-col items-center justify-center">
                 <span id="p-year-branch-char" class="text-2xl sm:text-4xl font-black mb-1">-</span>
-                <span id="p-year-branch-hangul" class="text-xs sm:text-sm text-slate-300">-</span>
+                <span id="p-year-branch-hangul" class="text-xs sm:text-sm text-slate-600 font-medium">-</span>
               </div>
 
               <!-- 4. Ten Gods (Branches) -->
-              <div id="p-hour-branch-god" class="text-xs sm:text-sm text-slate-300 font-medium">-</div>
-              <div id="p-day-branch-god" class="text-xs sm:text-sm text-indigo-300 font-bold">-</div>
-              <div id="p-month-branch-god" class="text-xs sm:text-sm text-slate-300 font-medium">-</div>
-              <div id="p-year-branch-god" class="text-xs sm:text-sm text-slate-300 font-medium">-</div>
+              <div id="p-hour-branch-god" class="text-xs sm:text-sm text-slate-700 font-semibold">-</div>
+              <div id="p-day-branch-god" class="text-xs sm:text-sm text-[#1C3563] font-black">-</div>
+              <div id="p-month-branch-god" class="text-xs sm:text-sm text-slate-700 font-semibold">-</div>
+              <div id="p-year-branch-god" class="text-xs sm:text-sm text-slate-700 font-semibold">-</div>
 
               <!-- 5. 12 Stages (12운성) -->
-              <div class="bg-white/5 py-1.5 rounded text-xs sm:text-sm text-slate-200" id="p-hour-stage">-</div>
-              <div class="bg-indigo-500/20 py-1.5 rounded text-xs sm:text-sm text-indigo-200 font-bold" id="p-day-stage">-</div>
-              <div class="bg-white/5 py-1.5 rounded text-xs sm:text-sm text-slate-200" id="p-month-stage">-</div>
-              <div class="bg-white/5 py-1.5 rounded text-xs sm:text-sm text-slate-200" id="p-year-stage">-</div>
+              <div class="bg-purple-50 border border-purple-100 py-1.5 rounded text-xs sm:text-sm text-purple-900 font-medium" id="p-hour-stage">-</div>
+              <div class="bg-[#1C3563]/10 border border-[#1C3563]/30 py-1.5 rounded text-xs sm:text-sm text-[#1C3563] font-bold" id="p-day-stage">-</div>
+              <div class="bg-purple-50 border border-purple-100 py-1.5 rounded text-xs sm:text-sm text-purple-900 font-medium" id="p-month-stage">-</div>
+              <div class="bg-purple-50 border border-purple-100 py-1.5 rounded text-xs sm:text-sm text-purple-900 font-medium" id="p-year-stage">-</div>
 
               <!-- 6. Hidden Stems (지장간) -->
-              <div class="text-xs text-slate-400" id="p-hour-hidden">-</div>
-              <div class="text-xs text-slate-400" id="p-day-hidden">-</div>
-              <div class="text-xs text-slate-400" id="p-month-hidden">-</div>
-              <div class="text-xs text-slate-400" id="p-year-hidden">-</div>
+              <div class="text-xs text-slate-500 font-medium" id="p-hour-hidden">-</div>
+              <div class="text-xs text-slate-500 font-medium" id="p-day-hidden">-</div>
+              <div class="text-xs text-slate-500 font-medium" id="p-month-hidden">-</div>
+              <div class="text-xs text-slate-500 font-medium" id="p-year-hidden">-</div>
             </div>
 
             <!-- Five Elements & Shensha Summary -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-4 border-t border-white/10">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-4 border-t border-purple-100">
               <!-- Five Elements Bar -->
               <div class="space-y-2">
                 <div class="flex items-center justify-between text-sm">
-                  <span class="font-bold text-slate-200">오행(五行) 분포 비율</span>
-                  <span class="text-slate-300 text-xs sm:text-sm" id="out-elements-detail">목0 화0 토0 금0 수0</span>
+                  <span class="font-bold text-slate-800">오행(五行) 분포 비율</span>
+                  <span class="text-slate-600 text-xs sm:text-sm font-semibold" id="out-elements-detail">목0 화0 토0 금0 수0</span>
                 </div>
-                <div class="h-3.5 w-full bg-brand-900 rounded-full overflow-hidden flex border border-white/10" id="ohaeng-bar">
+                <div class="h-3.5 w-full bg-slate-200 rounded-full overflow-hidden flex border border-slate-300" id="ohaeng-bar">
                   <div id="bar-wood" style="width: 20%;" class="bg-emerald-500 h-full transition-all" title="목(Wood)"></div>
                   <div id="bar-fire" style="width: 20%;" class="bg-rose-500 h-full transition-all" title="화(Fire)"></div>
                   <div id="bar-earth" style="width: 20%;" class="bg-amber-500 h-full transition-all" title="토(Earth)"></div>
-                  <div id="bar-metal" style="width: 20%;" class="bg-slate-300 h-full transition-all" title="금(Metal)"></div>
+                  <div id="bar-metal" style="width: 20%;" class="bg-slate-400 h-full transition-all" title="금(Metal)"></div>
                   <div id="bar-water" style="width: 20%;" class="bg-blue-500 h-full transition-all" title="수(Water)"></div>
                 </div>
-                <div class="flex justify-between text-xs text-slate-300 px-0.5">
-                  <span class="text-emerald-400 font-semibold">● 목(木)</span>
-                  <span class="text-rose-400 font-semibold">● 화(火)</span>
-                  <span class="text-amber-400 font-semibold">● 토(土)</span>
-                  <span class="text-slate-200 font-semibold">● 금(金)</span>
-                  <span class="text-blue-400 font-semibold">● 수(水)</span>
+                <div class="flex justify-between text-xs text-slate-600 px-0.5 font-bold">
+                  <span class="text-emerald-700">● 목(木)</span>
+                  <span class="text-rose-700">● 화(火)</span>
+                  <span class="text-amber-800">● 토(土)</span>
+                  <span class="text-slate-700">● 금(金)</span>
+                  <span class="text-blue-700">● 수(水)</span>
                 </div>
               </div>
 
               <!-- Major Shensha (신살) Badges -->
               <div class="space-y-2">
-                <div class="text-sm font-bold text-slate-200">주요 신살 & 귀인 분석</div>
+                <div class="text-sm font-bold text-slate-800">주요 신살 & 귀인 분석</div>
                 <div id="out-shensha-badges" class="flex flex-wrap gap-2 min-h-[36px] items-center">
                   <!-- Badges inserted dynamically -->
                 </div>
@@ -362,12 +368,12 @@
             </div>
 
             <!-- Interactivity (합·충·형·파·해) Badges Section -->
-            <div class="mt-5 pt-4 border-t border-white/10 space-y-2">
+            <div class="mt-5 pt-4 border-t border-purple-100 space-y-2">
               <div class="flex items-center justify-between">
-                <div class="text-sm font-bold text-slate-200">
-                  <i class="fa-solid fa-arrows-split-up-and-left text-pink-400 mr-1.5"></i> 원국 내 천간합충 & 지지 합·충·형·파·해
+                <div class="text-sm font-bold text-slate-800">
+                  <i class="fa-solid fa-arrows-split-up-and-left text-[#1C3563] mr-1.5"></i> 원국 내 천간합충 & 지지 합·충·형·파·해
                 </div>
-                <span class="text-xs text-slate-400">글자 간 상호작용 및 변화</span>
+                <span class="text-xs text-slate-500">글자 간 상호작용 및 변화</span>
               </div>
               <div id="out-interaction-badges" class="flex flex-wrap gap-2 min-h-[32px] items-center">
                 <!-- Interaction badges inserted dynamically -->
@@ -375,12 +381,12 @@
             </div>
 
             <!-- Daewoon Timeline -->
-            <div class="mt-5 pt-4 border-t border-white/10">
+            <div class="mt-5 pt-4 border-t border-purple-100">
               <div class="flex items-center justify-between mb-3">
-                <div class="text-sm font-bold text-slate-200">
-                  <i class="fa-solid fa-timeline text-indigo-400 mr-1.5"></i> 대운(大運) 흐름표 <span class="font-normal text-slate-300" id="out-daewoon-info">(대운수: 4 / 순행)</span>
+                <div class="text-sm font-bold text-slate-800">
+                  <i class="fa-solid fa-timeline text-[#1C3563] mr-1.5"></i> 대운(大運) 흐름표 <span class="font-normal text-slate-600" id="out-daewoon-info">(대운수: 4 / 순행)</span>
                 </div>
-                <span class="text-xs text-slate-400">10년 단위 환경 변화</span>
+                <span class="text-xs text-slate-500">10년 단위 환경 변화</span>
               </div>
               <div id="daewoon-container" class="grid grid-cols-5 sm:grid-cols-10 gap-2 text-center custom-scrollbar overflow-x-auto pb-1">
                 <!-- Daewoon columns dynamically generated -->
@@ -389,26 +395,26 @@
           </div>
 
           <!-- Master Prompt Output Card -->
-          <div class="glass-card rounded-2xl p-6 sm:p-7 shadow-xl border border-white/10 no-print">
-            <div class="flex flex-wrap items-center justify-between gap-3 pb-3 mb-3 border-b border-white/10">
+          <div class="glass-card rounded-2xl p-6 sm:p-7 shadow-md border border-purple-200/80 no-print">
+            <div class="flex flex-wrap items-center justify-between gap-3 pb-3 mb-3 border-b border-purple-100">
               <div class="flex items-center gap-2.5">
-                <div class="w-9 h-9 rounded-lg bg-pink-500/20 text-pink-400 flex items-center justify-center">
+                <div class="w-9 h-9 rounded-lg bg-[#1C3563]/10 text-[#1C3563] flex items-center justify-center font-bold">
                   <i class="fa-solid fa-code text-base"></i>
                 </div>
                 <div>
-                  <h3 class="font-bold text-base sm:text-lg text-white">LLM 입력용 전문 사주 프롬프트</h3>
-                  <p class="text-xs sm:text-sm text-slate-300">원클릭 복사하여 ChatGPT / Claude / Gemini에 붙여넣으세요.</p>
+                  <h3 class="font-bold text-base sm:text-lg text-[#1C3563]">LLM 입력용 전문 사주 프롬프트</h3>
+                  <p class="text-xs sm:text-sm text-slate-600">원클릭 복사하여 ChatGPT / Claude / Gemini에 붙여넣으세요.</p>
                 </div>
               </div>
 
               <div class="flex items-center gap-2">
-                <button onclick="copyMasterPrompt()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-sm font-bold text-white shadow-lg transition flex items-center gap-2">
+                <button onclick="copyMasterPrompt()" class="px-4 py-2 rounded-xl bg-[#1C3563] hover:bg-[#15284b] text-sm font-bold text-white shadow-sm transition flex items-center gap-2">
                   <i class="fa-regular fa-clone"></i> 마스터 프롬프트 복사
                 </button>
-                <button onclick="downloadReport('txt')" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-sm font-medium text-slate-200 transition" title="TXT 저장">
+                <button onclick="downloadReport('txt')" class="px-3.5 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-sm font-semibold text-[#1C3563] border border-purple-200 transition" title="TXT 저장">
                   TXT
                 </button>
-                <button onclick="downloadReport('md')" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-sm font-medium text-slate-200 transition" title="MD 저장">
+                <button onclick="downloadReport('md')" class="px-3.5 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-sm font-semibold text-[#1C3563] border border-purple-200 transition" title="MD 저장">
                   MD
                 </button>
               </div>
@@ -416,16 +422,16 @@
 
             <!-- Prompt Text Area Preview -->
             <div class="relative">
-              <textarea id="out-prompt-text" readonly rows="11" class="glass-input w-full p-4 rounded-xl font-mono text-sm text-slate-200 leading-relaxed custom-scrollbar focus:outline-none border border-white/15 select-all"></textarea>
+              <textarea id="out-prompt-text" readonly rows="11" class="w-full p-4 rounded-xl font-mono text-sm text-slate-800 bg-white border border-purple-200/90 leading-relaxed custom-scrollbar focus:outline-none focus:border-[#1C3563] shadow-inner select-all"></textarea>
             </div>
             
-            <div class="mt-3 flex items-center justify-between text-sm text-slate-300">
+            <div class="mt-3 flex items-center justify-between text-sm text-slate-600">
               <span>💡 위 텍스트를 클릭하면 전체 선택됩니다.</span>
               <div class="flex gap-4">
-                <button onclick="switchTab('terms')" class="text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1">
+                <button onclick="switchTab('terms')" class="text-[#1C3563] hover:underline font-bold flex items-center gap-1">
                   사주 용어 해설 보기 <i class="fa-solid fa-arrow-right text-xs"></i>
                 </button>
-                <button onclick="switchTab('guide')" class="text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1">
+                <button onclick="switchTab('guide')" class="text-[#1C3563] hover:underline font-bold flex items-center gap-1">
                   LLM 활용 가이드 보기 <i class="fa-solid fa-arrow-right text-xs"></i>
                 </button>
               </div>
@@ -437,16 +443,17 @@
     </div>
 
     <!-- ========================================================================= -->
+    <!-- ========================================================================= -->
     <!-- TAB 2: SAJU TERMINOLOGY & RESULT GUIDE (COMPREHENSIVE 11-STAGE GLOSSARY)  -->
     <!-- ========================================================================= -->
     <div id="view-terms" class="space-y-6 hidden">
       
       <!-- Terminology Header -->
-      <div class="glass-card rounded-2xl p-6 shadow-xl border border-white/10">
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mb-2">
+      <div class="glass-card rounded-2xl p-6 shadow-md border border-purple-200/80">
+        <h2 class="text-2xl sm:text-3xl font-black text-[#1C3563] tracking-tight mb-2">
           정밀 명리학 용어 & 분석 프레임워크 해설
         </h2>
-        <p class="text-base text-slate-200 leading-relaxed">
+        <p class="text-base text-slate-700 leading-relaxed">
           정밀 명리 분석 시스템에서 사용되는 <b>사주 4주 8자, 지장간(투간), 신강신약, 조후, 격국, 용희기신, 합충형파해, 대운·세운</b>의 핵심 원리를 정리했습니다.
         </p>
       </div>
@@ -455,148 +462,148 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
         <!-- 1. 사주 4주 8자 & 지장간 (Four Pillars & Hidden Stems) -->
-        <div class="glass-card rounded-2xl p-6 shadow-lg border border-white/10 space-y-4">
-          <div class="flex items-center gap-3 pb-3 border-b border-white/10">
-            <div class="w-9 h-9 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-lg">
+        <div class="glass-card rounded-2xl p-6 shadow-md border border-purple-200/80 space-y-4">
+          <div class="flex items-center gap-3 pb-3 border-b border-purple-100">
+            <div class="w-9 h-9 rounded-lg bg-[#1C3563]/10 text-[#1C3563] flex items-center justify-center font-bold text-lg">
               1
             </div>
             <div>
-              <h3 class="font-bold text-lg text-white">사주 4주 8자 & 지장간(支藏干)</h3>
-              <p class="text-xs text-slate-300">시간의 4개 기둥과 지지 속에 품은 3단계 기운</p>
+              <h3 class="font-bold text-lg text-[#1C3563]">사주 4주 8자 & 지장간(支藏干)</h3>
+              <p class="text-xs text-slate-500">시간의 4개 기둥과 지지 속에 품은 3단계 기운</p>
             </div>
           </div>
-          <div class="space-y-2.5 text-sm text-slate-200 leading-relaxed">
-            <p><strong class="text-indigo-300">● 일주(日柱·본원):</strong> <span class="font-bold text-white">나 자신(일간)</span>과 배우자궁(일지)을 나타내며 사주 해석의 중심 기준점입니다.</p>
-            <p><strong class="text-slate-300">● 월주(月柱·월령):</strong> 내가 태어난 계절의 기운(월령)과 사회적 직업 환경을 결정합니다.</p>
-            <p><strong class="text-purple-300">● 지장간 3단계(여기·중기·본기):</strong> 지지 안에 숨어 있는 천간 기운으로, 겉으로 드러난 기질과 운에서 활성화되는 잠재 기질을 구별하는 열쇠입니다.</p>
-            <p><strong class="text-pink-300">● 투간(透干):</strong> 지장간의 기운이 천간으로 뻗어 나와 사회적으로 강력하게 발현되는 현상입니다.</p>
+          <div class="space-y-2.5 text-sm text-slate-700 leading-relaxed">
+            <p><strong class="text-[#1C3563]">● 일주(日柱·본원):</strong> <span class="font-bold text-slate-900">나 자신(일간)</span>과 배우자궁(일지)을 나타내며 사주 해석의 중심 기준점입니다.</p>
+            <p><strong class="text-slate-900">● 월주(月柱·월령):</strong> 내가 태어난 계절의 기운(월령)과 사회적 직업 환경을 결정합니다.</p>
+            <p><strong class="text-[#1C3563]">● 지장간 3단계(여기·중기·본기):</strong> 지지 안에 숨어 있는 천간 기운으로, 겉으로 드러난 기질과 운에서 활성화되는 잠재 기질을 구별하는 열쇠입니다.</p>
+            <p><strong class="text-purple-700">● 투간(透干):</strong> 지장간의 기운이 천간으로 뻗어 나와 사회적으로 강력하게 발현되는 현상입니다.</p>
           </div>
         </div>
 
         <!-- 2. 신강·신약 & 조후 (Body Strength & Climate Balance) -->
-        <div class="glass-card rounded-2xl p-6 shadow-lg border border-white/10 space-y-4">
-          <div class="flex items-center gap-3 pb-3 border-b border-white/10">
-            <div class="w-9 h-9 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-lg">
+        <div class="glass-card rounded-2xl p-6 shadow-md border border-purple-200/80 space-y-4">
+          <div class="flex items-center gap-3 pb-3 border-b border-purple-100">
+            <div class="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-lg">
               2
             </div>
             <div>
-              <h3 class="font-bold text-lg text-white">신강·신약(身强身弱) & 조후(調候)</h3>
-              <p class="text-xs text-slate-300">일간의 에너지 주도권과 원국의 온습도 균형</p>
+              <h3 class="font-bold text-lg text-[#1C3563]">신강·신약(身强身弱) & 조후(調候)</h3>
+              <p class="text-xs text-slate-500">일간의 에너지 주도권과 원국의 온습도 균형</p>
             </div>
           </div>
-          <div class="space-y-2 text-sm text-slate-200 leading-relaxed">
-            <p><strong class="text-emerald-300">● 득령(得令)·득지(得地)·득세(得勢):</strong> 월령(월지)을 얻었는지, 지지에 뿌리를 내렸는지, 천간의 생조를 받는지로 신강/신약을 판정합니다.</p>
-            <p><strong class="text-slate-200">● 신강(身强):</strong> 주관과 추진력이 강하여 관성(조직/책임)이나 재성/식상을 감당할 힘이 큼.</p>
-            <p><strong class="text-slate-300">● 신약(身弱):</strong> 환경에 유연하고 센스가 뛰어나며 인성(학문/후원)과 비겁(동료/파트너)의 협업이 유리함.</p>
-            <p><strong class="text-blue-300">● 조후(한난조습):</strong> 사주의 춥고(寒), 덥고(暖), 마르고(燥), 습한(濕) 기후 균형을 맞추는 핵심 팩터입니다.</p>
+          <div class="space-y-2 text-sm text-slate-700 leading-relaxed">
+            <p><strong class="text-emerald-700">● 득령(得令)·득지(得地)·득세(得勢):</strong> 월령(월지)을 얻었는지, 지지에 뿌리를 내렸는지, 천간의 생조를 받는지로 신강/신약을 판정합니다.</p>
+            <p><strong class="text-slate-900">● 신강(身强):</strong> 주관과 추진력이 강하여 관성(조직/책임)이나 재성/식상을 감당할 힘이 큼.</p>
+            <p><strong class="text-slate-800">● 신약(身弱):</strong> 환경에 유연하고 센스가 뛰어나며 인성(학문/후원)과 비겁(동료/파트너)의 협업이 유리함.</p>
+            <p><strong class="text-blue-700">● 조후(한난조습):</strong> 사주의 춥고(寒), 덥고(暖), 마르고(燥), 습한(濕) 기후 균형을 맞추는 핵심 팩터입니다.</p>
           </div>
         </div>
 
         <!-- 3. 격국(格局)과 십신(十神)의 분리 -->
-        <div class="glass-card rounded-2xl p-6 shadow-lg border border-white/10 space-y-4">
-          <div class="flex items-center gap-3 pb-3 border-b border-white/10">
-            <div class="w-9 h-9 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-lg">
+        <div class="glass-card rounded-2xl p-6 shadow-md border border-purple-200/80 space-y-4">
+          <div class="flex items-center gap-3 pb-3 border-b border-purple-100">
+            <div class="w-9 h-9 rounded-lg bg-[#1C3563]/10 text-[#1C3563] flex items-center justify-center font-bold text-lg">
               3
             </div>
             <div>
-              <h3 class="font-bold text-lg text-white">격국(格局) vs 십신(十神)</h3>
-              <p class="text-xs text-slate-300">사회적 그릇의 틀(격국)과 세부 상호작용(십신)</p>
+              <h3 class="font-bold text-lg text-[#1C3563]">격국(格局) vs 십신(十神)</h3>
+              <p class="text-xs text-slate-500">사회적 그릇의 틀(격국)과 세부 상호작용(십신)</p>
             </div>
           </div>
-          <div class="space-y-2 text-sm text-slate-200 leading-relaxed">
-            <p><strong class="text-purple-300">● 격국(格局):</strong> 월지 지장간 투간을 기준으로 확정하는 사주의 **'사회적 역할과 그릇의 틀'** (정관격, 재격, 식신격, 인수격 등 정격 8격 및 특수격).</p>
-            <p><strong class="text-amber-300">● 십신(十神):</strong> 비겁(주체성), 식상(표현·생산), 재성(자산·결과), 관성(규범·직장), 인성(학문·수용) 5대 영역의 10가지 역동적 상호작용.</p>
+          <div class="space-y-2 text-sm text-slate-700 leading-relaxed">
+            <p><strong class="text-[#1C3563]">● 격국(格局):</strong> 월지 지장간 투간을 기준으로 확정하는 사주의 **'사회적 역할과 그릇의 틀'** (정관격, 재격, 식신격, 인수격 등 정격 8격 및 특수격).</p>
+            <p><strong class="text-amber-800">● 십신(十神):</strong> 비겁(주체성), 식상(표현·생산), 재성(자산·결과), 관성(규범·직장), 인성(학문·수용) 5대 영역의 10가지 역동적 상호작용.</p>
           </div>
         </div>
 
         <!-- 4. 용희기신 (Useful Gods & Balance) -->
-        <div class="glass-card rounded-2xl p-6 shadow-lg border border-white/10 space-y-4">
-          <div class="flex items-center gap-3 pb-3 border-b border-white/10">
-            <div class="w-9 h-9 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-lg">
+        <div class="glass-card rounded-2xl p-6 shadow-md border border-purple-200/80 space-y-4">
+          <div class="flex items-center gap-3 pb-3 border-b border-purple-100">
+            <div class="w-9 h-9 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-lg">
               4
             </div>
             <div>
-              <h3 class="font-bold text-lg text-white">용희기신 (用喜忌神)</h3>
-              <p class="text-xs text-slate-300">사주의 균형과 발전을 이끄는 전략적 기운</p>
+              <h3 class="font-bold text-lg text-[#1C3563]">용희기신 (用喜忌神)</h3>
+              <p class="text-xs text-slate-500">사주의 균형과 발전을 이끄는 전략적 기운</p>
             </div>
           </div>
-          <div class="space-y-2 text-sm text-slate-200 leading-relaxed">
-            <p><strong class="text-emerald-400">● 용신(用神):</strong> 사주의 불균형을 해소하고 최상의 성과를 내게 돕는 핵심 글자/오행.</p>
-            <p><strong class="text-indigo-300">● 희신(喜神):</strong> 용신을 생조하고 돕는 긍정적 파트너 기운.</p>
-            <p><strong class="text-rose-400">● 기신(忌神) & 구신(仇神):</strong> 사주의 균형을 깨뜨리거나 용신을 극하는 주의 기운.</p>
-            <p><strong class="text-slate-400">● 한신(閑神):</strong> 상황에 따라 길흉이 달라지는 중립 기운.</p>
+          <div class="space-y-2 text-sm text-slate-700 leading-relaxed">
+            <p><strong class="text-emerald-700">● 용신(用神):</strong> 사주의 불균형을 해소하고 최상의 성과를 내게 돕는 핵심 글자/오행.</p>
+            <p><strong class="text-[#1C3563]">● 희신(喜神):</strong> 용신을 생조하고 돕는 긍정적 파트너 기운.</p>
+            <p><strong class="text-rose-700">● 기신(忌神) & 구신(仇神):</strong> 사주의 균형을 깨뜨리거나 용신을 극하는 주의 기운.</p>
+            <p><strong class="text-slate-600">● 한신(閑神):</strong> 상황에 따라 길흉이 달라지는 중립 기운.</p>
           </div>
         </div>
 
         <!-- 5. 합·충·형·파·해 (Harmonies, Clashes & Destructions) -->
-        <div class="glass-card rounded-2xl p-6 shadow-lg border border-white/10 space-y-4">
-          <div class="flex items-center gap-3 pb-3 border-b border-white/10">
-            <div class="w-9 h-9 rounded-lg bg-pink-500/20 text-pink-400 flex items-center justify-center font-bold text-lg">
+        <div class="glass-card rounded-2xl p-6 shadow-md border border-purple-200/80 space-y-4">
+          <div class="flex items-center gap-3 pb-3 border-b border-purple-100">
+            <div class="w-9 h-9 rounded-lg bg-pink-100 text-pink-700 flex items-center justify-center font-bold text-lg">
               5
             </div>
             <div>
-              <h3 class="font-bold text-lg text-white">합·충·형·파·해 (合·沖·刑·破·害)</h3>
-              <p class="text-xs text-slate-300">글자 간 결합, 충돌, 조정의 동적 역학</p>
+              <h3 class="font-bold text-lg text-[#1C3563]">합·충·형·파·해 (合·沖·刑·破·害)</h3>
+              <p class="text-xs text-slate-500">글자 간 결합, 충돌, 조정의 동적 역학</p>
             </div>
           </div>
-          <div class="space-y-2 text-sm text-slate-200 leading-relaxed">
-            <p><strong class="text-pink-300">● 합(合 - 천간합/육합/삼합/방합):</strong> 기운의 융합과 협력, 새로운 오행으로의 변화(합화).</p>
-            <p><strong class="text-rose-400">● 충(沖 - 6충):</strong> 정면충돌, 급격한 변화, 이동, 활발한 역동성 촉발.</p>
-            <p><strong class="text-amber-300">● 형(刑 - 삼형/자형):</strong> 수술, 법률, 정밀 가공, 권력, 자기 성찰과 스트레스 관리.</p>
-            <p><strong class="text-slate-300">● 파(破)·해(害):</strong> 조율 과정의 틈, 분리, 관계적 미세 마찰.</p>
+          <div class="space-y-2 text-sm text-slate-700 leading-relaxed">
+            <p><strong class="text-pink-700">● 합(合 - 천간합/육합/삼합/방합):</strong> 기운의 융합과 협력, 새로운 오행으로의 변화(합화).</p>
+            <p><strong class="text-rose-700">● 충(沖 - 6충):</strong> 정면충돌, 급격한 변화, 이동, 활발한 역동성 촉발.</p>
+            <p><strong class="text-amber-800">● 형(刑 - 삼형/자형):</strong> 수술, 법률, 정밀 가공, 권력, 자기 성찰과 스트레스 관리.</p>
+            <p><strong class="text-slate-700">● 파(破)·해(害):</strong> 조율 과정의 틈, 분리, 관계적 미세 마찰.</p>
           </div>
         </div>
 
         <!-- 6. 12운성 & 신살 (Supplementary Energies) -->
-        <div class="glass-card rounded-2xl p-6 shadow-lg border border-white/10 space-y-4">
-          <div class="flex items-center gap-3 pb-3 border-b border-white/10">
-            <div class="w-9 h-9 rounded-lg bg-slate-500/20 text-slate-300 flex items-center justify-center font-bold text-lg">
+        <div class="glass-card rounded-2xl p-6 shadow-md border border-purple-200/80 space-y-4">
+          <div class="flex items-center gap-3 pb-3 border-b border-purple-100">
+            <div class="w-9 h-9 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-lg">
               6
             </div>
             <div>
-              <h3 class="font-bold text-lg text-white">12운성 & 신살 (보조 지표)</h3>
-              <p class="text-xs text-slate-300">기운의 완급 조절과 특수 재능 뉘앙스</p>
+              <h3 class="font-bold text-lg text-[#1C3563]">12운성 & 신살 (보조 지표)</h3>
+              <p class="text-xs text-slate-500">기운의 완급 조절과 특수 재능 뉘앙스</p>
             </div>
           </div>
-          <div class="space-y-2 text-sm text-slate-200 leading-relaxed">
-            <p><strong class="text-indigo-300">● 12운성:</strong> 장생, 건록, 제왕, 쇠, 묘, 절 등 에너지 발현의 활성/잠재 완급 척도 (단정적 길흉 배제).</p>
-            <p><strong class="text-amber-300">● 길신(천을귀인, 문창):</strong> 위기 돌파 조력과 학습/문장 역량.</p>
-            <p><strong class="text-rose-300">● 특수살(도화, 역마, 괴강, 백호):</strong> 대중 인기, 글로벌 활동력, 프로페셔널 돌파력.</p>
+          <div class="space-y-2 text-sm text-slate-700 leading-relaxed">
+            <p><strong class="text-[#1C3563]">● 12운성:</strong> 장생, 건록, 제왕, 쇠, 묘, 절 등 에너지 발현의 활성/잠재 완급 척도 (단정적 길흉 배제).</p>
+            <p><strong class="text-amber-800">● 길신(천을귀인, 문창):</strong> 위기 돌파 조력과 학습/문장 역량.</p>
+            <p><strong class="text-rose-700">● 특수살(도화, 역마, 괴강, 백호):</strong> 대중 인기, 글로벌 활동력, 프로페셔널 돌파력.</p>
           </div>
         </div>
 
         <!-- 7. 대운(大運)과 세운(歲運) -->
-        <div class="glass-card rounded-2xl p-6 shadow-lg border border-white/10 space-y-4">
-          <div class="flex items-center gap-3 pb-3 border-b border-white/10">
-            <div class="w-9 h-9 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-lg">
+        <div class="glass-card rounded-2xl p-6 shadow-md border border-purple-200/80 space-y-4">
+          <div class="flex items-center gap-3 pb-3 border-b border-purple-100">
+            <div class="w-9 h-9 rounded-lg bg-blue-100 text-blue-800 flex items-center justify-center font-bold text-lg">
               7
             </div>
             <div>
-              <h3 class="font-bold text-lg text-white">대운(大運) × 세운(歲運)</h3>
-              <p class="text-xs text-slate-300">10년의 환경(계절)과 1년의 사건(촉발점)</p>
+              <h3 class="font-bold text-lg text-[#1C3563]">대운(大運) × 세운(歲運)</h3>
+              <p class="text-xs text-slate-500">10년의 환경(계절)과 1년의 사건(촉발점)</p>
             </div>
           </div>
-          <div class="space-y-2 text-sm text-slate-200 leading-relaxed">
-            <p><strong class="text-blue-300">● 원국(바탕):</strong> 자동차의 성능과 하드웨어 구조.</p>
-            <p><strong class="text-indigo-300">● 대운(10년 환경):</strong> 자동차가 달리는 고속도로/비포장도로 등 거시적 날씨와 도로 조건.</p>
-            <p><strong class="text-pink-300">● 세운(1년 촉발점):</strong> 특정 해에 신호등이나 갈림길처럼 구체적 사건을 일으키는 트리거.</p>
+          <div class="space-y-2 text-sm text-slate-700 leading-relaxed">
+            <p><strong class="text-blue-700">● 원국(바탕):</strong> 자동차의 성능과 하드웨어 구조.</p>
+            <p><strong class="text-[#1C3563]">● 대운(10년 환경):</strong> 자동차가 달리는 고속도로/비포장도로 등 거시적 날씨와 도로 조건.</p>
+            <p><strong class="text-pink-700">● 세운(1년 촉발점):</strong> 특정 해에 신호등이나 갈림길처럼 구체적 사건을 일으키는 트리거.</p>
           </div>
         </div>
 
         <!-- 8. 현대적 행동 전략 (Modern Strategy) -->
-        <div class="glass-card rounded-2xl p-6 shadow-lg border border-white/10 space-y-4">
-          <div class="flex items-center gap-3 pb-3 border-b border-white/10">
-            <div class="w-9 h-9 rounded-lg bg-teal-500/20 text-teal-400 flex items-center justify-center font-bold text-lg">
+        <div class="glass-card rounded-2xl p-6 shadow-md border border-purple-200/80 space-y-4">
+          <div class="flex items-center gap-3 pb-3 border-b border-purple-100">
+            <div class="w-9 h-9 rounded-lg bg-teal-100 text-teal-800 flex items-center justify-center font-bold text-lg">
               8
             </div>
             <div>
-              <h3 class="font-bold text-lg text-white">현대적 행동 전략 프레임워크</h3>
-              <p class="text-xs text-slate-300">일하는 방식 6대 모델 & 행동 재무학</p>
+              <h3 class="font-bold text-lg text-[#1C3563]">현대적 행동 전략 프레임워크</h3>
+              <p class="text-xs text-slate-500">일하는 방식 6대 모델 & 행동 재무학</p>
             </div>
           </div>
-          <div class="space-y-2 text-sm text-slate-200 leading-relaxed">
-            <p><strong class="text-teal-300">● 일하는 방식 6대 모델:</strong> 조직형 / 사내 독립전문가 / 관리자·리더 / 프로젝트형 / 고객접점형 / 창업·프리랜서형.</p>
-            <p><strong class="text-amber-300">● 행동 재무학:</strong> 소득 창출 방식, 자산 축적, 소비 패턴, 투자 레버리지, 손실 대응력 분석.</p>
+          <div class="space-y-2 text-sm text-slate-700 leading-relaxed">
+            <p><strong class="text-teal-700">● 일하는 방식 6대 모델:</strong> 조직형 / 사내 독립전문가 / 관리자·리더 / 프로젝트형 / 고객접점형 / 창업·프리랜서형.</p>
+            <p><strong class="text-amber-800">● 행동 재무학:</strong> 소득 창출 방식, 자산 축적, 소비 패턴, 투자 레버리지, 손실 대응력 분석.</p>
           </div>
         </div>
 
@@ -609,70 +616,70 @@
     <div id="view-guide" class="space-y-6 hidden">
       
       <!-- Guide Header -->
-      <div class="glass-card rounded-2xl p-6 shadow-xl border border-white/10">
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mb-2">
+      <div class="glass-card rounded-2xl p-6 shadow-md border border-purple-200/80">
+        <h2 class="text-2xl sm:text-3xl font-black text-[#1C3563] tracking-tight mb-2">
           LLM 활용 가이드
         </h2>
-        <p class="text-base text-slate-200 leading-relaxed">
+        <p class="text-base text-slate-700 leading-relaxed">
           생성된 11단계 정밀 사주 프롬프트를 <b>ChatGPT, Claude, Gemini</b>에 등록하고 나만의 전략적 인생 코치로 활용하는 방법입니다.
         </p>
       </div>
 
       <!-- 3 Steps Simple Cards -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div class="glass-card rounded-2xl p-6 shadow-lg border border-white/10">
-          <div class="w-10 h-10 rounded-xl bg-indigo-600/40 text-indigo-300 flex items-center justify-center font-bold text-lg mb-3">
+        <div class="glass-card rounded-2xl p-6 shadow-md border border-purple-200/80">
+          <div class="w-10 h-10 rounded-xl bg-[#1C3563]/10 text-[#1C3563] flex items-center justify-center font-bold text-lg mb-3">
             1
           </div>
-          <h3 class="font-bold text-lg text-white mb-2">사주 프롬프트 복사</h3>
-          <p class="text-sm text-slate-300 leading-relaxed">
+          <h3 class="font-bold text-lg text-[#1C3563] mb-2">사주 프롬프트 복사</h3>
+          <p class="text-sm text-slate-600 leading-relaxed">
             사주 연산 후 <b>[마스터 프롬프트 복사]</b> 버튼을 누르거나 <b>[리포트 다운로드(.md)]</b>를 받습니다.
           </p>
         </div>
 
-        <div class="glass-card rounded-2xl p-6 shadow-lg border border-white/10">
-          <div class="w-10 h-10 rounded-xl bg-purple-600/40 text-purple-300 flex items-center justify-center font-bold text-lg mb-3">
+        <div class="glass-card rounded-2xl p-6 shadow-md border border-purple-200/80">
+          <div class="w-10 h-10 rounded-xl bg-[#1C3563]/10 text-[#1C3563] flex items-center justify-center font-bold text-lg mb-3">
             2
           </div>
-          <h3 class="font-bold text-lg text-white mb-2">LLM 프로젝트 등록</h3>
-          <p class="text-sm text-slate-300 leading-relaxed">
-            <strong class="text-indigo-200">Claude Project / Custom GPTs / Gemini Gems에 프롬프트를 등록하세요.</strong> (대화 맥락이 영구 보존됩니다)
+          <h3 class="font-bold text-lg text-[#1C3563] mb-2">LLM 프로젝트 등록</h3>
+          <p class="text-sm text-slate-600 leading-relaxed">
+            <strong class="text-[#1C3563]">Claude Project / Custom GPTs / Gemini Gems에 프롬프트를 등록하세요.</strong> (대화 맥락이 영구 보존됩니다)
           </p>
         </div>
 
-        <div class="glass-card rounded-2xl p-6 shadow-lg border border-white/10">
-          <div class="w-10 h-10 rounded-xl bg-pink-600/40 text-pink-300 flex items-center justify-center font-bold text-lg mb-3">
+        <div class="glass-card rounded-2xl p-6 shadow-md border border-purple-200/80">
+          <div class="w-10 h-10 rounded-xl bg-[#1C3563]/10 text-[#1C3563] flex items-center justify-center font-bold text-lg mb-3">
             3
           </div>
-          <h3 class="font-bold text-lg text-white mb-2">심층 전략 상담</h3>
-          <p class="text-sm text-slate-300 leading-relaxed">
+          <h3 class="font-bold text-lg text-[#1C3563] mb-2">심층 전략 상담</h3>
+          <p class="text-sm text-slate-600 leading-relaxed">
             커리어, 재무행동, 대운 변곡점, 관계 소통 팁 등 아래의 정밀 질문을 활용해 무제한 질의응답을 진행합니다.
           </p>
         </div>
       </div>
 
       <!-- Master Questions -->
-      <div class="glass-card rounded-2xl p-6 sm:p-7 shadow-xl border border-white/10 space-y-5">
-        <div class="flex items-center justify-between pb-3 border-b border-white/10">
-          <h3 class="font-bold text-xl text-white flex items-center gap-2.5">
-            <i class="fa-solid fa-comments text-indigo-400"></i> AI에게 물어보기 좋은 추천 정밀 질문
+      <div class="glass-card rounded-2xl p-6 sm:p-7 shadow-md border border-purple-200/80 space-y-5">
+        <div class="flex items-center justify-between pb-3 border-b border-purple-100">
+          <h3 class="font-bold text-xl text-[#1C3563] flex items-center gap-2.5">
+            <i class="fa-solid fa-comments text-[#1C3563]"></i> AI에게 물어보기 좋은 추천 정밀 질문
           </h3>
-          <span class="text-xs sm:text-sm text-slate-400">클릭 시 질문 복사</span>
+          <span class="text-xs sm:text-sm text-slate-500 font-medium">클릭 시 질문 복사</span>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           
           <!-- Career & Job -->
-          <div class="bg-brand-900/60 p-5 rounded-xl border border-white/10 space-y-3">
-            <h4 class="text-base font-bold text-indigo-300 flex items-center gap-2">
-              <i class="fa-solid fa-briefcase text-indigo-400"></i> 💼 일하는 방식 & 커리어
+          <div class="bg-purple-50/70 p-5 rounded-xl border border-purple-200/80 space-y-3">
+            <h4 class="text-base font-bold text-[#1C3563] flex items-center gap-2">
+              <i class="fa-solid fa-briefcase text-[#1C3563]"></i> 💼 일하는 방식 & 커리어
             </h4>
             <div class="space-y-2">
-              <div onclick="copyText(this.innerText)" class="p-3 rounded-lg bg-white/5 hover:bg-indigo-600/30 hover:border-indigo-400/50 border border-transparent cursor-pointer transition flex items-center justify-between text-sm text-slate-200">
+              <div onclick="copyText(this.innerText)" class="p-3 rounded-lg bg-white hover:bg-slate-50 border border-purple-200/70 hover:border-[#1C3563] cursor-pointer transition shadow-sm flex items-center justify-between text-sm text-slate-800">
                 <span>"현대적 6대 모델 중 내 격국과 용신에 가장 부합하는 최적의 일하는 방식과 조직 문화는?"</span>
                 <i class="fa-regular fa-copy text-slate-400 ml-2"></i>
               </div>
-              <div onclick="copyText(this.innerText)" class="p-3 rounded-lg bg-white/5 hover:bg-indigo-600/30 hover:border-indigo-400/50 border border-transparent cursor-pointer transition flex items-center justify-between text-sm text-slate-200">
+              <div onclick="copyText(this.innerText)" class="p-3 rounded-lg bg-white hover:bg-slate-50 border border-purple-200/70 hover:border-[#1C3563] cursor-pointer transition shadow-sm flex items-center justify-between text-sm text-slate-800">
                 <span>"업무 의사결정 권한과 협업 템포 측면에서 내가 스트레스를 덜 받고 성과를 내는 환경은?"</span>
                 <i class="fa-regular fa-copy text-slate-400 ml-2"></i>
               </div>
@@ -680,16 +687,16 @@
           </div>
 
           <!-- Wealth & Investment -->
-          <div class="bg-brand-900/60 p-5 rounded-xl border border-white/10 space-y-3">
-            <h4 class="text-base font-bold text-amber-300 flex items-center gap-2">
-              <i class="fa-solid fa-coins text-amber-400"></i> 💰 재물 & 금융 행동 패턴
+          <div class="bg-amber-50/70 p-5 rounded-xl border border-amber-200/80 space-y-3">
+            <h4 class="text-base font-bold text-amber-900 flex items-center gap-2">
+              <i class="fa-solid fa-coins text-amber-600"></i> 💰 재물 & 금융 행동 패턴
             </h4>
             <div class="space-y-2">
-              <div onclick="copyText(this.innerText)" class="p-3 rounded-lg bg-white/5 hover:bg-amber-600/30 hover:border-amber-400/50 border border-transparent cursor-pointer transition flex items-center justify-between text-sm text-slate-200">
+              <div onclick="copyText(this.innerText)" class="p-3 rounded-lg bg-white hover:bg-amber-50/90 border border-amber-200/70 hover:border-amber-500 cursor-pointer transition shadow-sm flex items-center justify-between text-sm text-slate-800">
                 <span>"행동 재무학 관점에서 나의 소비 습관, 투자 리스크 수용도, 충동 매매 위험 구간은?"</span>
                 <i class="fa-regular fa-copy text-slate-400 ml-2"></i>
               </div>
-              <div onclick="copyText(this.innerText)" class="p-3 rounded-lg bg-white/5 hover:bg-amber-600/30 hover:border-amber-400/50 border border-transparent cursor-pointer transition flex items-center justify-between text-sm text-slate-200">
+              <div onclick="copyText(this.innerText)" class="p-3 rounded-lg bg-white hover:bg-amber-50/90 border border-amber-200/70 hover:border-amber-500 cursor-pointer transition shadow-sm flex items-center justify-between text-sm text-slate-800">
                 <span>"대운과 2025~2027 세운의 조합으로 볼 때 자산 확장과 리스크 방어의 적절한 타이밍은?"</span>
                 <i class="fa-regular fa-copy text-slate-400 ml-2"></i>
               </div>
@@ -697,16 +704,16 @@
           </div>
 
           <!-- Relationship & Love -->
-          <div class="bg-brand-900/60 p-5 rounded-xl border border-white/10 space-y-3">
-            <h4 class="text-base font-bold text-pink-300 flex items-center gap-2">
-              <i class="fa-solid fa-heart text-pink-400"></i> ❤️ 연애·배우자 & 인간관계
+          <div class="bg-pink-50/70 p-5 rounded-xl border border-pink-200/80 space-y-3">
+            <h4 class="text-base font-bold text-pink-900 flex items-center gap-2">
+              <i class="fa-solid fa-heart text-pink-600"></i> ❤️ 연애·배우자 & 인간관계
             </h4>
             <div class="space-y-2">
-              <div onclick="copyText(this.innerText)" class="p-3 rounded-lg bg-white/5 hover:bg-pink-600/30 hover:border-pink-400/50 border border-transparent cursor-pointer transition flex items-center justify-between text-sm text-slate-200">
+              <div onclick="copyText(this.innerText)" class="p-3 rounded-lg bg-white hover:bg-pink-50/90 border border-pink-200/70 hover:border-pink-500 cursor-pointer transition shadow-sm flex items-center justify-between text-sm text-slate-800">
                 <span>"일지 배우자궁과 십신 관계를 분석하여 파트너와의 갈등을 예방하는 현실적인 대화법은?"</span>
                 <i class="fa-regular fa-copy text-slate-400 ml-2"></i>
               </div>
-              <div onclick="copyText(this.innerText)" class="p-3 rounded-lg bg-white/5 hover:bg-pink-600/30 hover:border-pink-400/50 border border-transparent cursor-pointer transition flex items-center justify-between text-sm text-slate-200">
+              <div onclick="copyText(this.innerText)" class="p-3 rounded-lg bg-white hover:bg-pink-50/90 border border-pink-200/70 hover:border-pink-500 cursor-pointer transition shadow-sm flex items-center justify-between text-sm text-slate-800">
                 <span>"원국의 합충형파해 구조가 사회적 인간관계에서 오해를 부르는 지점과 대처 방안은?"</span>
                 <i class="fa-regular fa-copy text-slate-400 ml-2"></i>
               </div>
@@ -714,16 +721,16 @@
           </div>
 
           <!-- Mindset & Balance (개운법) -->
-          <div class="bg-brand-900/60 p-5 rounded-xl border border-white/10 space-y-3">
-            <h4 class="text-base font-bold text-emerald-300 flex items-center gap-2">
-              <i class="fa-solid fa-spa text-emerald-400"></i> 🧘 멘탈 & 조후 개운법
+          <div class="bg-emerald-50/70 p-5 rounded-xl border border-emerald-200/80 space-y-3">
+            <h4 class="text-base font-bold text-emerald-900 flex items-center gap-2">
+              <i class="fa-solid fa-spa text-emerald-600"></i> 🧘 멘탈 & 조후 개운법
             </h4>
             <div class="space-y-2">
-              <div onclick="copyText(this.innerText)" class="p-3 rounded-lg bg-white/5 hover:bg-emerald-600/30 hover:border-emerald-400/50 border border-transparent cursor-pointer transition flex items-center justify-between text-sm text-slate-200">
+              <div onclick="copyText(this.innerText)" class="p-3 rounded-lg bg-white hover:bg-emerald-50/90 border border-emerald-200/70 hover:border-emerald-500 cursor-pointer transition shadow-sm flex items-center justify-between text-sm text-slate-800">
                 <span>"조후(한난조습)와 용희기신을 고려할 때 내 일상 에너지와 집중력을 높이는 환경 세팅법은?"</span>
                 <i class="fa-regular fa-copy text-slate-400 ml-2"></i>
               </div>
-              <div onclick="copyText(this.innerText)" class="p-3 rounded-lg bg-white/5 hover:bg-emerald-600/30 hover:border-emerald-400/50 border border-transparent cursor-pointer transition flex items-center justify-between text-sm text-slate-200">
+              <div onclick="copyText(this.innerText)" class="p-3 rounded-lg bg-white hover:bg-emerald-50/90 border border-emerald-200/70 hover:border-emerald-500 cursor-pointer transition shadow-sm flex items-center justify-between text-sm text-slate-800">
                 <span>"현재 지나고 있는 10년 대운의 거시적 과제를 완수하기 위한 핵심 마인드셋 전략은?"</span>
                 <i class="fa-regular fa-copy text-slate-400 ml-2"></i>
               </div>
@@ -737,10 +744,10 @@
   </main>
 
   <!-- Footer -->
-  <footer class="border-t border-white/10 bg-brand-950/80 py-6 text-center text-xs text-slate-500 no-print">
+  <footer class="border-t border-purple-200/70 bg-[#F4EFFF]/90 py-6 text-center text-xs text-slate-600 no-print">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
       <div>
-        <a href="../index.html" class="text-indigo-400 hover:text-indigo-300 font-medium inline-flex items-center gap-1.5 transition">
+        <a href="../index.html" class="text-[#1C3563] hover:underline font-bold inline-flex items-center gap-1.5 transition">
           <i class="fa-solid fa-arrow-left text-xs"></i> <span>Henrysuh 메인 포털로 이동</span>
         </a>
       </div>
@@ -774,31 +781,31 @@
 
     // --- 1. Basic Astrological & Myungri Constants ---
     const STEMS = [
-      { char: '甲', hangul: '갑', element: 'wood', yang: true, ohaeng: '목(木)', color: 'text-emerald-400', bg: 'bg-emerald-950/60 border-emerald-500/40' },
-      { char: '乙', hangul: '을', element: 'wood', yang: false, ohaeng: '목(木)', color: 'text-emerald-300', bg: 'bg-emerald-950/60 border-emerald-500/40' },
-      { char: '丙', hangul: '병', element: 'fire', yang: true, ohaeng: '화(火)', color: 'text-rose-400', bg: 'bg-rose-950/60 border-rose-500/40' },
-      { char: '丁', hangul: '정', element: 'fire', yang: false, ohaeng: '화(火)', color: 'text-rose-300', bg: 'bg-rose-950/60 border-rose-500/40' },
-      { char: '戊', hangul: '무', element: 'earth', yang: true, ohaeng: '토(土)', color: 'text-amber-400', bg: 'bg-amber-950/60 border-amber-500/40' },
-      { char: '己', hangul: '기', element: 'earth', yang: false, ohaeng: '토(土)', color: 'text-amber-300', bg: 'bg-amber-950/60 border-amber-500/40' },
-      { char: '庚', hangul: '경', element: 'metal', yang: true, ohaeng: '금(金)', color: 'text-slate-200', bg: 'bg-slate-800/80 border-slate-400/40' },
-      { char: '辛', hangul: '신', element: 'metal', yang: false, ohaeng: '금(金)', color: 'text-slate-300', bg: 'bg-slate-800/80 border-slate-400/40' },
-      { char: '壬', hangul: '임', element: 'water', yang: true, ohaeng: '수(水)', color: 'text-blue-400', bg: 'bg-blue-950/60 border-blue-500/40' },
-      { char: '癸', hangul: '계', element: 'water', yang: false, ohaeng: '수(水)', color: 'text-blue-300', bg: 'bg-blue-950/60 border-blue-500/40' }
+      { char: '甲', hangul: '갑', element: 'wood', yang: true, ohaeng: '목(木)', color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-300' },
+      { char: '乙', hangul: '을', element: 'wood', yang: false, ohaeng: '목(木)', color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-300' },
+      { char: '丙', hangul: '병', element: 'fire', yang: true, ohaeng: '화(火)', color: 'text-rose-700', bg: 'bg-rose-50 border-rose-300' },
+      { char: '丁', hangul: '정', element: 'fire', yang: false, ohaeng: '화(火)', color: 'text-rose-700', bg: 'bg-rose-50 border-rose-300' },
+      { char: '戊', hangul: '무', element: 'earth', yang: true, ohaeng: '토(土)', color: 'text-amber-800', bg: 'bg-amber-50 border-amber-300' },
+      { char: '己', hangul: '기', element: 'earth', yang: false, ohaeng: '토(土)', color: 'text-amber-800', bg: 'bg-amber-50 border-amber-300' },
+      { char: '庚', hangul: '경', element: 'metal', yang: true, ohaeng: '금(金)', color: 'text-slate-800', bg: 'bg-slate-100 border-slate-300' },
+      { char: '辛', hangul: '신', element: 'metal', yang: false, ohaeng: '금(金)', color: 'text-slate-800', bg: 'bg-slate-100 border-slate-300' },
+      { char: '壬', hangul: '임', element: 'water', yang: true, ohaeng: '수(水)', color: 'text-blue-700', bg: 'bg-blue-50 border-blue-300' },
+      { char: '癸', hangul: '계', element: 'water', yang: false, ohaeng: '수(水)', color: 'text-blue-700', bg: 'bg-blue-50 border-blue-300' }
     ];
 
     const BRANCHES = [
-      { char: '子', hangul: '자', animal: '쥐', element: 'water', yang: true, ohaeng: '수(水)', color: 'text-blue-400', bg: 'bg-blue-950/60 border-blue-500/40', hidden: ['壬', '癸'], hiddenDetail: [{char:'壬', type:'여기', days:10}, {char:'癸', type:'본기', days:20}] },
-      { char: '丑', hangul: '축', animal: '소', element: 'earth', yang: false, ohaeng: '토(土)', color: 'text-amber-300', bg: 'bg-amber-950/60 border-amber-500/40', hidden: ['癸', '辛', '己'], hiddenDetail: [{char:'癸', type:'여기', days:9}, {char:'辛', type:'중기', days:3}, {char:'己', type:'본기', days:18}] },
-      { char: '寅', hangul: '인', animal: '호랑이', element: 'wood', yang: true, ohaeng: '목(木)', color: 'text-emerald-400', bg: 'bg-emerald-950/60 border-emerald-500/40', hidden: ['戊', '丙', '甲'], hiddenDetail: [{char:'戊', type:'여기', days:7}, {char:'丙', type:'중기', days:7}, {char:'甲', type:'본기', days:16}] },
-      { char: '卯', hangul: '묘', animal: '토끼', element: 'wood', yang: false, ohaeng: '목(木)', color: 'text-emerald-300', bg: 'bg-emerald-950/60 border-emerald-500/40', hidden: ['甲', '乙'], hiddenDetail: [{char:'甲', type:'여기', days:10}, {char:'乙', type:'본기', days:20}] },
-      { char: '辰', hangul: '진', animal: '용', element: 'earth', yang: true, ohaeng: '토(土)', color: 'text-amber-400', bg: 'bg-amber-950/60 border-amber-500/40', hidden: ['乙', '癸', '戊'], hiddenDetail: [{char:'乙', type:'여기', days:9}, {char:'癸', type:'중기', days:3}, {char:'戊', type:'본기', days:18}] },
-      { char: '巳', hangul: '사', animal: '뱀', element: 'fire', yang: false, ohaeng: '화(火)', color: 'text-rose-400', bg: 'bg-rose-950/60 border-rose-500/40', hidden: ['戊', '庚', '丙'], hiddenDetail: [{char:'戊', type:'여기', days:7}, {char:'庚', type:'중기', days:7}, {char:'丙', type:'본기', days:16}] },
-      { char: '午', hangul: '오', animal: '말', element: 'fire', yang: true, ohaeng: '화(火)', color: 'text-rose-300', bg: 'bg-rose-950/60 border-rose-500/40', hidden: ['丙', '己', '丁'], hiddenDetail: [{char:'丙', type:'여기', days:10}, {char:'己', type:'중기', days:9}, {char:'丁', type:'본기', days:11}] },
-      { char: '未', hangul: '미', animal: '양', element: 'earth', yang: false, ohaeng: '토(土)', color: 'text-amber-300', bg: 'bg-amber-950/60 border-amber-500/40', hidden: ['丁', '乙', '己'], hiddenDetail: [{char:'丁', type:'여기', days:9}, {char:'乙', type:'중기', days:3}, {char:'己', type:'본기', days:18}] },
-      { char: '申', hangul: '신', animal: '원숭이', element: 'metal', yang: true, ohaeng: '금(金)', color: 'text-slate-200', bg: 'bg-slate-800/80 border-slate-400/40', hidden: ['戊', '壬', '庚'], hiddenDetail: [{char:'戊', type:'여기', days:7}, {char:'壬', type:'중기', days:7}, {char:'庚', type:'본기', days:16}] },
-      { char: '酉', hangul: '유', animal: '닭', element: 'metal', yang: false, ohaeng: '금(金)', color: 'text-slate-300', bg: 'bg-slate-800/80 border-slate-400/40', hidden: ['庚', '辛'], hiddenDetail: [{char:'庚', type:'여기', days:10}, {char:'辛', type:'본기', days:20}] },
-      { char: '戌', hangul: '술', animal: '개', element: 'earth', yang: true, ohaeng: '토(土)', color: 'text-amber-400', bg: 'bg-amber-950/60 border-amber-500/40', hidden: ['辛', '丁', '戊'], hiddenDetail: [{char:'辛', type:'여기', days:9}, {char:'丁', type:'중기', days:3}, {char:'戊', type:'본기', days:18}] },
-      { char: '亥', hangul: '해', animal: '돼지', element: 'water', yang: false, ohaeng: '수(水)', color: 'text-blue-300', bg: 'bg-blue-950/60 border-blue-500/40', hidden: ['戊', '甲', '壬'], hiddenDetail: [{char:'戊', type:'여기', days:7}, {char:'甲', type:'중기', days:7}, {char:'壬', type:'본기', days:16}] }
+      { char: '子', hangul: '자', animal: '쥐', element: 'water', yang: true, ohaeng: '수(水)', color: 'text-blue-700', bg: 'bg-blue-50 border-blue-300', hidden: ['壬', '癸'], hiddenDetail: [{char:'壬', type:'여기', days:10}, {char:'癸', type:'본기', days:20}] },
+      { char: '丑', hangul: '축', animal: '소', element: 'earth', yang: false, ohaeng: '토(土)', color: 'text-amber-800', bg: 'bg-amber-50 border-amber-300', hidden: ['癸', '辛', '己'], hiddenDetail: [{char:'癸', type:'여기', days:9}, {char:'辛', type:'중기', days:3}, {char:'己', type:'본기', days:18}] },
+      { char: '寅', hangul: '인', animal: '호랑이', element: 'wood', yang: true, ohaeng: '목(木)', color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-300', hidden: ['戊', '丙', '甲'], hiddenDetail: [{char:'戊', type:'여기', days:7}, {char:'丙', type:'중기', days:7}, {char:'甲', type:'본기', days:16}] },
+      { char: '卯', hangul: '묘', animal: '토끼', element: 'wood', yang: false, ohaeng: '목(木)', color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-300', hidden: ['甲', '乙'], hiddenDetail: [{char:'甲', type:'여기', days:10}, {char:'乙', type:'본기', days:20}] },
+      { char: '辰', hangul: '진', animal: '용', element: 'earth', yang: true, ohaeng: '토(土)', color: 'text-amber-800', bg: 'bg-amber-50 border-amber-300', hidden: ['乙', '癸', '戊'], hiddenDetail: [{char:'乙', type:'여기', days:9}, {char:'癸', type:'중기', days:3}, {char:'戊', type:'본기', days:18}] },
+      { char: '巳', hangul: '사', animal: '뱀', element: 'fire', yang: false, ohaeng: '화(火)', color: 'text-rose-700', bg: 'bg-rose-50 border-rose-300', hidden: ['戊', '庚', '丙'], hiddenDetail: [{char:'戊', type:'여기', days:7}, {char:'庚', type:'중기', days:7}, {char:'丙', type:'본기', days:16}] },
+      { char: '午', hangul: '오', animal: '말', element: 'fire', yang: true, ohaeng: '화(火)', color: 'text-rose-700', bg: 'bg-rose-50 border-rose-300', hidden: ['丙', '己', '丁'], hiddenDetail: [{char:'丙', type:'여기', days:10}, {char:'己', type:'중기', days:9}, {char:'丁', type:'본기', days:11}] },
+      { char: '未', hangul: '미', animal: '양', element: 'earth', yang: false, ohaeng: '토(土)', color: 'text-amber-800', bg: 'bg-amber-50 border-amber-300', hidden: ['丁', '乙', '己'], hiddenDetail: [{char:'丁', type:'여기', days:9}, {char:'乙', type:'중기', days:3}, {char:'己', type:'본기', days:18}] },
+      { char: '申', hangul: '신', animal: '원숭이', element: 'metal', yang: true, ohaeng: '금(金)', color: 'text-slate-800', bg: 'bg-slate-100 border-slate-300', hidden: ['戊', '壬', '庚'], hiddenDetail: [{char:'戊', type:'여기', days:7}, {char:'壬', type:'중기', days:7}, {char:'庚', type:'본기', days:16}] },
+      { char: '酉', hangul: '유', animal: '닭', element: 'metal', yang: false, ohaeng: '금(金)', color: 'text-slate-800', bg: 'bg-slate-100 border-slate-300', hidden: ['庚', '辛'], hiddenDetail: [{char:'庚', type:'여기', days:10}, {char:'辛', type:'본기', days:20}] },
+      { char: '戌', hangul: '술', animal: '개', element: 'earth', yang: true, ohaeng: '토(土)', color: 'text-amber-800', bg: 'bg-amber-50 border-amber-300', hidden: ['辛', '丁', '戊'], hiddenDetail: [{char:'辛', type:'여기', days:9}, {char:'丁', type:'중기', days:3}, {char:'戊', type:'본기', days:18}] },
+      { char: '亥', hangul: '해', animal: '돼지', element: 'water', yang: false, ohaeng: '수(水)', color: 'text-blue-700', bg: 'bg-blue-50 border-blue-300', hidden: ['戊', '甲', '壬'], hiddenDetail: [{char:'戊', type:'여기', days:7}, {char:'甲', type:'중기', days:7}, {char:'壬', type:'본기', days:16}] }
     ];
 
     const STAGES_12 = ['장생', '목욕', '관대', '건록', '제왕', '쇠', '병', '사', '묘', '절', '태', '양'];
@@ -973,7 +980,7 @@
       ];
       stemHap.forEach(h => {
         if (stemChars.includes(h.pair[0]) && stemChars.includes(h.pair[1])) {
-          interactions.push({ type: '천간합', name: `${h.name} (${h.pair[0]}+${h.pair[1]})`, badgeClass: 'bg-pink-500/15 border-pink-500/30 text-pink-300' });
+          interactions.push({ type: '천간합', name: `${h.name} (${h.pair[0]}+${h.pair[1]})`, badgeClass: 'bg-pink-100 border-pink-300 text-pink-800 font-semibold shadow-sm' });
         }
       });
 
@@ -986,7 +993,7 @@
       ];
       stemChung.forEach(c => {
         if (stemChars.includes(c.pair[0]) && stemChars.includes(c.pair[1])) {
-          interactions.push({ type: '천간충', name: `${c.name} (${c.pair[0]}+${c.pair[1]})`, badgeClass: 'bg-rose-500/15 border-rose-500/30 text-rose-300' });
+          interactions.push({ type: '천간충', name: `${c.name} (${c.pair[0]}+${c.pair[1]})`, badgeClass: 'bg-rose-100 border-rose-300 text-rose-800 font-semibold shadow-sm' });
         }
       });
 
@@ -1001,7 +1008,7 @@
       ];
       branchYukHap.forEach(h => {
         if (branchChars.includes(h.pair[0]) && branchChars.includes(h.pair[1])) {
-          interactions.push({ type: '지지육합', name: `${h.name} (${h.pair[0]}+${h.pair[1]})`, badgeClass: 'bg-purple-500/15 border-purple-500/30 text-purple-300' });
+          interactions.push({ type: '지지육합', name: `${h.name} (${h.pair[0]}+${h.pair[1]})`, badgeClass: 'bg-purple-100 border-purple-300 text-purple-800 font-semibold shadow-sm' });
         }
       });
 
@@ -1015,9 +1022,9 @@
       branchSamHap.forEach(s => {
         const matches = s.trio.filter(ch => branchChars.includes(ch));
         if (matches.length === 3) {
-          interactions.push({ type: '지지삼합', name: `${s.name} [완전합]`, badgeClass: 'bg-indigo-500/20 border-indigo-500/40 text-indigo-300 font-bold' });
+          interactions.push({ type: '지지삼합', name: `${s.name} [완전합]`, badgeClass: 'bg-indigo-100 border-indigo-300 text-indigo-950 font-black shadow-sm' });
         } else if (matches.length === 2 && matches.includes(s.trio[1])) {
-          interactions.push({ type: '지지반합', name: `${matches.join('')} 반합(${s.trio[1]} 왕지포함)`, badgeClass: 'bg-indigo-500/15 border-indigo-500/30 text-indigo-300' });
+          interactions.push({ type: '지지반합', name: `${matches.join('')} 반합(${s.trio[1]} 왕지포함)`, badgeClass: 'bg-indigo-50 border-indigo-200 text-indigo-900 font-bold shadow-sm' });
         }
       });
 
@@ -1031,7 +1038,7 @@
       branchBangHap.forEach(b => {
         const matches = b.trio.filter(ch => branchChars.includes(ch));
         if (matches.length === 3) {
-          interactions.push({ type: '지지방합', name: `${b.name} [완전방합]`, badgeClass: 'bg-blue-500/20 border-blue-500/40 text-blue-300 font-bold' });
+          interactions.push({ type: '지지방합', name: `${b.name} [완전방합]`, badgeClass: 'bg-blue-100 border-blue-300 text-blue-950 font-black shadow-sm' });
         }
       });
 
@@ -1046,32 +1053,32 @@
       ];
       branchYukChung.forEach(c => {
         if (branchChars.includes(c.pair[0]) && branchChars.includes(c.pair[1])) {
-          interactions.push({ type: '지지육충', name: `${c.name} (${c.pair[0]}+${c.pair[1]})`, badgeClass: 'bg-red-500/15 border-red-500/30 text-red-300' });
+          interactions.push({ type: '지지육충', name: `${c.name} (${c.pair[0]}+${c.pair[1]})`, badgeClass: 'bg-red-100 border-red-300 text-red-800 font-bold shadow-sm' });
         }
       });
 
       // 7) 지지 삼형 / 형
       if (branchChars.includes('寅') && branchChars.includes('巳') && branchChars.includes('申')) {
-        interactions.push({ type: '삼형살', name: '인사신 삼형살(寅巳申 三刑 - 무은지형)', badgeClass: 'bg-amber-500/20 border-amber-500/40 text-amber-300 font-bold' });
+        interactions.push({ type: '삼형살', name: '인사신 삼형살(寅巳申 三刑 - 무은지형)', badgeClass: 'bg-amber-100 border-amber-300 text-amber-950 font-black shadow-sm' });
       } else if ((branchChars.includes('寅') && branchChars.includes('巳')) || (branchChars.includes('巳') && branchChars.includes('申')) || (branchChars.includes('寅') && branchChars.includes('申'))) {
-        interactions.push({ type: '형', name: '인사신 형(刑) 부분 결합', badgeClass: 'bg-amber-500/15 border-amber-500/30 text-amber-300' });
+        interactions.push({ type: '형', name: '인사신 형(刑) 부분 결합', badgeClass: 'bg-amber-50 border-amber-200 text-amber-900 font-semibold shadow-sm' });
       }
 
       if (branchChars.includes('丑') && branchChars.includes('戌') && branchChars.includes('未')) {
-        interactions.push({ type: '삼형살', name: '축술미 삼형살(丑戌未 三刑 - 지세지형)', badgeClass: 'bg-amber-500/20 border-amber-500/40 text-amber-300 font-bold' });
+        interactions.push({ type: '삼형살', name: '축술미 삼형살(丑戌未 三刑 - 지세지형)', badgeClass: 'bg-amber-100 border-amber-300 text-amber-950 font-black shadow-sm' });
       } else if ((branchChars.includes('丑') && branchChars.includes('戌')) || (branchChars.includes('戌') && branchChars.includes('未')) || (branchChars.includes('丑') && branchChars.includes('未'))) {
-        interactions.push({ type: '형', name: '축술미 형(刑) 부분 결합', badgeClass: 'bg-amber-500/15 border-amber-500/30 text-amber-300' });
+        interactions.push({ type: '형', name: '축술미 형(刑) 부분 결합', badgeClass: 'bg-amber-50 border-amber-200 text-amber-900 font-semibold shadow-sm' });
       }
 
       if (branchChars.includes('子') && branchChars.includes('卯')) {
-        interactions.push({ type: '형', name: '자묘형(子卯刑 - 무례지형)', badgeClass: 'bg-amber-500/15 border-amber-500/30 text-amber-300' });
+        interactions.push({ type: '형', name: '자묘형(子卯刑 - 무례지형)', badgeClass: 'bg-amber-50 border-amber-200 text-amber-900 font-semibold shadow-sm' });
       }
 
       // 자형
       ['辰', '午', '酉', '亥'].forEach(ch => {
         const count = branchChars.filter(c => c === ch).length;
         if (count >= 2) {
-          interactions.push({ type: '자형', name: `${ch}${ch} 자형(自刑)`, badgeClass: 'bg-amber-500/15 border-amber-500/30 text-amber-300' });
+          interactions.push({ type: '자형', name: `${ch}${ch} 자형(自刑)`, badgeClass: 'bg-amber-100 border-amber-300 text-amber-900 font-semibold shadow-sm' });
         }
       });
 
@@ -1086,7 +1093,7 @@
       ];
       branchPa.forEach(p => {
         if (branchChars.includes(p.pair[0]) && branchChars.includes(p.pair[1])) {
-          interactions.push({ type: '지지파', name: `${p.name} (${p.pair[0]}+${p.pair[1]})`, badgeClass: 'bg-slate-500/20 border-slate-500/30 text-slate-300' });
+          interactions.push({ type: '지지파', name: `${p.name} (${p.pair[0]}+${p.pair[1]})`, badgeClass: 'bg-slate-100 border-slate-300 text-slate-800 font-medium shadow-sm' });
         }
       });
 
@@ -1101,7 +1108,7 @@
       ];
       branchHae.forEach(h => {
         if (branchChars.includes(h.pair[0]) && branchChars.includes(h.pair[1])) {
-          interactions.push({ type: '지지해', name: `${h.name} (${h.pair[0]}+${h.pair[1]})`, badgeClass: 'bg-slate-500/20 border-slate-500/30 text-slate-300' });
+          interactions.push({ type: '지지해', name: `${h.name} (${h.pair[0]}+${h.pair[1]})`, badgeClass: 'bg-slate-100 border-slate-300 text-slate-800 font-medium shadow-sm' });
         }
       });
 
@@ -1401,11 +1408,11 @@
       const shenshaContainer = document.getElementById('out-shensha-badges');
       shenshaContainer.innerHTML = '';
       if (res.shenshaList.length === 0) {
-        shenshaContainer.innerHTML = '<span class="text-sm text-slate-400">특이 신살 없음 (조화로움)</span>';
+        shenshaContainer.innerHTML = '<span class="text-sm text-slate-500">특이 신살 없음 (조화로움)</span>';
       } else {
         res.shenshaList.forEach(s => {
           const badge = document.createElement('span');
-          badge.className = 'px-2.5 py-1 rounded-lg text-xs sm:text-sm font-semibold bg-indigo-500/15 border border-indigo-500/30 text-indigo-300';
+          badge.className = 'px-2.5 py-1 rounded-lg text-xs sm:text-sm font-semibold bg-purple-100 border border-purple-300 text-purple-800 shadow-sm';
           badge.title = s.desc;
           badge.innerText = s.name;
           shenshaContainer.appendChild(badge);
@@ -1416,11 +1423,11 @@
       const interContainer = document.getElementById('out-interaction-badges');
       interContainer.innerHTML = '';
       if (res.interactionList.length === 0) {
-        interContainer.innerHTML = '<span class="text-sm text-slate-400">원국 내 뚜렷한 합·충·형·파·해 없음 (안정적 원국)</span>';
+        interContainer.innerHTML = '<span class="text-sm text-slate-500 font-medium">원국 내 뚜렷한 합·충·형·파·해 없음 (안정적 원국)</span>';
       } else {
         res.interactionList.forEach(item => {
           const badge = document.createElement('span');
-          badge.className = `px-2.5 py-1 rounded-lg text-xs sm:text-sm font-semibold border ${item.badgeClass || 'bg-white/10 border-white/20 text-slate-200'}`;
+          badge.className = `px-2.5 py-1 rounded-lg text-xs sm:text-sm font-semibold border ${item.badgeClass || 'bg-slate-100 border-slate-300 text-slate-800'}`;
           badge.innerText = item.name;
           interContainer.appendChild(badge);
         });
@@ -1432,12 +1439,12 @@
       dwContainer.innerHTML = '';
       res.daewoonList.forEach(dw => {
         const card = document.createElement('div');
-        card.className = 'bg-brand-900/60 p-2.5 rounded-xl border border-white/10 flex flex-col items-center min-w-[58px]';
+        card.className = 'bg-white p-2.5 rounded-xl border border-purple-200 shadow-sm flex flex-col items-center min-w-[58px]';
         card.innerHTML = `
-          <span class="text-xs text-slate-300 font-bold mb-1">${dw.age}세~</span>
+          <span class="text-xs text-indigo-950 font-bold mb-1">${dw.age}세~</span>
           <span class="text-sm font-black ${dw.stem.color}">${dw.stem.char}</span>
           <span class="text-sm font-black ${dw.branch.color} mb-1">${dw.branch.char}</span>
-          <span class="text-xs text-slate-300">${dw.stage}</span>
+          <span class="text-xs text-slate-500 font-medium">${dw.stage}</span>
         `;
         dwContainer.appendChild(card);
       });
@@ -1626,8 +1633,8 @@
       viewGuide.classList.add('hidden');
 
       // Reset all buttons
-      const inactiveClass = 'px-3.5 py-2 rounded-lg font-semibold transition-all text-slate-300 hover:text-white hover:bg-white/5';
-      const activeClass = 'px-3.5 py-2 rounded-lg font-semibold transition-all bg-indigo-600 text-white shadow-md';
+      const inactiveClass = 'px-3.5 py-2 rounded-lg font-semibold transition-all text-slate-600 hover:text-[#1C3563] hover:bg-[#1C3563]/10';
+      const activeClass = 'px-3.5 py-2 rounded-lg font-semibold transition-all bg-[#1C3563] text-white shadow-sm';
 
       btnApp.className = inactiveClass;
       btnTerms.className = inactiveClass;
