@@ -449,164 +449,515 @@
     <div id="view-terms" class="space-y-6 hidden">
       
       <!-- Terminology Header -->
-      <div class="glass-card rounded-2xl p-6 shadow-md border border-purple-200/80">
-        <h2 class="text-2xl sm:text-3xl font-black text-[#1C3563] tracking-tight mb-2">
-          정밀 명리학 용어 & 분석 프레임워크 해설
-        </h2>
+      <div class="glass-card rounded-2xl p-6 sm:p-7 shadow-md border border-purple-200/80 space-y-3">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1C3563]/10 text-[#1C3563] text-xs font-bold mb-2">
+              <i class="fa-solid fa-book-sparkles"></i> 명리학 용어 & 스토리라인 비교 가이드
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-black text-[#1C3563] tracking-tight">
+              사주 용어 해설 (전통 명리학 vs 쉬운 풀이)
+            </h2>
+          </div>
+          <div class="text-xs text-slate-600 bg-white/80 border border-purple-100 rounded-xl p-3 shadow-sm md:text-right">
+            <span class="font-bold text-[#1C3563]">해석 로직:</span> 구조(설계도) ➔ 균형(체력·기후) ➔ 상호작용(격국·합충) ➔ 시간(대운·세운)
+          </div>
+        </div>
+
         <p class="text-base text-slate-700 leading-relaxed">
-          정밀 명리 분석 시스템에서 사용되는 <b>사주 4주 8자, 지장간(투간), 신강신약, 조후, 격국, 용희기신, 합충형파해, 대운·세운</b>의 핵심 원리를 정리했습니다.
+          왼쪽의 <b>전통 명리학 전문 개념</b>과 오른쪽의 <b>직관적인 스토리라인 풀이</b>를 나란히 비교하여, 복잡한 사주 원리를 누구나 쉽고 명확하게 이해할 수 있도록 구성했습니다.
         </p>
       </div>
 
-      <!-- Key Dimensions Grid (8 Cards) -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Vertical 1~8 Storyline & Terms Sequence -->
+      <div class="space-y-6">
 
-        <!-- 1. 사주 4주 8자 & 지장간 (Four Pillars & Hidden Stems) -->
-        <div class="glass-card rounded-2xl p-6 shadow-md border border-purple-200/80 space-y-4">
-          <div class="flex items-center gap-3 pb-3 border-b border-purple-100">
-            <div class="w-9 h-9 rounded-lg bg-[#1C3563]/10 text-[#1C3563] flex items-center justify-center font-bold text-lg">
-              1
+        <!-- 1: 사주 4주 8자 & 지장간 -->
+        <div class="glass-card rounded-2xl p-6 sm:p-7 shadow-md border border-purple-200/80 hover:border-purple-300 transition-all">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            <!-- Left: Traditional Saju Terms & Principles -->
+            <div class="lg:col-span-7 flex flex-col justify-start space-y-3.5 pr-0 lg:pr-3">
+              <div class="flex items-center gap-3 pb-3 border-b border-purple-100">
+                <div class="w-8 h-8 rounded-lg bg-[#1C3563]/10 text-[#1C3563] flex items-center justify-center font-bold text-base shrink-0">
+                  1
+                </div>
+                <div>
+                  <h4 class="font-bold text-lg sm:text-xl text-[#1C3563]">사주 4주 8자 & 지장간(支藏干)</h4>
+                  <p class="text-xs sm:text-sm text-slate-500">시간의 4개 기둥과 지지 속에 품은 3단계 기운(여기·중기·본기)</p>
+                </div>
+              </div>
+
+              <div class="space-y-3 text-sm sm:text-[15px] text-slate-800 leading-relaxed">
+                <p><strong class="text-[#1C3563]">● 일주(日柱·본원):</strong> <span class="font-bold text-slate-950">나 자신(일간)</span>과 배우자궁(일지)을 나타내며 모든 사주 해석의 절대적 중심 기준점입니다.</p>
+                <p><strong class="text-slate-900">● 월주(月柱·월령):</strong> 태어난 계절의 기운이자 사회적 직업 환경, 성장 배경의 기반을 결정합니다.</p>
+                <p><strong class="text-slate-900">● 년주 & 시주:</strong> 년주는 나의 뿌리·가문·초기 환경, 시주는 후반 인생·미래·자녀·최종 결실을 뜻합니다.</p>
+                <p><strong class="text-[#1C3563]">● 지장간 3단계(여기·중기·본기):</strong> 지지 안에 숨겨진 천간 기운으로, 겉으로 드러난 성향과 운에서 깨어나는 잠재 성분을 정밀 판별합니다.</p>
+                <p><strong class="text-purple-700 font-semibold">● 투간(透干):</strong> 지장간의 잠재 기운이 천간으로 뻗어 나와 사회적으로 강력하게 발현되는 현상입니다.</p>
+              </div>
             </div>
-            <div>
-              <h3 class="font-bold text-lg text-[#1C3563]">사주 4주 8자 & 지장간(支藏干)</h3>
-              <p class="text-xs text-slate-500">시간의 4개 기둥과 지지 속에 품은 3단계 기운</p>
+
+            <!-- Right: Easy Storyline Interpretation -->
+            <div class="lg:col-span-5 flex flex-col justify-between p-5 rounded-xl bg-gradient-to-br from-purple-50/90 via-indigo-50/60 to-purple-50/40 border border-purple-100 space-y-4">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-purple-700 bg-purple-100/80 px-2.5 py-0.5 rounded-full">기본 설계도 & 숨은 재료</span>
+                </div>
+                <h3 class="text-lg font-bold text-[#1C3563]">“이 사람은 어떤 구조로 태어났는가?”</h3>
+                <p class="text-xs text-slate-600 font-medium">인물 소개 & 겉으로 드러나지 않은 내부 구성</p>
+              </div>
+
+              <div class="p-3.5 rounded-lg bg-white/90 border border-purple-200/60 shadow-sm space-y-2 text-xs sm:text-sm text-slate-700 leading-relaxed">
+                <div class="flex items-center gap-2 font-bold text-[#1C3563]">
+                  <i class="fa-solid fa-building-user text-purple-600"></i>
+                  <span>쉬운 비유: 건물의 외관과 숨은 원자재</span>
+                </div>
+                <p>
+                  천간과 지지가 건물의 외관(표면적인 인물 소개)이라면, <b>지장간은 그 지지 속에 숨어 있는 핵심 재료</b>입니다.
+                </p>
+                <p class="text-slate-600">
+                  겉으로는 흙(土)처럼 보여도 내부에는 나무(木)·불(火)이 숨어 있을 수 있습니다. 즉 <b>"표면적인 사주 ➔ 내면의 잠재 성분"</b>으로 들어가는 첫 단계입니다.
+                </p>
+              </div>
+
+              <div class="text-[11px] text-purple-800 font-semibold bg-purple-100/50 p-2 rounded-md">
+                💡 질문: 겉으로 보이는 나와 내면의 숨겨진 재능은 무엇인가?
+              </div>
             </div>
-          </div>
-          <div class="space-y-2.5 text-sm text-slate-700 leading-relaxed">
-            <p><strong class="text-[#1C3563]">● 일주(日柱·본원):</strong> <span class="font-bold text-slate-900">나 자신(일간)</span>과 배우자궁(일지)을 나타내며 사주 해석의 중심 기준점입니다.</p>
-            <p><strong class="text-slate-900">● 월주(月柱·월령):</strong> 내가 태어난 계절의 기운(월령)과 사회적 직업 환경을 결정합니다.</p>
-            <p><strong class="text-[#1C3563]">● 지장간 3단계(여기·중기·본기):</strong> 지지 안에 숨어 있는 천간 기운으로, 겉으로 드러난 기질과 운에서 활성화되는 잠재 기질을 구별하는 열쇠입니다.</p>
-            <p><strong class="text-purple-700">● 투간(透干):</strong> 지장간의 기운이 천간으로 뻗어 나와 사회적으로 강력하게 발현되는 현상입니다.</p>
           </div>
         </div>
 
-        <!-- 2. 신강·신약 & 조후 (Body Strength & Climate Balance) -->
-        <div class="glass-card rounded-2xl p-6 shadow-md border border-purple-200/80 space-y-4">
-          <div class="flex items-center gap-3 pb-3 border-b border-purple-100">
-            <div class="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-lg">
-              2
+        <!-- 2: 신강·신약 -->
+        <div class="glass-card rounded-2xl p-6 sm:p-7 shadow-md border border-purple-200/80 hover:border-purple-300 transition-all">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            <!-- Left: Traditional Saju Terms & Principles -->
+            <div class="lg:col-span-7 flex flex-col justify-start space-y-3.5 pr-0 lg:pr-3">
+              <div class="flex items-center gap-3 pb-3 border-b border-purple-100">
+                <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-base shrink-0">
+                  2
+                </div>
+                <div>
+                  <h4 class="font-bold text-lg sm:text-xl text-[#1C3563]">신강·신약(身强身弱) 판정 체계</h4>
+                  <p class="text-xs sm:text-sm text-slate-500">득령·득지·득세 기반의 에너지 주도권 분석</p>
+                </div>
+              </div>
+
+              <div class="space-y-3 text-sm sm:text-[15px] text-slate-800 leading-relaxed">
+                <p><strong class="text-emerald-700">● 득령(得令):</strong> 태어난 월(월지)이 나를 돕는 계절인가? (신강약 판정에서 가장 큰 가중치).</p>
+                <p><strong class="text-[#1C3563]">● 득지(得地) & 득세(得勢):</strong> 지지에 뿌리를 내렸는지(통근), 천간에서 비겁과 인성의 생조 세력을 얻었는지를 계산합니다.</p>
+                <p><strong class="text-slate-900">● 신강(身强):</strong> 주체성과 추진력이 강하여 관성(조직 규범)과 재성·식상의 부담을 스스로 짊어지고 돌파할 힘이 큼.</p>
+                <p><strong class="text-slate-800">● 신약(身弱):</strong> 상황에 유연하고 센스가 뛰어나며, 인성(학문/멘토 후원)과 비겁(파트너십/동료 협업)을 활용할 때 최고의 성과 창출.</p>
+              </div>
             </div>
-            <div>
-              <h3 class="font-bold text-lg text-[#1C3563]">신강·신약(身强身弱) & 조후(調候)</h3>
-              <p class="text-xs text-slate-500">일간의 에너지 주도권과 원국의 온습도 균형</p>
+
+            <!-- Right: Easy Storyline Interpretation -->
+            <div class="lg:col-span-5 flex flex-col justify-between p-5 rounded-xl bg-gradient-to-br from-emerald-50/90 via-teal-50/60 to-emerald-50/40 border border-emerald-100 space-y-4">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-emerald-700 bg-emerald-100/80 px-2.5 py-0.5 rounded-full">기본 체력 & 에너지</span>
+                </div>
+                <h3 class="text-lg font-bold text-emerald-950">“내 기본 체력(엔진 크기)은 어느 정도인가?”</h3>
+                <p class="text-xs text-slate-600 font-medium">나라는 주체의 에너지 자생력과 추진 강도</p>
+              </div>
+
+              <div class="p-3.5 rounded-lg bg-white/90 border border-emerald-200/60 shadow-sm space-y-2 text-xs sm:text-sm text-slate-700 leading-relaxed">
+                <div class="flex items-center gap-2 font-bold text-emerald-800">
+                  <i class="fa-solid fa-car-battery text-emerald-600"></i>
+                  <span>쉬운 비유: 자동차 엔진의 배기량</span>
+                </div>
+                <p>
+                  일간을 기준으로 <b>“나라는 주체가 강한가, 약한가?”</b>를 봅니다.
+                </p>
+                <p class="text-slate-600">
+                  • <b>신강</b> = 대형 엔진 (추진력 큼) / • <b>신약</b> = 소형 엔진 (연비·기동성 우수)<br/>
+                  엔진이 크다고 무조건 좋고 작다고 나쁜 게 아닙니다. <b>"큰 엔진에는 제어와 방향이 필요하고, 작은 엔진에는 연료와 보호가 필요합니다."</b>
+                </p>
+              </div>
+
+              <div class="text-[11px] text-emerald-800 font-semibold bg-emerald-100/50 p-2 rounded-md">
+                💡 질문: 나는 혼자 밀어붙이는 돌파형인가, 협업과 조력으로 풀어나가는 유연형인가?
+              </div>
             </div>
-          </div>
-          <div class="space-y-2 text-sm text-slate-700 leading-relaxed">
-            <p><strong class="text-emerald-700">● 득령(得令)·득지(得地)·득세(得勢):</strong> 월령(월지)을 얻었는지, 지지에 뿌리를 내렸는지, 천간의 생조를 받는지로 신강/신약을 판정합니다.</p>
-            <p><strong class="text-slate-900">● 신강(身强):</strong> 주관과 추진력이 강하여 관성(조직/책임)이나 재성/식상을 감당할 힘이 큼.</p>
-            <p><strong class="text-slate-800">● 신약(身弱):</strong> 환경에 유연하고 센스가 뛰어나며 인성(학문/후원)과 비겁(동료/파트너)의 협업이 유리함.</p>
-            <p><strong class="text-blue-700">● 조후(한난조습):</strong> 사주의 춥고(寒), 덥고(暖), 마르고(燥), 습한(濕) 기후 균형을 맞추는 핵심 팩터입니다.</p>
           </div>
         </div>
 
-        <!-- 3. 격국(格局)과 십신(十神)의 분리 -->
-        <div class="glass-card rounded-2xl p-6 shadow-md border border-purple-200/80 space-y-4">
-          <div class="flex items-center gap-3 pb-3 border-b border-purple-100">
-            <div class="w-9 h-9 rounded-lg bg-[#1C3563]/10 text-[#1C3563] flex items-center justify-center font-bold text-lg">
-              3
+        <!-- 3: 조후(調候) -->
+        <div class="glass-card rounded-2xl p-6 sm:p-7 shadow-md border border-purple-200/80 hover:border-purple-300 transition-all">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            <!-- Left: Traditional Saju Terms & Principles -->
+            <div class="lg:col-span-7 flex flex-col justify-start space-y-3.5 pr-0 lg:pr-3">
+              <div class="flex items-center gap-3 pb-3 border-b border-purple-100">
+                <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-800 flex items-center justify-center font-bold text-base shrink-0">
+                  3
+                </div>
+                <div>
+                  <h4 class="font-bold text-lg sm:text-xl text-[#1C3563]">조후(한난조습·寒暖燥濕) 균형 원리</h4>
+                  <p class="text-xs sm:text-sm text-slate-500">사주의 생명력과 정서적 안정감을 지키는 기후 인자</p>
+                </div>
+              </div>
+
+              <div class="space-y-3 text-sm sm:text-[15px] text-slate-800 leading-relaxed">
+                <p><strong class="text-blue-700">● 한난조습(寒暖燥濕):</strong> 사주의 춥고(寒), 덥고(暖), 마르고(燥), 습한(濕) 4대 기후 밸런스를 측정합니다.</p>
+                <p><strong class="text-[#1C3563]">● 월령(월지) 중심 진단:</strong> 한겨울(해자축월)생은 火(온기)가 시급하고, 한여름(사오미월)생은 水(수분·냉각)가 최우선 구원투수(조후용신)가 됩니다.</p>
+                <p><strong class="text-slate-900">● 심리적 회복탄력성:</strong> 조후가 맞으면 마음에 여유와 정서적 안정감이 생겨 위기 상황에서도 올바른 판단을 내립니다.</p>
+                <p><strong class="text-amber-800">● 조후 결핍 시:</strong> 능력이 뛰어나도 환경이 척박하게 느껴지거나 번아웃·불안을 겪기 쉬우므로 보정 요소(환경/사람/습관)가 필수적입니다.</p>
+              </div>
             </div>
-            <div>
-              <h3 class="font-bold text-lg text-[#1C3563]">격국(格局) vs 십신(十神)</h3>
-              <p class="text-xs text-slate-500">사회적 그릇의 틀(격국)과 세부 상호작용(십신)</p>
+
+            <!-- Right: Easy Storyline Interpretation -->
+            <div class="lg:col-span-5 flex flex-col justify-between p-5 rounded-xl bg-gradient-to-br from-sky-50/90 via-blue-50/60 to-sky-50/40 border border-sky-100 space-y-4">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-blue-700 bg-blue-100/80 px-2.5 py-0.5 rounded-full">기후 & 환경 조건</span>
+                </div>
+                <h3 class="text-lg font-bold text-blue-950">“이 자동차가 놓인 기후는 어떤가?”</h3>
+                <p class="text-xs text-slate-600 font-medium">원국의 온도와 습도(한난조습) 밸런스</p>
+              </div>
+
+              <div class="p-3.5 rounded-lg bg-white/90 border border-sky-200/60 shadow-sm space-y-2 text-xs sm:text-sm text-slate-700 leading-relaxed">
+                <div class="flex items-center gap-2 font-bold text-blue-800">
+                  <i class="fa-solid fa-cloud-sun text-blue-600"></i>
+                  <span>쉬운 비유: 달리는 도로의 날씨와 온도</span>
+                </div>
+                <p>
+                  신강·신약이 <b>힘(체력)의 문제</b>라면 조후는 <b>온도와 습도의 문제</b>입니다.
+                </p>
+                <p class="text-slate-600">
+                  겨울 태생에게 불(火)은 단순한 오행이 아니라 <b>얼어붙은 엔진을 녹여 굴러가게 만드는 필수 온기</b>입니다.<br/>
+                  <b>"신강약 = 체력 / 조후 = 달리는 기후 환경"</b>
+                </p>
+              </div>
+
+              <div class="text-[11px] text-blue-800 font-semibold bg-blue-100/50 p-2 rounded-md">
+                💡 질문: 내 마음과 환경이 너무 차가운가, 너무 뜨겁고 조급한가?
+              </div>
             </div>
-          </div>
-          <div class="space-y-2 text-sm text-slate-700 leading-relaxed">
-            <p><strong class="text-[#1C3563]">● 격국(格局):</strong> 월지 지장간 투간을 기준으로 확정하는 사주의 **'사회적 역할과 그릇의 틀'** (정관격, 재격, 식신격, 인수격 등 정격 8격 및 특수격).</p>
-            <p><strong class="text-amber-800">● 십신(十神):</strong> 비겁(주체성), 식상(표현·생산), 재성(자산·결과), 관성(규범·직장), 인성(학문·수용) 5대 영역의 10가지 역동적 상호작용.</p>
           </div>
         </div>
 
-        <!-- 4. 용희기신 (Useful Gods & Balance) -->
-        <div class="glass-card rounded-2xl p-6 shadow-md border border-purple-200/80 space-y-4">
-          <div class="flex items-center gap-3 pb-3 border-b border-purple-100">
-            <div class="w-9 h-9 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-lg">
-              4
+        <!-- 4: 격국(格局) & 십신(十神) -->
+        <div class="glass-card rounded-2xl p-6 sm:p-7 shadow-md border border-purple-200/80 hover:border-purple-300 transition-all">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            <!-- Left: Traditional Saju Terms & Principles -->
+            <div class="lg:col-span-7 flex flex-col justify-start space-y-3.5 pr-0 lg:pr-3">
+              <div class="flex items-center gap-3 pb-3 border-b border-purple-100">
+                <div class="w-8 h-8 rounded-lg bg-[#1C3563]/10 text-[#1C3563] flex items-center justify-center font-bold text-base shrink-0">
+                  4
+                </div>
+                <div>
+                  <h4 class="font-bold text-lg sm:text-xl text-[#1C3563]">격국(格局)과 십신(十神) 체계</h4>
+                  <p class="text-xs sm:text-sm text-slate-500">사회적 그릇의 틀(격국)과 5대 기능 영역(십신)</p>
+                </div>
+              </div>
+
+              <div class="space-y-3 text-sm sm:text-[15px] text-slate-800 leading-relaxed">
+                <p><strong class="text-[#1C3563]">● 격국(格局):</strong> 월지 지장간 투간을 기준으로 사주의 사회적 역할과 성취 통로 확정 (정관격, 재격, 식신격, 인수격 등 정격 8격 및 특수격).</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-xs sm:text-sm">
+                  <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200/70">
+                    <b class="text-emerald-700">● 비겁(比劫):</b> 자립심, 주체성, 동료 네트워크
+                  </div>
+                  <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200/70">
+                    <b class="text-sky-700">● 식상(食傷):</b> 기획, 창의, 생산, 표현 및 전문기술
+                  </div>
+                  <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200/70">
+                    <b class="text-amber-700">● 재성(財星):</b> 자산 관리, 결과물 창출, 시장 감각
+                  </div>
+                  <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200/70">
+                    <b class="text-purple-700">● 관성(官星):</b> 조직 규범, 리더십, 책임감, 브랜드
+                  </div>
+                </div>
+                <p><strong class="text-rose-800">● 인성(印星):</strong> 수용성, 학습 연구, 지적 재산권, 멘토 후원 역량.</p>
+              </div>
             </div>
-            <div>
-              <h3 class="font-bold text-lg text-[#1C3563]">용희기신 (用喜忌神)</h3>
-              <p class="text-xs text-slate-500">사주의 균형과 발전을 이끄는 전략적 기운</p>
+
+            <!-- Right: Easy Storyline Interpretation -->
+            <div class="lg:col-span-5 flex flex-col justify-between p-5 rounded-xl bg-gradient-to-br from-indigo-50/90 via-purple-50/60 to-indigo-50/40 border border-indigo-100 space-y-4">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-indigo-700 bg-indigo-100/80 px-2.5 py-0.5 rounded-full">사회적 작동 방식</span>
+                </div>
+                <h3 class="text-lg font-bold text-[#1C3563]">“사회에서 성과를 내는 주요 방식은 무엇인가?”</h3>
+                <p class="text-xs text-slate-600 font-medium">직업적 그릇의 틀(격국)과 5대 역동 관계(십신)</p>
+              </div>
+
+              <div class="p-3.5 rounded-lg bg-white/90 border border-indigo-200/60 shadow-sm space-y-2 text-xs sm:text-sm text-slate-700 leading-relaxed">
+                <div class="flex items-center gap-2 font-bold text-[#1C3563]">
+                  <i class="fa-solid fa-gears text-indigo-600"></i>
+                  <span>쉬운 비유: 자동차의 용도와 구동 방식</span>
+                </div>
+                <p>
+                  격국은 단순히 "당신은 이런 직업입니다"라는 점괘가 아니라, <b>“이 사주가 현실에서 성과를 만들어내는 주요 통로가 무엇인가?”</b>를 보는 것입니다.
+                </p>
+                <p class="text-slate-600">
+                  재격이면 자산/시장 중심, 관격이면 조직/시스템 중심, 식신격이면 전문기술/기획 중심으로 사회와 상호작용합니다.
+                </p>
+              </div>
+
+              <div class="text-[11px] text-indigo-800 font-semibold bg-indigo-100/50 p-2 rounded-md">
+                💡 질문: 나는 조직의 룰을 세우는 사람인가, 가치를 만들어 파는 사람인가, 기술을 갈고닦는 사람인가?
+              </div>
             </div>
-          </div>
-          <div class="space-y-2 text-sm text-slate-700 leading-relaxed">
-            <p><strong class="text-emerald-700">● 용신(用神):</strong> 사주의 불균형을 해소하고 최상의 성과를 내게 돕는 핵심 글자/오행.</p>
-            <p><strong class="text-[#1C3563]">● 희신(喜神):</strong> 용신을 생조하고 돕는 긍정적 파트너 기운.</p>
-            <p><strong class="text-rose-700">● 기신(忌神) & 구신(仇神):</strong> 사주의 균형을 깨뜨리거나 용신을 극하는 주의 기운.</p>
-            <p><strong class="text-slate-600">● 한신(閑神):</strong> 상황에 따라 길흉이 달라지는 중립 기운.</p>
           </div>
         </div>
 
-        <!-- 5. 합·충·형·파·해 (Harmonies, Clashes & Destructions) -->
-        <div class="glass-card rounded-2xl p-6 shadow-md border border-purple-200/80 space-y-4">
-          <div class="flex items-center gap-3 pb-3 border-b border-purple-100">
-            <div class="w-9 h-9 rounded-lg bg-pink-100 text-pink-700 flex items-center justify-center font-bold text-lg">
-              5
+        <!-- 5: 용희기신 (用喜忌神) -->
+        <div class="glass-card rounded-2xl p-6 sm:p-7 shadow-md border border-purple-200/80 hover:border-purple-300 transition-all">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            <!-- Left: Traditional Saju Terms & Principles -->
+            <div class="lg:col-span-7 flex flex-col justify-start space-y-3.5 pr-0 lg:pr-3">
+              <div class="flex items-center gap-3 pb-3 border-b border-purple-100">
+                <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-base shrink-0">
+                  5
+                </div>
+                <div>
+                  <h4 class="font-bold text-lg sm:text-xl text-[#1C3563]">용희기신(用喜忌神) 밸런스 시스템</h4>
+                  <p class="text-xs sm:text-sm text-slate-500">사주의 불균형을 해소하고 최상의 성과를 이끄는 핵심 기운</p>
+                </div>
+              </div>
+
+              <div class="space-y-3 text-sm sm:text-[15px] text-slate-800 leading-relaxed">
+                <p><strong class="text-emerald-700">● 용신(用神):</strong> 사주의 결핍이나 지나침을 보정하여 최적의 균형과 잠재력을 폭발시키는 가장 핵심적인 글자/오행.</p>
+                <p><strong class="text-[#1C3563]">● 희신(喜神):</strong> 용신을 생조하고 돕는 긍정적 파트너 기운으로, 용신의 지속력을 보장함.</p>
+                <p><strong class="text-rose-700">● 기신(忌神) & 구신(仇神):</strong> 사주의 균형을 깨뜨리거나 용신을 공격하는 과도한 기운 (리스크 관리 대상).</p>
+                <p><strong class="text-slate-600">● 한신(閑神):</strong> 대운이나 세운의 조합에 따라 용신 편이 되기도 하고 기신 편이 되기도 하는 중립 기운.</p>
+              </div>
             </div>
-            <div>
-              <h3 class="font-bold text-lg text-[#1C3563]">합·충·형·파·해 (合·沖·刑·破·害)</h3>
-              <p class="text-xs text-slate-500">글자 간 결합, 충돌, 조정의 동적 역학</p>
+
+            <!-- Right: Easy Storyline Interpretation -->
+            <div class="lg:col-span-5 flex flex-col justify-between p-5 rounded-xl bg-gradient-to-br from-amber-50/90 via-orange-50/60 to-amber-50/40 border border-amber-100 space-y-4">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-amber-700 bg-amber-100/80 px-2.5 py-0.5 rounded-full">맞춤 처방전</span>
+                </div>
+                <h3 class="text-lg font-bold text-amber-950">“무엇이 필요하고 무엇을 조심해야 하는가?”</h3>
+                <p class="text-xs text-slate-600 font-medium">앞의 모든 분석을 종합한 시스템 밸런스 패치</p>
+              </div>
+
+              <div class="p-3.5 rounded-lg bg-white/90 border border-amber-200/60 shadow-sm space-y-2 text-xs sm:text-sm text-slate-700 leading-relaxed">
+                <div class="flex items-center gap-2 font-bold text-amber-800">
+                  <i class="fa-solid fa-prescription-bottle-medical text-amber-600"></i>
+                  <span>쉬운 비유: 내 시스템을 살리는 전략 처방전</span>
+                </div>
+                <p>
+                  스토리로 연결하면 아주 간단합니다.<br/>
+                  <b>“현재 상태를 보니 ➔ 이런 불균형이 있다 ➔ 그러므로 이 요소가 필요하다.”</b>
+                </p>
+                <p class="text-slate-600">
+                  신강약·조후·격국은 따로 노는 게 아니라, <b>“어떻게 시스템을 안정시키고 성공시킬 것인가?”</b>라는 하나의 질문으로 귀결됩니다.
+                </p>
+              </div>
+
+              <div class="text-[11px] text-amber-800 font-semibold bg-amber-100/50 p-2 rounded-md">
+                💡 질문: 내 삶에 지금 가장 절실한 기운(용신)과 거리를 두어야 할 과욕(기신)은 무엇인가?
+              </div>
             </div>
-          </div>
-          <div class="space-y-2 text-sm text-slate-700 leading-relaxed">
-            <p><strong class="text-pink-700">● 합(合 - 천간합/육합/삼합/방합):</strong> 기운의 융합과 협력, 새로운 오행으로의 변화(합화).</p>
-            <p><strong class="text-rose-700">● 충(沖 - 6충):</strong> 정면충돌, 급격한 변화, 이동, 활발한 역동성 촉발.</p>
-            <p><strong class="text-amber-800">● 형(刑 - 삼형/자형):</strong> 수술, 법률, 정밀 가공, 권력, 자기 성찰과 스트레스 관리.</p>
-            <p><strong class="text-slate-700">● 파(破)·해(害):</strong> 조율 과정의 틈, 분리, 관계적 미세 마찰.</p>
           </div>
         </div>
 
-        <!-- 6. 12운성 & 신살 (Supplementary Energies) -->
-        <div class="glass-card rounded-2xl p-6 shadow-md border border-purple-200/80 space-y-4">
-          <div class="flex items-center gap-3 pb-3 border-b border-purple-100">
-            <div class="w-9 h-9 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-lg">
-              6
+        <!-- 6: 합·충·형·파·해 -->
+        <div class="glass-card rounded-2xl p-6 sm:p-7 shadow-md border border-purple-200/80 hover:border-purple-300 transition-all">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            <!-- Left: Traditional Saju Terms & Principles -->
+            <div class="lg:col-span-7 flex flex-col justify-start space-y-3.5 pr-0 lg:pr-3">
+              <div class="flex items-center gap-3 pb-3 border-b border-purple-100">
+                <div class="w-8 h-8 rounded-lg bg-pink-100 text-pink-700 flex items-center justify-center font-bold text-base shrink-0">
+                  6
+                </div>
+                <div>
+                  <h4 class="font-bold text-lg sm:text-xl text-[#1C3563]">합·충·형·파·해 (合·沖·刑·破·害) 동적 관계</h4>
+                  <p class="text-xs sm:text-sm text-slate-500">천간과 지지 사이에서 일어나는 사건 발생의 트리거 메커니즘</p>
+                </div>
+              </div>
+
+              <div class="space-y-3 text-sm sm:text-[15px] text-slate-800 leading-relaxed">
+                <p><strong class="text-pink-700">● 합(合 - 천간합·육합·삼합·방합):</strong> 기운의 융합과 협력, 결속력 강화 및 새로운 오행으로의 승화(합화).</p>
+                <p><strong class="text-rose-700">● 충(沖 - 6충):</strong> 정면충돌, 급격한 환경 변화, 이동·이직, 정체된 에너지를 깨뜨리고 분출시키는 역동성.</p>
+                <p><strong class="text-amber-800">● 형(刑 - 삼형·자형):</strong> 수술, 법률, 정밀 조정, 권력 행사, 자기 성찰과 내적 스트레스 관리 필요.</p>
+                <p><strong class="text-slate-700">● 파(破)·해(害):</strong> 조율 과정의 틈, 분리, 관계적 미세 마찰 및 디테일 보완 포인트.</p>
+              </div>
             </div>
-            <div>
-              <h3 class="font-bold text-lg text-[#1C3563]">12운성 & 신살 (보조 지표)</h3>
-              <p class="text-xs text-slate-500">기운의 완급 조절과 특수 재능 뉘앙스</p>
+
+            <!-- Right: Easy Storyline Interpretation -->
+            <div class="lg:col-span-5 flex flex-col justify-between p-5 rounded-xl bg-gradient-to-br from-pink-50/90 via-rose-50/60 to-pink-50/40 border border-pink-100 space-y-4">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-pink-700 bg-pink-100/80 px-2.5 py-0.5 rounded-full">내부 상호작용 & 사건</span>
+                </div>
+                <h3 class="text-lg font-bold text-pink-950">“인간관계와 사건에서 어디가 움직이는가?”</h3>
+                <p class="text-xs text-slate-600 font-medium">글자 간 결합, 충돌, 조정의 동적 역학</p>
+              </div>
+
+              <div class="p-3.5 rounded-lg bg-white/90 border border-pink-200/60 shadow-sm space-y-2 text-xs sm:text-sm text-slate-700 leading-relaxed">
+                <div class="flex items-center gap-2 font-bold text-pink-800">
+                  <i class="fa-solid fa-atom text-pink-600"></i>
+                  <span>쉬운 비유: 시스템 부품들의 상호작용과 사건 발생 지점</span>
+                </div>
+                <p>
+                  정적인 사주가 실제로 작동할 때 일어나는 <b>동적인 충돌과 결합</b>입니다.
+                </p>
+                <p class="text-slate-600">
+                  충(沖)이 무조건 나쁜 것이 아니라 <b>“무엇과 무엇이 부딪혀 새로운 변화를 촉발하는가?”</b>가 핵심입니다.<br/>
+                  (직업과 재물, 가족과 사회, 욕구와 현실의 접점 파악)
+                </p>
+              </div>
+
+              <div class="text-[11px] text-pink-800 font-semibold bg-pink-100/50 p-2 rounded-md">
+                💡 질문: 나와 주변 사람, 나와 일 사이에서 어떤 마찰과 시너지가 일어나는가?
+              </div>
             </div>
-          </div>
-          <div class="space-y-2 text-sm text-slate-700 leading-relaxed">
-            <p><strong class="text-[#1C3563]">● 12운성:</strong> 장생, 건록, 제왕, 쇠, 묘, 절 등 에너지 발현의 활성/잠재 완급 척도 (단정적 길흉 배제).</p>
-            <p><strong class="text-amber-800">● 길신(천을귀인, 문창):</strong> 위기 돌파 조력과 학습/문장 역량.</p>
-            <p><strong class="text-rose-700">● 특수살(도화, 역마, 괴강, 백호):</strong> 대중 인기, 글로벌 활동력, 프로페셔널 돌파력.</p>
           </div>
         </div>
 
-        <!-- 7. 대운(大運)과 세운(歲運) -->
-        <div class="glass-card rounded-2xl p-6 shadow-md border border-purple-200/80 space-y-4">
-          <div class="flex items-center gap-3 pb-3 border-b border-purple-100">
-            <div class="w-9 h-9 rounded-lg bg-blue-100 text-blue-800 flex items-center justify-center font-bold text-lg">
-              7
+        <!-- 7: 대운(大運)과 세운(歲運) -->
+        <div class="glass-card rounded-2xl p-6 sm:p-7 shadow-md border border-purple-200/80 hover:border-purple-300 transition-all">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            <!-- Left: Traditional Saju Terms & Principles -->
+            <div class="lg:col-span-7 flex flex-col justify-start space-y-3.5 pr-0 lg:pr-3">
+              <div class="flex items-center gap-3 pb-3 border-b border-purple-100">
+                <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-800 flex items-center justify-center font-bold text-base shrink-0">
+                  7
+                </div>
+                <div>
+                  <h4 class="font-bold text-lg sm:text-xl text-[#1C3563]">대운(大運) × 세운(歲運) & 보조 지표</h4>
+                  <p class="text-xs sm:text-sm text-slate-500">시간의 흐름에 따른 환경 변화와 12운성·신살의 뉘앙스</p>
+                </div>
+              </div>
+
+              <div class="space-y-3 text-sm sm:text-[15px] text-slate-800 leading-relaxed">
+                <p><strong class="text-blue-700">● 대운(大運 - 10년 주기):</strong> 계절처럼 흐르는 거시적 삶의 무대 변화. 대운이 바뀌는 '교운기'에는 직업, 거주지, 가치관의 대전환 발생.</p>
+                <p><strong class="text-pink-700">● 세운(歲運 - 1년 주기):</strong> 매년 들어오는 구체적 사건의 촉발점(트리거). 원국 및 대운과 만나 합/충을 일으키며 현실 사건화.</p>
+                <p><strong class="text-[#1C3563]">● 12운성(十二運星):</strong> 장생, 건록, 제왕, 쇠, 묘, 절 등 에너지 발현의 활성/잠재 완급 척도 (단정적 길흉 배제).</p>
+                <p><strong class="text-amber-800">● 신살(神煞):</strong> 천을귀인·문창(위기 돌파/학습 지혜), 도화·역마·괴강·백호(대중성/기동성/전문 돌파력) 등 특수 재능 뉘앙스.</p>
+              </div>
             </div>
-            <div>
-              <h3 class="font-bold text-lg text-[#1C3563]">대운(大運) × 세운(歲運)</h3>
-              <p class="text-xs text-slate-500">10년의 환경(계절)과 1년의 사건(촉발점)</p>
+
+            <!-- Right: Easy Storyline Interpretation -->
+            <div class="lg:col-span-5 flex flex-col justify-between p-5 rounded-xl bg-gradient-to-br from-blue-50/90 via-indigo-50/60 to-blue-50/40 border border-blue-100 space-y-4">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-blue-700 bg-blue-100/80 px-2.5 py-0.5 rounded-full">시대 배경과 이벤트</span>
+                </div>
+                <h3 class="text-lg font-bold text-blue-950">“그 사람은 지금 어떤 시대를 지나고 있는가?”</h3>
+                <p class="text-xs text-slate-600 font-medium">10년 단위의 시대 배경(대운)과 연간 이벤트(세운)</p>
+              </div>
+
+              <div class="p-3.5 rounded-lg bg-white/90 border border-blue-200/60 shadow-sm space-y-2 text-xs sm:text-sm text-slate-700 leading-relaxed">
+                <div class="flex items-center gap-2 font-bold text-blue-800">
+                  <i class="fa-solid fa-road text-blue-600"></i>
+                  <span>쉬운 비유: 10년의 도로 상태와 1년의 신호등</span>
+                </div>
+                <p>
+                  • <b>원국</b> = 자동차의 기본 성능과 하드웨어<br/>
+                  • <b>대운</b> = 지금 10년 동안 달리는 도로(고속도로 vs 비포장길)<br/>
+                  • <b>세운</b> = 그 길목에서 올해 만나는 구체적 신호등/갈림길
+                </p>
+                <p class="text-slate-600">
+                  내 원국에 필요한 오행(용신)이 대운에서 들어오면 <b>“내 설계에 딱 맞는 최적의 시대 환경이 10년간 펼쳐진다”</b>고 해석합니다.
+                </p>
+              </div>
+
+              <div class="text-[11px] text-blue-800 font-semibold bg-blue-100/50 p-2 rounded-md">
+                💡 질문: 지금 10년은 씨앗을 뿌릴 때인가, 거침없이 수확할 때인가?
+              </div>
             </div>
-          </div>
-          <div class="space-y-2 text-sm text-slate-700 leading-relaxed">
-            <p><strong class="text-blue-700">● 원국(바탕):</strong> 자동차의 성능과 하드웨어 구조.</p>
-            <p><strong class="text-[#1C3563]">● 대운(10년 환경):</strong> 자동차가 달리는 고속도로/비포장도로 등 거시적 날씨와 도로 조건.</p>
-            <p><strong class="text-pink-700">● 세운(1년 촉발점):</strong> 특정 해에 신호등이나 갈림길처럼 구체적 사건을 일으키는 트리거.</p>
           </div>
         </div>
 
-        <!-- 8. 현대적 행동 전략 (Modern Strategy) -->
-        <div class="glass-card rounded-2xl p-6 shadow-md border border-purple-200/80 space-y-4">
-          <div class="flex items-center gap-3 pb-3 border-b border-purple-100">
-            <div class="w-9 h-9 rounded-lg bg-teal-100 text-teal-800 flex items-center justify-center font-bold text-lg">
-              8
+        <!-- 8: 현대적 행동 전략 -->
+        <div class="glass-card rounded-2xl p-6 sm:p-7 shadow-md border border-purple-200/80 hover:border-purple-300 transition-all">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            <!-- Left: Traditional Saju Terms & Principles -->
+            <div class="lg:col-span-7 flex flex-col justify-start space-y-3.5 pr-0 lg:pr-3">
+              <div class="flex items-center gap-3 pb-3 border-b border-purple-100">
+                <div class="w-8 h-8 rounded-lg bg-teal-100 text-teal-800 flex items-center justify-center font-bold text-base shrink-0">
+                  8
+                </div>
+                <div>
+                  <h4 class="font-bold text-lg sm:text-xl text-[#1C3563]">현대적 행동 전략 프레임워크</h4>
+                  <p class="text-xs sm:text-sm text-slate-500">일하는 방식 6대 모델 & 행동 재무학 기반 리스크 관리</p>
+                </div>
+              </div>
+
+              <div class="space-y-3 text-sm sm:text-[15px] text-slate-800 leading-relaxed">
+                <p><strong class="text-teal-700">● 일하는 방식 6대 모델:</strong></p>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs sm:text-sm">
+                  <span class="p-2 rounded-lg bg-slate-50 border border-slate-200/60 text-slate-800 font-medium text-center">① 조직형</span>
+                  <span class="p-2 rounded-lg bg-slate-50 border border-slate-200/60 text-slate-800 font-medium text-center">② 사내 독립전문가</span>
+                  <span class="p-2 rounded-lg bg-slate-50 border border-slate-200/60 text-slate-800 font-medium text-center">③ 관리자·리더</span>
+                  <span class="p-2 rounded-lg bg-slate-50 border border-slate-200/60 text-slate-800 font-medium text-center">④ 프로젝트형</span>
+                  <span class="p-2 rounded-lg bg-slate-50 border border-slate-200/60 text-slate-800 font-medium text-center">⑤ 고객접점형</span>
+                  <span class="p-2 rounded-lg bg-slate-50 border border-slate-200/60 text-slate-800 font-medium text-center">⑥ 창업·프리랜서</span>
+                </div>
+                <p><strong class="text-amber-800">● 행동 재무학 5대 영역:</strong> 소득 창출 방식, 자산 축적, 소비 패턴, 투자 레버리지, 손실 대응력의 행동 성향 분석.</p>
+                <p><strong class="text-slate-800">● 실천적 피드백:</strong> 단점에 좌절하지 않고 강점을 레버리지하며, 취약한 기운이 올 때 시스템으로 방어하는 지혜.</p>
+              </div>
             </div>
-            <div>
-              <h3 class="font-bold text-lg text-[#1C3563]">현대적 행동 전략 프레임워크</h3>
-              <p class="text-xs text-slate-500">일하는 방식 6대 모델 & 행동 재무학</p>
+
+            <!-- Right: Easy Storyline Interpretation -->
+            <div class="lg:col-span-5 flex flex-col justify-between p-5 rounded-xl bg-gradient-to-br from-teal-50/90 via-emerald-50/60 to-teal-50/40 border border-teal-100 space-y-4">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-teal-700 bg-teal-100/80 px-2.5 py-0.5 rounded-full">전략적 의사결정</span>
+                </div>
+                <h3 class="text-lg font-bold text-teal-950">“결국 명리학은 무엇을 위해 읽는가?”</h3>
+                <p class="text-xs text-slate-600 font-medium">운명을 넘어선 전략적 의사결정과 삶의 최적화</p>
+              </div>
+
+              <div class="p-3.5 rounded-lg bg-white/90 border border-teal-200/60 shadow-sm space-y-2 text-xs sm:text-sm text-slate-700 leading-relaxed">
+                <div class="flex items-center gap-2 font-bold text-teal-800">
+                  <i class="fa-solid fa-compass text-teal-600"></i>
+                  <span>쉬운 비유: 나침반과 맞춤형 내비게이션</span>
+                </div>
+                <p>
+                  명리학의 재미는 "좋은 사주 / 나쁜 사주"를 가르는 데 있지 않습니다.
+                </p>
+                <p class="text-slate-600">
+                  <b>‘구조 ➔ 균형 ➔ 상호작용 ➔ 시간’</b>이라는 4단계로 나를 객관화하고, 내게 맞는 일하는 방식과 리스크 관리법을 찾아 실행하는 <b>전략적 나침반</b>입니다.
+                </p>
+              </div>
+
+              <div class="text-[11px] text-teal-800 font-semibold bg-teal-100/50 p-2 rounded-md">
+                💡 결론: 사주를 핑계 삼는 것이 아니라, 내 엔진에 맞는 최선의 주행법을 선택하는 것!
+              </div>
             </div>
-          </div>
-          <div class="space-y-2 text-sm text-slate-700 leading-relaxed">
-            <p><strong class="text-teal-700">● 일하는 방식 6대 모델:</strong> 조직형 / 사내 독립전문가 / 관리자·리더 / 프로젝트형 / 고객접점형 / 창업·프리랜서형.</p>
-            <p><strong class="text-amber-800">● 행동 재무학:</strong> 소득 창출 방식, 자산 축적, 소비 패턴, 투자 레버리지, 손실 대응력 분석.</p>
           </div>
         </div>
 
+      </div>
+
+      <!-- Bottom Synthesis Story Flow Callout -->
+      <div class="glass-card rounded-2xl p-6 sm:p-7 shadow-md border border-purple-200/80 bg-gradient-to-r from-purple-50/50 via-white to-indigo-50/50 space-y-4">
+        <h3 class="font-bold text-lg text-[#1C3563] flex items-center gap-2">
+          <i class="fa-solid fa-route text-purple-600"></i>
+          한 편의 이야기로 완성되는 운(運)의 5단계 흐름
+        </h3>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-5 gap-3 text-xs sm:text-sm">
+          <div class="p-3.5 rounded-xl bg-white border border-purple-100 shadow-sm space-y-1">
+            <span class="font-black text-[#1C3563] block text-xs">① 원국(原局)</span>
+            <p class="text-slate-700 font-semibold">“나는 원래 이런 사람이다”</p>
+            <p class="text-[11px] text-slate-500">기본 설계도와 하드웨어</p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-white border border-purple-100 shadow-sm space-y-1">
+            <span class="font-black text-blue-700 block text-xs">② 대운(大運)</span>
+            <p class="text-slate-700 font-semibold">“지금 10년은 이런 환경이다”</p>
+            <p class="text-[11px] text-slate-500">10년의 거시적 도로 배경</p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-white border border-purple-100 shadow-sm space-y-1">
+            <span class="font-black text-pink-700 block text-xs">③ 세운(歲運)</span>
+            <p class="text-slate-700 font-semibold">“올해는 이런 기운이 온다”</p>
+            <p class="text-[11px] text-slate-500">매년 찾아오는 촉발 이벤트</p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-white border border-purple-100 shadow-sm space-y-1">
+            <span class="font-black text-amber-700 block text-xs">④ 합충형파해</span>
+            <p class="text-slate-700 font-semibold">“원국의 어디를 건드리는가?”</p>
+            <p class="text-[11px] text-slate-500">사건이 일어나는 접점</p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-white border border-purple-100 shadow-sm space-y-1">
+            <span class="font-black text-emerald-700 block text-xs">⑤ 용희기신</span>
+            <p class="text-slate-700 font-semibold">“그 결과가 유리한가 불리한가?”</p>
+            <p class="text-[11px] text-slate-500">처방전과 최적의 행동 선택</p>
+          </div>
+        </div>
       </div>
     </div>
 
