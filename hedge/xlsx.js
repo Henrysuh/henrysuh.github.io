@@ -11,7 +11,7 @@
      sh.set('B2', { v: '제목', s: S.title });
      sh.set('C5', { v: 100,   s: S.inputNum });
      sh.set('C14', { f: 'C6+C7+C8', s: S.num });
-     wb.download('nickel_hedge.xlsx');
+     wb.download('commodity_hedge.xlsx');
    =========================================================================== */
 
 /* 스타일 인덱스 — styles.xml 의 cellXfs 순서와 1:1 대응 */

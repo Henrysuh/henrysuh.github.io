@@ -95,10 +95,10 @@ body {
 .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .brand-mark {
   display: grid; place-items: center;
-  width: 36px; height: 36px; flex: none;
-  border-radius: 9px;
+  height: 44px; padding: 0 14px; flex: none;
+  border-radius: 10px;
   background: var(--series-1); color: #fff;
-  font-weight: 700; letter-spacing: .02em;
+  font-size: 18px; font-weight: 700; letter-spacing: .01em;
 }
 .topbar h1 { margin: 0; font-size: 17.3px; font-weight: 650; letter-spacing: -.01em; }
 .brand-sub { margin: 0; font-size: 13.3px; color: var(--text-secondary); }

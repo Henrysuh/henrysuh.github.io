@@ -33,10 +33,10 @@ function buildOverview(wb, m) {
   const head = t => { sh.set(`B${r}`, { v: t, s: S.section }); sh.set(`C${r}`, { v: '', s: S.section }); r += 1; };
   const kv = (k, v) => { sh.row(`B${r}`, [{ v: k, s: S.bold }, { v, s: S.wrap }]); r += 1; };
 
-  sh.set(`B${r}`, { v: '니켈 Simulation 모델 — 익스포저 대응 수단: 무대응, Forward 매도, Future 매도, 저가법 평가', s: S.title }); r += 2;
+  sh.set(`B${r}`, { v: '원자재 Hedge Simulation 모델 — 익스포저 대응 수단: 무대응, Forward 매도, Future 매도, 저가법 평가', s: S.title }); r += 2;
   sh.set(`B${r}`, { v: `타임라인: W0 매입가 확정 → 구매·운송 ${c.transportEnd}주 → 생산 → 출고준비 → 출고월 W${c.shipStart}~W${c.shipEnd} 정산`, s: S.muted }); r += 2;
 
-  head('Player');
+  head('Player (예시 사례 — 니켈)');
   kv('A Company', '황산니켈 생산업체. 니켈 100톤을 구매·가공하여 황산니켈로 판매 (니켈 함량 100톤 기준으로 단순화)');
   kv('Cathode', '양극재 생산업체(고객). 황산니켈을 ‘인도 시점 니켈 시장가 + 가공마진’ 조건으로 구매');
   kv('IB (브로커)', '선물: A의 주문을 LME에 중개, 변동증거금 관리. 선도: A와 1:1 고정가 계약 후 자기 리스크를 LME에 되헤지');
@@ -604,14 +604,14 @@ function buildRef(wb) {
 
   sh.set(`B${r}`, { v: '참고 자료', s: S.title }); r += 2;
 
-  section('단위 환산 — 니켈 금속 ↔ 황산니켈');
+  section('단위 환산 — 니켈 금속 ↔ 황산니켈 (예시 사례)');
   sh.set(`B${r}`, { v: REF_UNIT.headline, s: S.bold }); r += 1;
   sh.row(`B${r}`, [{ v: '구분', s: S.header }, { v: '값', s: S.header }]); r += 1;
   REF_UNIT.rows.forEach(([k, v]) => { sh.row(`B${r}`, [{ v: k }, { v, s: S.wrap }]); r += 1; });
   REF_UNIT.notes.forEach(t => { sh.set(`B${r}`, { v: t, s: S.wrap }); r += 1; });
   r += 1;
 
-  section('니켈 원료 수송 기간');
+  section('니켈 원료 수송 기간 (예시 사례)');
   sh.row(`B${r}`, [{ v: '출발지', s: S.header }, { v: '소요 기간', s: S.header }, { v: '비고', s: S.header }]);
   r += 1;
   REF_SHIPPING.forEach(([a, b, cc]) => {
@@ -632,5 +632,5 @@ function buildRef(wb) {
 function exportXlsx(state) {
   const d = new Date();
   const stamp = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  buildWorkbook(state).download(`nickel_hedge_${stamp}.xlsx`);
+  buildWorkbook(state).download(`commodity_hedge_${stamp}.xlsx`);
 }

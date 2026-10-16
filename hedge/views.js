@@ -81,7 +81,7 @@ function renderOverview(state) {
   const tabs = [
     ['거래조건', '물량·기간·가공마진 입력 → 구매·운송 / 생산 / 출고준비 / 출고월 타임라인이 자동으로 재구성된다'],
     ['Hedge 손익', '시황 → 매출/Exposure 현황판(물량 · 가격 · Hedge) → Hedge 결과 → 손익, 그리고 what-if 두 개(대응 일원화 · 증거금 Cash Flow). 엑셀의 Exposure·손익계산서·케이스 4시트를 하나로 합쳤다'],
-    ['참고', '단위 환산(니켈 금속 ↔ 황산니켈), 니켈 원료 수송 기간, 용어집']
+    ['참고', '예시 사례(니켈) — 단위 환산(니켈 금속 ↔ 황산니켈), 원료 수송 기간 · 용어집']
   ];
 
   const seg = (label, span, klass) =>
@@ -89,7 +89,7 @@ function renderOverview(state) {
 
   return `
     <div class="card hero">
-      <h2>니켈 Simulation 모델</h2>
+      <h2>원자재 Hedge Simulation 모델</h2>
       <p class="card-sub">
         매입가 확정(W0)부터 출고월 정산(W${c.shipEnd})까지의 가격 익스포저를,
         <b>무대응 · Forward · Future · 저가법 평가</b> 네 가지 대응으로 갈라 본다.
@@ -104,7 +104,7 @@ function renderOverview(state) {
     </div>
 
     <div class="grid-2">
-      <div class="card"><h2>Player</h2>${dl(cast)}</div>
+      <div class="card"><h2>Player <span class="badge">예시 사례 — 니켈</span></h2>${dl(cast)}</div>
       <div class="card"><h2>핵심 프레임</h2>${dl(frame)}</div>
     </div>
 
@@ -274,7 +274,7 @@ function renderHedge(state) {
       values: state.market.prices[sc].slice(0, m.px.length),
       dashed: sc !== state.market.scenario
     })),
-    aria: '시나리오별 니켈 가격 경로'
+    aria: '시나리오별 가격 경로'
   });
 
   /* ---------- ② 매출/Exposure 현황판 ----------
@@ -813,7 +813,7 @@ function renderHedge(state) {
 function renderRef() {
   return `
     <div class="card">
-      <h2>단위 환산 — 니켈 금속 ↔ 황산니켈</h2>
+      <h2>단위 환산 — 니켈 금속 ↔ 황산니켈 <span class="badge">예시 사례</span></h2>
       <p class="card-sub">${esc(REF_UNIT.headline)}</p>
       <div class="table-scroll"><table>
         <thead><tr><th>구분</th><th>값</th></tr></thead>
@@ -824,7 +824,7 @@ function renderRef() {
     </div>
 
     <div class="card">
-      <h2>니켈 원료 수송 기간</h2>
+      <h2>니켈 원료 수송 기간 <span class="badge">예시 사례</span></h2>
       <p class="card-sub">거래조건 탭의 ‘구매 ~ 운송’ 기간을 정할 때의 근거 자료.</p>
       <div class="table-scroll"><table>
         <thead><tr><th>출발지</th><th>소요 기간</th><th>비고</th></tr></thead>
