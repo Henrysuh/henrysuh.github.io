@@ -4,3 +4,5 @@ life/
 *.md
 !README.md
 .DS_Store
+# 당분간 비공개 — 로컬에만 보관 (다시 열 때 이 줄 삭제 후 git add)
+asset_roadmap/
