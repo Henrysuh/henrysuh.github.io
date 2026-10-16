@@ -79,7 +79,7 @@ function renderOverview(state) {
     ['헤지 전략(가정)', 'Rolling을 통한 운영 우선, 잔여 익스포저만 Hedge. 따라서 Hedge 진입시점은 Rolling이 끝나는 W' + c.decisionWeek ]
   ];
   const tabs = [
-    ['거래조건', '물량·기간·가공마진 입력 → 구매·운송 / 생산 / 출고준비 / 출고월 타임라인이 자동으로 재구성된다'],
+    ['거래조건', 'Hedge 대상 · 물량 · 기간 · 가공마진 · 비용 기준 입력 → 구매·운송 / 생산 / 출고준비 / 출고월 타임라인이 자동으로 재구성된다'],
     ['Hedge 손익', '시황 → 매출/Exposure 현황판(물량 · 가격 · Hedge) → Hedge 결과 → 손익, 그리고 what-if 두 개(대응 일원화 · 증거금 Cash Flow). 엑셀의 Exposure·손익계산서·케이스 4시트를 하나로 합쳤다'],
     ['참고', '예시 사례(니켈) — 단위 환산(니켈 금속 ↔ 황산니켈), 원료 수송 기간 · 용어집']
   ];
@@ -149,6 +149,7 @@ function renderOverview(state) {
 /* =============================== 거래조건 ================================ */
 function renderTerms(state) {
   const t = state.terms;
+  const hp = state.hedgeParams;
   const m = computeModel(state);
   const c = m.terms;
 
@@ -157,12 +158,21 @@ function renderTerms(state) {
       <div class="card">
         <h2>입력</h2>
         <p class="card-sub">기간을 바꾸면 타임라인 · Rolling 단계 · 헤지 진입 시점이 모두 따라 움직인다.</p>
+        <div class="toolbar">
+          <button class="btn btn-sm btn-input" type="button" data-act="dl-inputs">↓ 입력 기준 내려받기 (CSV)</button>
+          <label class="btn btn-sm btn-input file-btn">↑ 입력 기준 올리기
+            <input type="file" accept=".csv,text/csv" data-act="ul-inputs" hidden>
+          </label>
+          <span class="toolbar-hint">이 카드의 입력값 전체 — 고쳐서 올리면 한 번에 바뀝니다.</span>
+        </div>
+        ${field('Hedge 대상', `<input type="text" autocomplete="off" data-bind="terms.target" value="${esc(t.target)}">`)}
         ${field('물량 (톤/월)', inp('terms.qty', t.qty, '', '1'))}
         ${field('구매 ~ 운송 (주)', inp('terms.transportWeeks', t.transportWeeks, '', '1'))}
         ${field('생산 (주)', inp('terms.mfgWeeks', t.mfgWeeks, '', '1'))}
         ${field('출고준비 (주)', inp('terms.shipPrepWeeks', t.shipPrepWeeks, '', '1'))}
         ${field('출고 (주) — 판매 QP 길이', inp('terms.shipWeeks', t.shipWeeks, '', '1'))}
-        ${field('가공마진 ($/ton)', inp('terms.procMargin', t.procMargin, '', '10'))}
+        ${field('가공마진 (% of 매입가)', inp('terms.procMarginPct', t.procMarginPct, '', '0.5'),
+          `= ${unit(m.procMarginUnit)} — 매입가에 고정되어 상수로 남는다`)}
         ${field('매입가 확정 방식',
           sel('terms.buyPriceMode', t.buyPriceMode, Object.entries(BUY_PRICE_MODES)),
           '단일 시점은 판매자 우위, 평균은 구매자 우위')}
@@ -177,6 +187,19 @@ function renderTerms(state) {
           + 편입 ${n0(state.inventory.addQty)}t × ${unit(m.buyPrice)}) ÷ 합계</span>.
           저가법 평가의 기준 원가가 된다.
         </div>
+        <h3 class="sub-head">비용 기준 — ${esc(t.target || '대상')} 기준값, 대상이 바뀌면 수정</h3>
+        ${field('브로커 스프레드 (% of Hedge 진입가)', inp('hedgeParams.ibSpreadPct', hp.ibSpreadPct, '', '0.05'),
+          `= ${unit(m.spreadUnit)} — Forward 고정가에 내재, 청구서에 안 보임`)}
+        ${field('창고비 ($/ton/월)', inp('hedgeParams.storagePerMonth', hp.storagePerMonth, '', '1'),
+          `× 헤지 기간 ${n1(m.hedgeMonths)}개월 = ${unit(m.storageUnit)} — 무게 기준`)}
+        ${field('보험료 (%/년, Hedge 진입가 기준)', inp('hedgeParams.insurancePct', hp.insurancePct, '', '0.05'),
+          `× 헤지 기간 = ${unit(m.insuranceUnit)} — 가치 기준`)}
+        ${field('브로커 수수료 · Forward ($/ton)', inp('hedgeParams.ibFeeForward', hp.ibFeeForward, '', '0.5'),
+          '명시 청구 → 원가 계상')}
+        ${field('브로커 수수료 · Future ($/ton)', inp('hedgeParams.ibFeeFuture', hp.ibFeeFuture, '', '0.5'),
+          'round-turn (진입 + 청산). 거래소 lot 당 정액을 톤당으로 환산')}
+        ${field('연 이자율 (%)', inp('hedgeParams.ratePct', hp.ratePct, '', '0.5'), '보유비용의 금융이자 부분')}
+        ${field('개시증거금율 (%)', inp('hedgeParams.imRatePct', hp.imRatePct, '', '1'), 'Future 개시증거금')}
       </div>
       <div class="card">
         <h2>구매 요약</h2>
@@ -564,7 +587,7 @@ function renderHedge(state) {
     <div class="card" id="sec-market">
       <div class="card-head">
         <div>
-          <h2>① 시황</h2>
+          <h2>① 시황 — ${esc(state.terms.target || '대상')}</h2>
           <p class="card-sub">
             Contango, Backwardation, Fluctuation에서 선택, 시나리오 가격표 편집을 통해 신규 시나리오 추가 가능
           </p>
@@ -658,27 +681,18 @@ function renderHedge(state) {
         어차피 부담하는 보유비용이고, 선도가는 딱 그만큼을 얹어 <i>보상</i>해 주는 것이라 순효과가 0이다.
         게다가 이 비용은 파생 수단 모두에 똑같이 발생하므로 수단을 가르지 못한다.
         따라서 ⓓ에는 실제로 A가 넘겨주는 두 가지만 남긴다 —
-        <code>ⓓ = −(적기공급 프리미엄 ${unit(hp.convenienceYield)} + 브로커 스프레드 ${unit(hp.ibSpread)}) = ${unit(m.carryPerTon)}</code>.
+        <code>ⓓ = −(적기공급 프리미엄 ${unit(hp.convenienceYield)} + 브로커 스프레드 ${unit(m.spreadUnit)}) = ${unit(m.carryPerTon)}</code>.
         <b>항상 0 이하</b>이며, 백워데이션(적기공급 프리미엄 &gt; 0)에서 크게 벌어진다.
       </div>
-      <h3 class="sub-head">Hedge 파라미터</h3>
+      <h3 class="sub-head">Hedge 파라미터 <span class="muted">— 스프레드 · 창고비 · 보험료 · 수수료 · 이자율은 거래조건 탭에서 입력</span></h3>
       <div class="param-grid">
-        ${field('연 이자율 (%)', inp('hedgeParams.ratePct', hp.ratePct, '', '0.5'), '보유비용의 금융이자 부분')}
-        ${field('창고 · 보험료 ($/ton)', inp('hedgeParams.storage', hp.storage, '', '10'),
-          '보유비용의 물류 부분')}
         ${field('적기공급 프리미엄 ($/ton)', inp('hedgeParams.convenienceYield', hp.convenienceYield, '', '100'),
           '백워데이션에서 > 0 — ⓓ를 키운다')}
-        ${field('브로커 스프레드 ($/ton)', inp('hedgeParams.ibSpread', hp.ibSpread, '', '10'),
-          '고정가에 내재 — 청구서에 안 보임')}
-        ${field('브로커 수수료 · Forward ($/ton)', inp('hedgeParams.ibFeeForward', hp.ibFeeForward, '', '0.5'),
-          '명시 청구 → 원가 계상')}
-        ${field('브로커 수수료 · Future ($/ton)', inp('hedgeParams.ibFeeFuture', hp.ibFeeFuture, '', '0.5'),
-          'round-turn (진입 + 청산)')}
       </div>
       <div class="stat-row">
         ${stat('이론 선도가격', unit(m.fwdTheory),
-          `W${c.decisionWeek} 현물 + 이자 ${unit(m.fwdInterest)} + 창고 ${unit(hp.storage)} − 편의수익 ${unit(hp.convenienceYield)}`)}
-        ${stat('A가 받는 고정가', unit(m.fwdFixed), `이론가 − 브로커 스프레드 ${unit(hp.ibSpread)}`)}
+          `W${c.decisionWeek} 현물 + 이자 ${unit(m.fwdInterest)} + 창고 ${unit(m.storageUnit)} + 보험 ${unit(m.insuranceUnit)} − 편의수익 ${unit(hp.convenienceYield)}`)}
+        ${stat('A가 받는 고정가', unit(m.fwdFixed), `이론가 − 브로커 스프레드 ${unit(m.spreadUnit)}`)}
         ${stat('ⓓ 단가 효과', unit(m.carryPerTon), '−(편의수익 + 스프레드)', cls(m.carryPerTon))}
         ${stat('헤지 기간', `${c.hedgeWeeks} 주`, `≈ ${n1(m.hedgeMonths)} 개월`)}
       </div>
@@ -801,7 +815,6 @@ function renderHedge(state) {
         </table></div>
       </details>
       <div class="inline-fields">
-        ${field('개시증거금율 (%)', inp('hedgeParams.imRatePct', hp.imRatePct, '', '1'))}
         ${field('가용 현금 한도 ($)', inp('hedgeParams.cashLimit', hp.cashLimit, '', '100000'))}
       </div>
     </div>

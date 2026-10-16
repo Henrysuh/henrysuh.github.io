@@ -92,17 +92,30 @@ function buildTerms(wb, state, m) {
     sh.row(`B${r}`, [{ v: label }, { v: value, s: style }, hint ? { v: hint, s: S.muted } : null]);
     return `$C$${r++}`;
   };
+  const hp = state.hedgeParams;
+  T.target     = input('Hedge 대상', t.target, S.inputText, '표시용 이름 — 계산에는 쓰이지 않는다');
   T.qty        = input('물량 (톤/월)', t.qty, S.inputNum);
   T.transport  = input('구매 ~ 운송 (주)', t.transportWeeks, S.inputNum);
   T.mfg        = input('생산 (주)', t.mfgWeeks, S.inputNum);
   T.prep       = input('출고준비 (주)', t.shipPrepWeeks, S.inputNum);
   T.ship       = input('출고 (주) — 판매 QP 길이', t.shipWeeks, S.inputNum);
-  T.procMargin = input('가공마진 ($/ton)', t.procMargin, S.inputNum);
+  T.procPct    = input('가공마진 (% of 매입가)', t.procMarginPct, S.inputNum2, '매입가에 고정되어 상수로 남는다');
   T.buyMode    = input('매입가 확정 방식', t.buyPriceMode === 'avg' ? '평균' : '단일', S.inputText,
                        '단일 = W0 단일가 (판매자 우위) / 평균 = 리드타임 평균 (구매자 우위)');
   T.invPrev    = input('재고 단가 — 전월 이월 ($/ton)', state.inventory.prevUnit, S.inputNum);
   T.invAdd     = input('금월 재고 편입 물량 (톤)', state.inventory.addQty, S.inputNum,
                        '편입분은 매입가와 가중평균되어 재고 단가를 갱신한다');
+  r += 1;
+
+  sh.set(`B${r}`, { v: `비용 기준 — ${t.target || '대상'} 기준값, 대상이 바뀌면 수정`, s: S.section });
+  sh.set(`C${r}`, { v: '', s: S.section }); sh.set(`D${r}`, { v: '', s: S.section }); r += 1;
+  T.spreadPct  = input('브로커 스프레드 (% of Hedge 진입가)', hp.ibSpreadPct, S.inputNum2, 'Forward 고정가에 내재 — 청구서에 안 보임');
+  T.storageM   = input('창고비 ($/ton/월)', hp.storagePerMonth, S.inputNum2, '무게 기준 × 헤지 기간');
+  T.insPct     = input('보험료 (%/년, Hedge 진입가 기준)', hp.insurancePct, S.inputNum2, '가치 기준 × 헤지 기간');
+  T.feeF       = input('브로커 수수료 · Forward ($/ton)', hp.ibFeeForward, S.inputNum2, '명시 청구 → 원가 계상');
+  T.feeU       = input('브로커 수수료 · Future ($/ton)', hp.ibFeeFuture, S.inputNum2, 'round-turn (진입 + 청산)');
+  T.rate       = input('연 이자율 (%)', hp.ratePct, S.inputNum2, '보유비용의 금융이자 부분');
+  T.imPct      = input('개시증거금율 (%)', hp.imRatePct, S.inputNum2, 'Future 개시증거금');
   r += 1;
 
   sh.set(`B${r}`, { v: '파생 (수식)', s: S.section });
@@ -134,8 +147,8 @@ function buildTerms(wb, state, m) {
   const steps = [
     ['구매 · 운송', T.qty, T.transport, `"W0 ~ W"&${T.transport}`,
      { f: buyPriceText }, '선택한 방식으로 매입가 확정 — 가격 익스포저 시작. 도착은 운송 기간 경과 후'],
-    ['생산 — 황산니켈 생산', T.qty, T.mfg, `"W"&${T.transport}&" ~ W"&${T.decision}`,
-     { v: '가공마진 (상수)' }, '시장가와 무관한 A Company 제조 이익'],
+    ['생산', T.qty, T.mfg, `"W"&${T.transport}&" ~ W"&${T.decision}`,
+     { f: `"가공마진 = 매입가 × "&${T.procPct}&"%"` }, '매입가에 고정 — 이후 시장가와 무관한 A Company 제조 이익'],
     ['출고준비', T.qty, T.prep, `"W"&${T.decision}&" ~ W"&${T.lead}`,
      { v: '—' }, '검사 · 포장 · 선적 서류. 가격 확정 없음'],
     ['출고 (출고월)', T.qty, T.ship, `"W"&${T.shipStart}&" ~ W"&${T.shipEnd}`,
@@ -206,6 +219,7 @@ function buildHedge(wb, state, m, T) {
     });
   }
   const PX_RANGE = `$D$${APPLY}:$${C_(P0 + nW - 1)}$${APPLY}`;
+  const WK_HEAD = `$D$${scenRow0 - 1}:$${C_(P0 + nW - 1)}$${scenRow0 - 1}`;   // W0..Wn 머리글
   /* 주차 → 셀. OFFSET 대신 INDEX 를 쓴다 — 비휘발성이라 재계산이 가볍다. */
   const PX = wk => `INDEX(${PX_RANGE},1,${wk}+1)`;
   const PX_AVG = (from, to) => `AVERAGE(${PX(from)}:${PX(to)})`;
@@ -229,6 +243,8 @@ function buildHedge(wb, state, m, T) {
     PX_AVG(`${SH_TERMS}!${T.shipStart}`, `${SH_TERMS}!${T.shipEnd}`), S.num);
   const SETTLE = calc('정산일 단일가 ($/ton)', PX(`${SH_TERMS}!${T.shipEnd}`),
     S.num, 'Future 는 이 한 점으로 정산된다');
+  const PROC = calc('가공마진 ($/ton)', `${BUY}*${SH_TERMS}!${T.procPct}/100`, S.num,
+    '매입가 × 가공마진율 — 거래조건 시트에서 입력');
   const invBaseRow = r, invUnitRow = r + 1;
   r += 3;
 
@@ -370,18 +386,22 @@ function buildHedge(wb, state, m, T) {
 
   /* ---------- ③ Hedge 결과 ---------- */
   section('③ Hedge 결과 — 파라미터', 4);
-  const RATE    = input('연 이자율 (%)', hp.ratePct, S.inputNum);
-  const STORAGE = input('창고 · 보험료 ($/ton, 기간 합계)', hp.storage, S.inputNum);
+  /* 스프레드 · 창고비 · 보험료 · 수수료 · 이자율 · 증거금율은 거래조건 시트의 비용 기준을 끌어온다 */
+  const RATE    = `${SH_TERMS}!${T.rate}`;
+  const FEE_F   = `${SH_TERMS}!${T.feeF}`;
+  const FEE_U   = `${SH_TERMS}!${T.feeU}`;
+  const IM_PCT  = `${SH_TERMS}!${T.imPct}`;
   const CY      = input('적기공급 프리미엄 ($/ton)', hp.convenienceYield, S.inputNum, '백워데이션에서 > 0');
-  const SPREAD  = input('브로커 스프레드 ($/ton)', hp.ibSpread, S.inputNum, '고정가에 내재 — 청구서에 안 보임');
-  const FEE_F   = input('브로커 수수료 · Forward ($/ton)', hp.ibFeeForward, S.inputNum2, '명시 청구 → 원가 계상');
-  const FEE_U   = input('브로커 수수료 · Future ($/ton)', hp.ibFeeFuture, S.inputNum2, 'round-turn (진입 + 청산)');
-  const IM_PCT  = input('개시증거금율 (%)', hp.imRatePct, S.inputNum);
   const CASH    = input('가용 현금 한도 ($)', hp.cashLimit, S.inputNum);
   const MONTHS  = calc('헤지 기간 (개월)', `${SH_TERMS}!${T.hedgeWks}/${SH_TERMS}!${T.ship}`, S.num2);
   const INTEREST = calc('금융이자 ($/ton)', `${ENTRY}*${RATE}/100*${MONTHS}/12`, S.num);
-  const THEORY  = calc('이론 선도가격 ($/ton)', `${ENTRY}+${INTEREST}+${STORAGE}-${CY}`, S.num,
-    '진입 시점 현물 + 이자 + 창고 − 편의수익');
+  const STORAGE = calc('창고비 ($/ton)', `${SH_TERMS}!${T.storageM}*${MONTHS}`, S.num, '창고비 ($/ton/월) × 헤지 기간');
+  const INSUR   = calc('보험료 ($/ton)', `${ENTRY}*${SH_TERMS}!${T.insPct}/100*${MONTHS}/12`, S.num,
+    'Hedge 진입가 × 보험료율 × 헤지 기간');
+  const SPREAD  = calc('브로커 스프레드 ($/ton)', `${ENTRY}*${SH_TERMS}!${T.spreadPct}/100`, S.num,
+    'Hedge 진입가 × 스프레드율 — 고정가에 내재');
+  const THEORY  = calc('이론 선도가격 ($/ton)', `${ENTRY}+${INTEREST}+${STORAGE}+${INSUR}-${CY}`, S.num,
+    '진입 시점 현물 + 이자 + 창고 + 보험 − 편의수익');
   const FIXED   = calc('A가 받는 고정가 ($/ton)', `${THEORY}-${SPREAD}`, S.num, '이론가 − 브로커 스프레드');
   /* ⓓ — 이자·창고는 A 가 어차피 부담하는 보유비용이고 선도가가 그만큼 보상해 주므로 순효과 0.
      수단을 가르는 건 편의수익과 스프레드뿐이라 그 둘만 센다 (항상 ≤ 0). */
@@ -473,10 +493,10 @@ function buildHedge(wb, state, m, T) {
   const soldOf = i => `$${SOLDQ_COL}${sal(i)}`;
   const refOf  = i => `$${SALEREF_COL}${hed(i)}`;
 
-  plRow('매출액', i => `${soldOf(i)}*(${refOf(i)}+${SH_TERMS}!${T.procMargin})`);
+  plRow('매출액', i => `${soldOf(i)}*(${refOf(i)}+${PROC})`);
   plRow('재료비', i => `-${soldOf(i)}*${BUY}`);
   const rowMargin = plRow('마진 (매출 + 재료비)', i => `${C_(3 + i)}${r - 2}+${C_(3 + i)}${r - 1}`);
-  plRow('　└ 가공마진 (상수)', i => `${soldOf(i)}*${SH_TERMS}!${T.procMargin}`);
+  plRow('　└ 가공마진 (상수)', i => `${soldOf(i)}*${PROC}`);
   plRow('　└ 가격변동마진 (변수)', i => `${AVGQ(i)}*(${refOf(i)}-${BUY})`);
   /* 재고 저가법 — 헤지 선택과 무관하게 발생하므로 무대응·Hedge 양쪽에 똑같이 들어간다 */
   const rowLcm = plRow('재고 평가손실 (저가법)', i => `${LCM_UNIT}*$${STOCKQ_COL}${sal(i)}`);
@@ -561,7 +581,8 @@ function buildHedge(wb, state, m, T) {
   const FQTY = calc('Future 매도 물량 (톤)',
     `SUMIF(${F_KIND},"Future 매도",${F_QTY})`, S.num);
   calc('개시증거금 ($)',
-    `SUMPRODUCT((${F_KIND}="Future 매도")*${F_QTY}*INDEX(${PX_RANGE},1,${F_WEEK}+1))*${IM_PCT}/100`,
+    /* INDEX 에 배열 인수를 주면 엑셀이 한 칸으로 줄여 #VALUE! 가 난다 — SUMIF 는 배열 조건을 그대로 받는다 */
+    `SUMPRODUCT((${F_KIND}="Future 매도")*${F_QTY}*SUMIF(${WK_HEAD},"W"&${F_WEEK},${PX_RANGE}))*${IM_PCT}/100`,
     S.num, '조각마다 진입가가 달라 물량 × 진입가를 각각 더한다');
   r += 1;
 

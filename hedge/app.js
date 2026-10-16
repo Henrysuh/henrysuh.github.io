@@ -192,6 +192,9 @@ document.addEventListener('click', ev => {
     } else if (act === 'dl-prices') {
       downloadPriceCsv();
       return;
+    } else if (act === 'dl-inputs') {
+      downloadInputCsv();
+      return;
     }
     saveState();
     render();
@@ -245,15 +248,16 @@ function priceCsv() {
   return '﻿' + [head].concat(rows).map(r => r.join(',')).join('\r\n') + '\r\n';
 }
 
-function downloadPriceCsv() {
-  const blob = new Blob([priceCsv()], { type: 'text/csv;charset=utf-8' });
+function downloadCsv(text, name) {
+  const blob = new Blob([text], { type: 'text/csv;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'price_table.csv';
+  a.download = name;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+const downloadPriceCsv = () => downloadCsv(priceCsv(), 'price_table.csv');
 
 function parsePriceCsv(text) {
   const lines = text.replace(/^﻿/, '').split(/\r?\n/).filter(l => l.trim() !== '');
@@ -296,6 +300,103 @@ document.addEventListener('change', ev => {
       render();
     } catch (err) {
       alert('가격표를 읽지 못했습니다.\n\n' + err.message);
+    }
+  };
+  reader.onerror = () => alert('파일을 읽지 못했습니다.');
+  reader.readAsText(file, 'utf-8');
+});
+
+/* -------------------------- 입력 기준 CSV 왕복 --------------------------
+   거래조건 탭 '입력' 카드의 값 전체. 대상을 바꿀 때 이 파일 하나로 갈아 끼운다.
+   열: 키 · 항목 · 값 · 설명. 읽을 때는 키와 값만 본다 (항목·설명은 사람이 읽는 용). */
+const INPUT_FIELDS = [
+  ['terms.target',               'Hedge 대상',                          'text'],
+  ['terms.qty',                  '물량 (톤/월)'],
+  ['terms.transportWeeks',       '구매 ~ 운송 (주)'],
+  ['terms.mfgWeeks',             '생산 (주)'],
+  ['terms.shipPrepWeeks',        '출고준비 (주)'],
+  ['terms.shipWeeks',            '출고 (주) — 판매 QP 길이'],
+  ['terms.procMarginPct',        '가공마진 (% of 매입가)'],
+  ['terms.buyPriceMode',         '매입가 확정 방식',                    'mode', 'spot = 구매 시점 단일가 / avg = 리드타임 평균'],
+  ['inventory.prevUnit',         '재고 단가 — 전월 이월 ($/ton)'],
+  ['inventory.addQty',           '금월 재고 편입 물량 (톤)'],
+  ['hedgeParams.ibSpreadPct',    '브로커 스프레드 (% of Hedge 진입가)'],
+  ['hedgeParams.storagePerMonth','창고비 ($/ton/월)'],
+  ['hedgeParams.insurancePct',   '보험료 (%/년, Hedge 진입가 기준)'],
+  ['hedgeParams.ibFeeForward',   '브로커 수수료 · Forward ($/ton)'],
+  ['hedgeParams.ibFeeFuture',    '브로커 수수료 · Future ($/ton)'],
+  ['hedgeParams.ratePct',        '연 이자율 (%)'],
+  ['hedgeParams.imRatePct',      '개시증거금율 (%)']
+];
+const getByPath = path => path.split('.').reduce((o, k) => o[k], state);
+const csvCell = v => (/[",\r\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : String(v));
+
+function inputCsv() {
+  const rows = [['키', '항목', '값', '설명']].concat(INPUT_FIELDS.map(([path, label, , hint]) =>
+    [path, label, getByPath(path), hint || '']));
+  return '﻿' + rows.map(r => r.map(csvCell).join(',')).join('\r\n') + '\r\n';
+}
+
+function downloadInputCsv() {
+  const name = String(state.terms.target || 'input').replace(/[^\w가-힣-]+/g, '_');
+  downloadCsv(inputCsv(), `input_basis_${name}.csv`);
+}
+
+/* 따옴표로 감싼 칸(쉼표 포함)까지 읽는 최소 CSV 한 줄 파서 */
+function splitCsvLine(line) {
+  const out = []; let cur = ''; let q = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (q) {
+      if (ch === '"' && line[i + 1] === '"') { cur += '"'; i++; }
+      else if (ch === '"') q = false;
+      else cur += ch;
+    } else if (ch === '"') q = true;
+    else if (ch === ',') { out.push(cur); cur = ''; }
+    else cur += ch;
+  }
+  out.push(cur);
+  return out.map(s => s.trim());
+}
+
+/* 모두 검사한 뒤에야 반영한다 — 한 칸이라도 틀리면 아무것도 바꾸지 않는다 */
+function parseInputCsv(text) {
+  const lines = text.replace(/^﻿/, '').split(/\r?\n/).filter(l => l.trim() !== '');
+  if (lines.length < 2) throw new Error('내용이 비어 있습니다.');
+  const known = new Map(INPUT_FIELDS.map(f => [f[0], f]));
+  const updates = [];
+  lines.slice(1).forEach((line, li) => {
+    const [key, label, raw = ''] = splitCsvLine(line);
+    const f = known.get(key);
+    if (!f) throw new Error(`${li + 2}행의 키 "${key}" 를 알 수 없습니다. 내려받은 파일의 키 열은 고치지 마세요.`);
+    let v;
+    if (f[2] === 'text') v = raw;
+    else if (f[2] === 'mode') {
+      if (!BUY_PRICE_MODES[raw]) throw new Error(`${label || key}: "${raw}" — spot 또는 avg 여야 합니다.`);
+      v = raw;
+    } else {
+      v = Number(raw.replace(/,/g, ''));
+      if (raw === '' || !Number.isFinite(v)) throw new Error(`${label || key}: "${raw}" 은 숫자가 아닙니다.`);
+    }
+    updates.push([key, v]);
+  });
+  return updates;
+}
+
+document.addEventListener('change', ev => {
+  const el = ev.target;
+  if (!el.dataset || el.dataset.act !== 'ul-inputs') return;
+  const file = el.files && el.files[0];
+  el.value = '';
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      parseInputCsv(String(reader.result)).forEach(([k, v]) => setByPath(k, v));
+      saveState();
+      render();
+    } catch (err) {
+      alert('입력 기준을 읽지 못했습니다.\n\n' + err.message);
     }
   };
   reader.onerror = () => alert('파일을 읽지 못했습니다.');

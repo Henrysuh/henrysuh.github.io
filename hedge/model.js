@@ -55,12 +55,13 @@ const BUY_PRICE_MODES = {
 function defaultState() {
   return {
     terms: {
+      target: 'Nickel',       // Hedge 대상 — 표시용 이름. 계산에는 쓰이지 않는다
       qty: 100,               // 물량 (톤/월)
       transportWeeks: 2,      // 구매 ~ 운송
       mfgWeeks: 4,            // 생산
       shipPrepWeeks: 2,       // 출고준비
       shipWeeks: 4,           // 출고 (= 출고월, 판매 QP 길이)
-      procMargin: 1500,       // 가공마진 ($/t)
+      procMarginPct: 7.5,     // 가공마진율 (% of 매입가) — 니켈 $20,000 × 7.5% = $1,500/ton
       buyPriceMode: 'spot'    // 매입가 확정 방식 — 단일 시점(판매자 우위) / 평균(구매자 우위)
     },
     market: {
@@ -79,12 +80,15 @@ function defaultState() {
       addQty: 0               // 금월 재고 편입 물량 (톤)
     },
     hedgeParams: {
+      /* 아래 비용 기준은 니켈 기준 기본값 — 대상이 바뀌면 거래조건 탭에서 고친다.
+         가격에 비례하는 것은 %, 무게·계약 단위로 붙는 것은 $/ton 으로 둔다. */
       ratePct: 5,             // 연 이자율 (%)
-      storage: 50,            // 창고·보험료 ($/t, 헤지 기간 합계)
+      storagePerMonth: 25,    // 창고비 ($/ton/월) — 무게 × 기간
+      insurancePct: 0.5,      // 보험료 (%/년, Hedge 진입가 기준) — 가치 × 기간
       convenienceYield: 0,    // 적기공급 프리미엄 (백워데이션에서 > 0)
-      ibSpread: 150,          // 브로커 스프레드 ($/t) — 선도 고정가에 내재 (가격에 숨은 비용)
-      ibFeeForward: 3,        // 브로커 수수료 — Forward 체결 ($/t, 명시 청구 → 원가 계상)
-      ibFeeFuture: 2.5,       // 브로커 수수료 — Future round-turn ($/t, 진입 + 청산)
+      ibSpreadPct: 0.75,      // 브로커 스프레드 (% of Hedge 진입가) — 선도 고정가에 내재
+      ibFeeForward: 3,        // 브로커 수수료 — Forward 체결 ($/ton, 명시 청구 → 원가 계상)
+      ibFeeFuture: 2.5,       // 브로커 수수료 — Future round-turn ($/ton, 진입 + 청산)
       imRatePct: 10,          // 개시증거금율 (%)
       cashLimit: 3000000      // 가용 현금 한도 ($) — 마진콜 대응력
     },
@@ -172,9 +176,9 @@ function computeTerms(t) {
           ? '다른 선택: 구매 시점 단일가 (W0)'
           : `다른 선택: 리드타임 평균 (W0~W${leadWeeks})`,
         rule: '선택한 방식으로 매입가 확정 — 가격 익스포저 시작. 도착은 운송 기간 경과 후' },
-      { name: '생산 — 황산니켈 생산', qty: t.qty, weeks: t.mfgWeeks, span: `W${transportEnd} ~ W${mfgEnd}`,
-        price: `$${t.procMargin.toLocaleString('en-US')} /t`,
-        rule: '가공마진 = 상수 (시장가 무관, A Company 제조 이익)' },
+      { name: '생산', qty: t.qty, weeks: t.mfgWeeks, span: `W${transportEnd} ~ W${mfgEnd}`,
+        price: `가공마진 = 매입가 × ${t.procMarginPct}%`,
+        rule: '가공마진 = 상수 (매입가에 고정 — 이후 시장가 무관, A Company 제조 이익)' },
       { name: '출고준비', qty: t.qty, weeks: t.shipPrepWeeks, span: `W${mfgEnd} ~ W${leadWeeks}`,
         price: '—',
         rule: '검사 · 포장 · 선적 서류. 가격 확정 없음' },
@@ -183,9 +187,9 @@ function computeTerms(t) {
         rule: 'FOB — 출고월 4주 평균으로 매출가 확정 → 가격 익스포저 종료 · 정산' }
     ],
     timeline: [
-      { week: 'W0', event: '니켈 구매 계약 — 매입가 확정', mark: 'start' },
+      { week: 'W0', event: `${t.target || '원자재'} 구매 계약 — 매입가 확정`, mark: 'start' },
       { week: `W0 ~ W${transportEnd}`, event: '구매 · 운송' },
-      { week: `W${transportEnd} ~ W${mfgEnd}`, event: '생산 — 황산니켈 생산' },
+      { week: `W${transportEnd} ~ W${mfgEnd}`, event: '생산' },
       { week: `W${stageWeeks[0]} · W${stageWeeks[1]} · W${stageWeeks[2]}`,
         event: 'Rolling — 추가 판매, 가격 조건 협상', mark: 'roll' },
       { week: `W${decisionWeek}`,
@@ -219,6 +223,8 @@ function computeModel(state) {
   const buyLabel = t.buyPriceMode === 'avg' ? `W0~W${c.leadWeeks} 평균` : 'W0 단일가';
   /* 전가 물량의 판매 QP — 매입가가 정해지는 구간이 곧 판매가가 정해지는 구간이다 */
   const buyQPLabel = t.buyPriceMode === 'avg' ? `W0 ~ W${c.leadWeeks}` : 'W0';
+  /* 가공마진 — 매입가에 비율을 곱해 W0 에 고정한다. 이후 시장가와 무관하므로 상수로 남는다 */
+  const procMarginUnit = buyPrice * t.procMarginPct / 100;
 
   const decisionPrice = at(c.decisionWeek);
   const settlePrice   = at(c.shipEnd);
@@ -234,15 +240,18 @@ function computeModel(state) {
      출고월 = 4주 = 1개월로 보아 헤지 기간을 개월로 환산한다. */
   const hedgeMonths = c.hedgeWeeks / Math.max(1, t.shipWeeks);
   const fwdInterest = decisionPrice * (hp.ratePct / 100) * hedgeMonths / 12;
-  const fwdTheory   = decisionPrice + fwdInterest + hp.storage - hp.convenienceYield;
-  const fwdFixed    = fwdTheory - hp.ibSpread;
+  const storageUnit   = hp.storagePerMonth * hedgeMonths;                      // 창고비 — 무게 × 기간
+  const insuranceUnit = decisionPrice * (hp.insurancePct / 100) * hedgeMonths / 12;  // 보험료 — 가치 × 기간
+  const spreadUnit    = decisionPrice * hp.ibSpreadPct / 100;                  // 스프레드 — 계약 금액 비례
+  const fwdTheory   = decisionPrice + fwdInterest + storageUnit + insuranceUnit - hp.convenienceYield;
+  const fwdFixed    = fwdTheory - spreadUnit;
   /* ⓓ — Forward 를 고른 대가로 A 가 실제로 '깎이는' 부분만 남긴다.
      고정가 − 현물 = (이자 + 창고) − 편의수익 − 스프레드 인데,
      앞의 (이자 + 창고)는 A 가 물건을 W6~W12 들고 있으면서 어차피 부담하는 보유비용이고
      선도가는 그만큼을 얹어 보상해 주는 것이라 순효과가 0이다 — 게다가 네 수단 모두 동일하다.
      수단을 갈라놓는 건 커브(적기공급 프리미엄)와 브로커 스프레드뿐이므로 그 둘만 센다.
      따라서 ⓓ는 항상 ≤ 0 — A 가 그만큼 할인해서 넘기는 값이다. */
-  const carryPerTon = -(hp.convenienceYield + hp.ibSpread);
+  const carryPerTon = -(hp.convenienceYield + spreadUnit);
   const carryGross  = fwdFixed - decisionPrice;      // 참고용 총액 (이자·창고 포함)
 
   /* ---------------- ① Exposure 현황판 ----------------
@@ -464,7 +473,7 @@ function computeModel(state) {
     const h = hedged[i];
     /* 전가 행은 참조가가 매입가라 두 조건을 한 줄로 쓸 수 있다 */
     const soldQty = row.soldQty;
-    const revenue = soldQty * (row.saleQPAvg + t.procMargin);
+    const revenue = soldQty * (row.saleQPAvg + procMarginUnit);
     const material = -soldQty * buyPrice;
     const margin = revenue + material;
     /* 재고 저가법 — 헤지 선택과 무관하게 발생하므로 무대응·Hedge 양쪽에 똑같이 들어간다 */
@@ -487,7 +496,7 @@ function computeModel(state) {
     return {
       name: row.name, kind: row.kind, cond: row.cond, hedge: row.hedge,
       revenue, material, margin,
-      procMargin: t.procMargin * soldQty,
+      procMargin: procMarginUnit * soldQty,
       priceMargin: row.avgQty * (row.saleQPAvg - buyPrice),
       stockLcm, hedgeEffect, opCost, carryCost, ibFee,
       plNoHedge, hedgeDelta: hedgeGain, plHedged, delta: plHedged - plNoHedge,
@@ -511,7 +520,7 @@ function computeModel(state) {
     terms: c, px, at,
     buyPrice, buyLabel, buySpot, buyAvg, decisionPrice, settlePrice,
     invBaseQty, invUnit,
-    fwdInterest, fwdTheory, fwdFixed, carryPerTon, carryGross, hedgeMonths, lcmPerTon,
+    fwdInterest, storageUnit, insuranceUnit, spreadUnit, procMarginUnit, fwdTheory, fwdFixed, carryPerTon, carryGross, hedgeMonths, lcmPerTon,
     rows, ledger, hedged, hedgeLegs, hedgedTotals, compare, benchQty, benchSale,
     future, pnl, pnlTotal, pnlKeys
   };
