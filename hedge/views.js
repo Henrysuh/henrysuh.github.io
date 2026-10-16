@@ -8,10 +8,8 @@ const n1 = v => (Math.round(v * 10) / 10).toLocaleString('en-US', { maximumFract
 const n2 = v => (Math.round(v * 100) / 100).toLocaleString('en-US',
   { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const usd = v => (v < 0 ? '−$' : '$') + n0(Math.abs(v));
-const unit = v => (v < 0 ? '−$' : '$') + n2(Math.abs(v)) + '/t';
-/* 딱 떨어지는 값의 .00 은 지우고, −2.50 처럼 뜻이 있는 소수만 남긴다 */
-const unitTrim = v => (v < 0 ? '−$' : '$') +
-  (Number.isInteger(Math.round(v * 100) / 100) ? n0(Math.abs(v)) : n2(Math.abs(v))) + '/t';
+/* 단가는 앱 전체에서 소수점 없이 $0/ton 으로 쓴다 */
+const unit = v => (v < 0 ? '−$' : '$') + n0(Math.abs(v)) + '/ton';
 const cls = v => (v > 0 ? 'pos' : v < 0 ? 'neg' : 'muted');
 const signed = v => `<span class="${cls(v)}">${usd(v)}</span>`;
 const dash = (v, f) => (v === 0 ? '<span class="muted">–</span>' : f(v));
@@ -49,12 +47,12 @@ const abbrCell = (short, full) =>
 
 /* 표 앞에 붙는 리드 문장 — 적은 그대로 실린다. 입력칸 자체가 결과물이라
    따로 미리보기를 두지 않는다 (파란 칸 = 고칠 수 있는 것, 이 앱의 규칙). */
-const leadBlock = (path, value, hint) => `
+const leadBlock = (path, value, hint = '') => `
   <div class="lead-block">
     <label class="lead-label" for="lead-${esc(path)}">Lead message</label>
     <input type="text" class="lead-input" id="lead-${esc(path)}"
       data-bind="${path}" value="${esc(value)}" placeholder="이 표에서 먼저 읽어야 할 한 줄">
-    <span class="lead-hint">${esc(hint)}</span>
+    ${hint ? `<span class="lead-hint">${esc(hint)}</span>` : ''}
   </div>`;
 
 /* 세로로 긴 탭의 좌측 목차 — 카드마다 붙은 id 로 건너뛴다 */
@@ -164,11 +162,11 @@ function renderTerms(state) {
         ${field('생산 (주)', inp('terms.mfgWeeks', t.mfgWeeks, '', '1'))}
         ${field('출고준비 (주)', inp('terms.shipPrepWeeks', t.shipPrepWeeks, '', '1'))}
         ${field('출고 (주) — 판매 QP 길이', inp('terms.shipWeeks', t.shipWeeks, '', '1'))}
-        ${field('가공마진 ($/t)', inp('terms.procMargin', t.procMargin, '', '10'))}
+        ${field('가공마진 ($/ton)', inp('terms.procMargin', t.procMargin, '', '10'))}
         ${field('매입가 확정 방식',
           sel('terms.buyPriceMode', t.buyPriceMode, Object.entries(BUY_PRICE_MODES)),
           '단일 시점은 판매자 우위, 평균은 구매자 우위')}
-        ${field('재고 단가 — 전월 이월 ($/t)',
+        ${field('재고 단가 — 전월 이월 ($/ton)',
           inp('inventory.prevUnit', state.inventory.prevUnit, '', '100'))}
         ${field('금월 재고 편입 물량 (톤)',
           inp('inventory.addQty', state.inventory.addQty, '', '5'),
@@ -432,10 +430,10 @@ function renderHedge(state) {
       </tr></tfoot>
     </table></div>`;
 
-  /* ---------- ③ Hedge 결과 — ⓐ~ⓕ 는 $/t, 물량을 곱해 금액이 된다.
+  /* ---------- ③ Hedge 결과 — ⓐ~ⓕ 는 $/ton, 물량을 곱해 금액이 된다.
        한 계약이라도 헤지분과 미헤지분은 단가 구조가 달라 줄을 나눈다. ---------- */
   const u = v => (v === 0 ? '<span class="muted">–</span>'
-                          : `<span class="${cls(v)}">${(v < 0 ? '−' : '') + n2(Math.abs(v))}</span>`);
+                          : `<span class="${cls(v)}">${(v < 0 ? '−' : '') + n0(Math.abs(v))}</span>`);
   const legTable = `
     <div class="table-scroll"><table>
       <thead><tr>
@@ -445,7 +443,7 @@ function renderHedge(state) {
         <th class="num">ⓒ QP 미스매치<br>출고월평균 − W${c.shipEnd}</th>
         <th class="num">ⓓ Forward spread</th>
         <th class="num">ⓕ 브로커 수수료</th>
-        <th class="num sep">소계<br>($/t)</th>
+        <th class="num sep">소계<br>($/ton)</th>
         <th class="num">× 물량<br>(톤)</th>
         <th class="num sep">= Hedge 손익</th>
         <th class="num">무대응 손익</th>
@@ -490,17 +488,7 @@ function renderHedge(state) {
       ${stat('Hedge − 무대응', usd(m.hedgedTotals.diff),
         '헤지해서 무대응보다 나아진 만큼', cls(m.hedgedTotals.diff))}
     </div>
-    <div class="note">
-      <b>ⓓ Forward spread란</b> — Forward를 고른 대가로 A Company가 실제로 <b>깎이는</b> 금액이다.
-      <code>이론 선도가격 = 진입 시점 현물 + 금융이자 + 창고·보험료 − 적기공급 프리미엄</code>,
-      여기서 브로커 스프레드를 뺀 값이 A가 받는 고정가다.
-      이 중 <b>금융이자 + 창고·보험료</b>는 A가 물건을 W${c.decisionWeek}~W${c.shipEnd} 들고 있으면서
-      어차피 부담하는 보유비용이고, 선도가는 딱 그만큼을 얹어 <i>보상</i>해 주는 것이라 순효과가 0이다.
-      게다가 이 비용은 파생 수단 모두에 똑같이 발생하므로 수단을 가르지 못한다.
-      따라서 ⓓ에는 실제로 A가 넘겨주는 두 가지만 남긴다 —
-      <code>ⓓ = −(적기공급 프리미엄 ${unit(hp.convenienceYield)} + 브로커 스프레드 ${unit(hp.ibSpread)}) = ${unit(m.carryPerTon)}</code>.
-      <b>항상 0 이하</b>이며, 백워데이션(적기공급 프리미엄 &gt; 0)에서 크게 벌어진다.
-    </div>`;
+`;
 
   /* ---------- ④ 손익 ---------- */
   const plLine = (label, key, klass = '') => `<tr class="${klass}">
@@ -508,7 +496,7 @@ function renderHedge(state) {
     ${m.pnl.map(r => `<td class="num">${dash(r[key], signed)}</td>`).join('')}
     <td class="num sep strong">${signed(m.pnlTotal[key])}</td></tr>`;
 
-  /* 메모 — 단위가 $/t 라 손익표(=$)와 섞지 않고 따로 뺀다. 읽기 전용. */
+  /* 메모 — 단위가 $/ton 이라 손익표(=$)와 섞지 않고 따로 뺀다. 읽기 전용. */
   const memoLine = (label, key, fmt, klass = '') => `<tr class="${klass}">
     <td class="name">${esc(label)}</td>
     ${m.pnl.map(r => `<td class="num">${r[key] == null
@@ -523,9 +511,9 @@ function renderHedge(state) {
           <th class="num sep">가중평균</th></tr></thead>
         <tbody>
           ${memoLine('출고월 평균 물량 (톤)', 'avgQty', v => n0(v), 'row-dim')}
-          ${memoLine('기준 판매단가 — 출고월 평균', 'refUnit', v => unitTrim(v))}
-          ${memoLine('헤지가 바꾼 단가', 'hedgeUnit', v => `<span class="${cls(v)}">${unitTrim(v)}</span>`)}
-          ${memoLine('실현 판매단가 (헤지 後)', 'realizedUnit', v => unitTrim(v), 'row-key')}
+          ${memoLine('기준 판매단가 — 출고월 평균', 'refUnit', v => unit(v))}
+          ${memoLine('헤지가 바꾼 단가', 'hedgeUnit', v => `<span class="${cls(v)}">${unit(v)}</span>`)}
+          ${memoLine('실현 판매단가 (헤지 後)', 'realizedUnit', v => unit(v), 'row-key')}
         </tbody>
       </table></div>
       <p class="chart-foot">
@@ -578,8 +566,7 @@ function renderHedge(state) {
         <div>
           <h2>① 시황</h2>
           <p class="card-sub">
-            시나리오를 고르면 적용 가격이 바뀌고 손익이 재계산 됩니다.
-            나머지 기준값(매입가 방식 · 재고 단가)은 거래조건 탭에서 정한다.
+            Contango, Backwardation, Fluctuation에서 선택, 시나리오 가격표 편집을 통해 신규 시나리오 추가 가능
           </p>
         </div>
         <button class="btn btn-primary" type="button" data-act="export-xlsx"
@@ -616,11 +603,9 @@ function renderHedge(state) {
       <h2>② 매출/Exposure 현황판</h2>
       <p class="card-sub">
         <b>판매 확정(S) → Natural Hedge(H1) → Exposure(E1) → Hedge 조치(H2) → 잔여(E2)</b> 로 구분.
-        <code>E1 = S − H1 + 재고</code>, <code>E2 = E1 − H2</code>.
       </p>
+      ${leadBlock('notes.boardLead', state.notes.boardLead)}
       ${boardTable}
-      ${leadBlock('notes.boardLead', state.notes.boardLead,
-        '현황판 바로 아래에 실릴 한 줄 — 여기 적은 문장이 엑셀 ②-3 요약 시트에도 같이 실린다')}
       <div class="stat-row">
         ${stat('판매 확정 (S)', n0(L.soldQty) + ' t', `계획 ${n0(L.planQty)}t + 추가 ${n0(L.addQty)}t`)}
         ${stat('Natural Hedge (H1)', n0(L.passQty) + ' t', '계약 구조로 상쇄 — 고객 전가')}
@@ -631,16 +616,15 @@ function renderHedge(state) {
         ${stat('잔여 Exposure (E2)', n0(L.exposureQty) + ' t',
           `미헤지 ${n0(L.openQty)}t + 재고 ${n0(L.stockQty)}t`)}
       </div>
-      <div class="note">재고는 팔지 않아도 Exposure(E1)에 들어간다.</div>
+      <div class="note">재고는 Exposure에 들어간다.</div>
 
       <details class="fold" open><summary>판매 물량 — 단계별 입력 (W${SW.join(' · W')})</summary>
         ${saleTable}
-        <div class="note">계약 물량은 W0에 이미 판매 확정이라 <b>계획</b>으로 잡힌다.</div>
       </details>
       <details class="fold" open><summary>Hedge 조치 — 단계별 입력 (W${SW.join(' · W')})</summary>
         ${actTable}
         <div class="note">
-          <b>시점이 손익을 가른다</b> — 조치 물량을 W${SW[0]} 칸에 적으면 ⓐ 미헤지 구간이
+          <b>Hedge시점에 따라 Exposure에 따른 불확실성 구간 결정</b> — 조치 물량을 W${SW[0]} 칸에 적으면 ⓐ 미헤지 구간이
           W0~W${SW[0]} 로 짧아지고, W${SW[SW.length - 1]} 에 적으면 W0~W${SW[SW.length - 1]} 까지 늘어난다.
         </div>
       </details>
@@ -650,38 +634,45 @@ function renderHedge(state) {
       <h2>③ Hedge 결과</h2>
       <p class="card-sub">
         Hedge 손익 = (ⓐ 미헤지 구간 + ⓑ 헤지 구간 노출 + ⓒ QP 미스매치 + ⓓ Forward spread
-        + ⓕ 브로커 수수료) × 그 물량. 어느 칸에 숫자가 남는지가 곧 그 수단의 속성이다.
-        같은 계약이라도 <b>헤지한 물량과 남긴 물량은 단가 구조가 달라</b> 줄을 나눴다.
-        <b>ⓓ + ⓕ 만 헤지를 실행한 비용</b>이고 ⓐⓑⓒ는 가격이 움직여서 생긴 마진변동손익이다.
-        재고 저가법은 헤지가 한 일이 아니므로 여기 넣지 않고 ④ 손익에서 계상한다.
+        + ⓕ 브로커 수수료) × 물량.
       </p>
       ${legTable}
       <div class="grid-2">
-        <div class="note">
-          <b>ⓒ가 Future에만 남는 이유</b> — 거래소 표준계약은 W${c.shipEnd} 단일가로 정산되는데
-          판매는 출고월 ${state.terms.shipWeeks}주 평균이라
-          <b>${unit(m.benchSale - m.settlePrice)}</b> 만큼 어긋난다.
-          Forward는 QP를 협상해 이 구간을 맞출 수 있어 ⓒ가 0이다.
-        </div>
         <div class="note">
           <b>ⓐ는 언제 걸었느냐로 갈린다</b> — W0~진입은 아직 헤지하지 않은 채 지나간 구간이다.
           같은 시점이면 파생 수단끼리 값이 같고, <i>시점을 앞당기면 짧아진다</i> —
           수단 선택이 아니라 의사결정 시점의 문제다.
           <b>고객 전가만 예외</b>로 판가조건 자체를 매입가 연동으로 돌리므로 이 구간까지 사라진다.
         </div>
+        <div class="note">
+          <b>ⓒ가 Future에만 남는 이유</b> — 거래소 표준계약은 W${c.shipEnd} 단일가로 정산되는데
+          판매는 출고월 ${state.terms.shipWeeks}주 평균이다.
+          Forward는 QP를 협상해 이 구간을 맞출 수 있어 ⓒ가 0이다.
+        </div>
+      </div>
+      <div class="note">
+        <b>ⓓ Forward spread란</b> — Forward를 고른 대가로 A Company가 실제로 <b>깎이는</b> 금액이다.
+        <code>이론 선도가격 = 진입 시점 현물 + 금융이자 + 창고·보험료 − 적기공급 프리미엄</code>,
+        여기서 브로커 스프레드를 뺀 값이 A가 받는 고정가다.
+        이 중 <b>금융이자 + 창고·보험료</b>는 A가 물건을 W${c.decisionWeek}~W${c.shipEnd} 들고 있으면서
+        어차피 부담하는 보유비용이고, 선도가는 딱 그만큼을 얹어 <i>보상</i>해 주는 것이라 순효과가 0이다.
+        게다가 이 비용은 파생 수단 모두에 똑같이 발생하므로 수단을 가르지 못한다.
+        따라서 ⓓ에는 실제로 A가 넘겨주는 두 가지만 남긴다 —
+        <code>ⓓ = −(적기공급 프리미엄 ${unit(hp.convenienceYield)} + 브로커 스프레드 ${unit(hp.ibSpread)}) = ${unit(m.carryPerTon)}</code>.
+        <b>항상 0 이하</b>이며, 백워데이션(적기공급 프리미엄 &gt; 0)에서 크게 벌어진다.
       </div>
       <h3 class="sub-head">Hedge 파라미터</h3>
       <div class="param-grid">
         ${field('연 이자율 (%)', inp('hedgeParams.ratePct', hp.ratePct, '', '0.5'), '보유비용의 금융이자 부분')}
-        ${field('창고 · 보험료 ($/t)', inp('hedgeParams.storage', hp.storage, '', '10'),
+        ${field('창고 · 보험료 ($/ton)', inp('hedgeParams.storage', hp.storage, '', '10'),
           '보유비용의 물류 부분')}
-        ${field('적기공급 프리미엄 ($/t)', inp('hedgeParams.convenienceYield', hp.convenienceYield, '', '100'),
+        ${field('적기공급 프리미엄 ($/ton)', inp('hedgeParams.convenienceYield', hp.convenienceYield, '', '100'),
           '백워데이션에서 > 0 — ⓓ를 키운다')}
-        ${field('브로커 스프레드 ($/t)', inp('hedgeParams.ibSpread', hp.ibSpread, '', '10'),
+        ${field('브로커 스프레드 ($/ton)', inp('hedgeParams.ibSpread', hp.ibSpread, '', '10'),
           '고정가에 내재 — 청구서에 안 보임')}
-        ${field('브로커 수수료 · Forward ($/t)', inp('hedgeParams.ibFeeForward', hp.ibFeeForward, '', '0.5'),
+        ${field('브로커 수수료 · Forward ($/ton)', inp('hedgeParams.ibFeeForward', hp.ibFeeForward, '', '0.5'),
           '명시 청구 → 원가 계상')}
-        ${field('브로커 수수료 · Future ($/t)', inp('hedgeParams.ibFeeFuture', hp.ibFeeFuture, '', '0.5'),
+        ${field('브로커 수수료 · Future ($/ton)', inp('hedgeParams.ibFeeFuture', hp.ibFeeFuture, '', '0.5'),
           'round-turn (진입 + 청산)')}
       </div>
       <div class="stat-row">
@@ -695,11 +686,7 @@ function renderHedge(state) {
 
     <div class="card" id="sec-pnl">
       <h2>④ 손익 (USD)</h2>
-      <p class="card-sub">
-        ③을 행과 열만 바꿔 회계 형태로 옮긴 것이다. 매출·재료비는 판매 확정된 물량만 계상한다.
-      </p>
-      ${leadBlock('notes.pnlLead', state.notes.pnlLead,
-        '표 위에 실릴 한 줄 — 여기 적은 문장이 엑셀 ④ 손익 시트에도 같이 실린다')}
+      ${leadBlock('notes.pnlLead', state.notes.pnlLead)}
       <div class="table-scroll"><table>
         <thead><tr><th>항목</th>${m.pnl.map(r =>
           `<th class="num">${esc(r.name)}<br><span class="th-sub">${esc(HEDGE_KINDS[r.hedge].short)}</span></th>`).join('')}
@@ -732,10 +719,9 @@ function renderHedge(state) {
         </div>
         <div class="note">
           <b>비용과 가격 상쇄를 갈라 놓았다</b> — 브로커가 가져가는 몫은
-          <b>가격에 내재된 스프레드 ${usd(-m.pnlTotal.carryCost)}</b> 와
-          <b>청구서에 찍히는 수수료 ${usd(-m.pnlTotal.ibFee)}</b> 둘인데, 성격이 같으므로 나란히 세웠다.
-          둘의 합 <b>${usd(-m.pnlTotal.opCost)}</b> 은 ③의 <i>Hedge Operation 비용</i>과 같은 값이다.
-          남는 <b>Hedge 효과 (가격 상쇄)</b> 는 순수하게 가격 변동을 얼마나 바꿨는지만 담는다.
+          <b>Forward 가격에 내재된 스프레드</b>와 <b>Future/Forward 수수료</b>이며,
+          <i>Hedge Operation 비용</i>으로 정의한다.
+          <b>Hedge 효과 (가격 상쇄)</b> 는 순수하게 가격 변동을 얼마나 바꿨는지만 담는다.
         </div>
       </div>
       <div class="note">
@@ -788,6 +774,11 @@ function renderHedge(state) {
         누적 납부 필요액 ${usd(m.future.maxNeed)} 이 현금 한도 ${usd(hp.cashLimit)} 을 넘었습니다 — 강제청산 구간입니다.
         최종 손익이 흑자여도 <b>버티는 기간의 현금흐름</b>을 못 대면 정점에서 손실이 확정됩니다.
       </div>` : ''}
+      <div class="note">
+        <b>헤지의 잠재 리스크</b> — 거래 기간의 현금흐름이다.
+        가격이 급등하면 숏은 매주 납부해야 하고, 그 현금을 못 대면 정점에서 강제청산된다 (2022년 LME 니켈 사태).
+        Forward는 유동성 부담을 브로커가 지므로 스프레드에 추가된다.
+      </div>
       ${mtmChart}
       ${!limitInScale && m.future.maxNeed > 0 ? `<p class="chart-foot">
         현금 한도 ${usd(hp.cashLimit)} 는 축 밖이라 표시하지 않았습니다 —
@@ -795,7 +786,7 @@ function renderHedge(state) {
       </p>` : ''}
       <details class="fold"><summary>주간 시가평가 상세 (W${m.future.startWeek} ~ W${c.shipEnd})</summary>
         <div class="table-scroll"><table>
-          <thead><tr><th>주차</th><th class="num">보유 물량 (톤)</th><th class="num">LME 가격 ($/t)</th>
+          <thead><tr><th>주차</th><th class="num">보유 물량 (톤)</th><th class="num">LME 가격 ($/ton)</th>
             <th class="num">주간 선물 손익<br>(− 납부 / + 환급)</th>
             <th class="num">누적 선물 손익<br>(= 누적 순현금흐름)</th>
             <th class="num">누적 납부 필요액</th></tr></thead>
@@ -812,11 +803,6 @@ function renderHedge(state) {
       <div class="inline-fields">
         ${field('개시증거금율 (%)', inp('hedgeParams.imRatePct', hp.imRatePct, '', '1'))}
         ${field('가용 현금 한도 ($)', inp('hedgeParams.cashLimit', hp.cashLimit, '', '100000'))}
-      </div>
-      <div class="note">
-        <b>헤지의 진짜 리스크</b> — 최종 손익이 아니라 버티는 기간의 현금흐름이다.
-        가격이 급등하면 숏은 매주 납부해야 하고, 그 현금을 못 대면 정점에서 강제청산된다 (2022년 LME 니켈 사태).
-        Forward는 이 표가 통째로 비어 있고, 대신 그 유동성 부담을 브로커가 지므로 스프레드에 얹힌다.
       </div>
     </div>
     </div>
