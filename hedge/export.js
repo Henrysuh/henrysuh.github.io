@@ -107,7 +107,8 @@ function buildTerms(wb, state, m) {
                        '편입분은 매입가와 가중평균되어 재고 단가를 갱신한다');
   r += 1;
 
-  sh.set(`B${r}`, { v: `비용 기준 — ${t.target || '대상'} 기준값, 대상이 바뀌면 수정`, s: S.section });
+  /* Hedge 대상 칸을 받아 쓴다 — 엑셀에서 대상만 고쳐도 제목이 따라 바뀐다 */
+  sh.set(`B${r}`, { f: `"비용 기준 — "&${T.target}&" 기준값, 대상이 바뀌면 수정"`, s: S.section });
   sh.set(`C${r}`, { v: '', s: S.section }); sh.set(`D${r}`, { v: '', s: S.section }); r += 1;
   T.spreadPct  = input('브로커 스프레드 (% of Hedge 진입가)', hp.ibSpreadPct, S.inputNum2, 'Forward 고정가에 내재 — 청구서에 안 보임');
   T.storageM   = input('창고비 ($/ton/월)', hp.storagePerMonth, S.inputNum2, '무게 기준 × 헤지 기간');
