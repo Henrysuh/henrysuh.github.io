@@ -4,20 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Henrysuh의 깃허브 홈페이지</title>
-  <meta name="description" content="전국 차박 명소 지도, AI 사주 만세력, 원자재 헤지 시뮬레이션, 생산성 미디어 도구 모음.">
-  <meta name="keywords" content="차박지도, AI사주, 만세력, Hedge Simulation, 생산성 도구, 미디어 도구">
+  <meta name="description" content="문서 관리 앱 Dokanizer, 시간·동선 일정 앱 maptime, 덧쓰는 일기장 Texture. 차박 지도, AI 사주 만세력, 원자재 헤지 시뮬레이션, 생산성·미디어 도구 모음.">
+  <meta name="keywords" content="Dokanizer, maptime, Texture, 문서 관리, 일정 계획, 일기장, 차박지도, AI사주, 만세력, Hedge Simulation, 생산성 도구, 미디어 도구">
   <meta name="google-site-verification" content="oCMfCFXUWVqj5dmG33eghAy9f_q5EO4P94TxJ2VdaIs" />
   <meta name="naver-site-verification" content="1903f9b3d361e5515ad4d748e1b18b1aead8b5d0" />
   <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #0f1923;
-      --panel: #162130;
-      --border: #1e3048;
-      --accent: #4fc3a1;
-      --accent2: #f0a500;
-      --text: #e8edf2;
-      --muted: #6b8299;
+      --bg: #FDF6E3;
+      --panel: #FFFBF0;
+      --panel2: #073642;
+      --border: #E8E1CC;
+      --accent: #2AA198;
+      --accent-dark: #1F7F78;
+      --accent2: #CB4B16;
+      --text: #073642;
+      --muted: #657B83;
       --font-display: 'Black Han Sans', sans-serif;
       --font-body: 'Noto Sans KR', sans-serif;
     }
@@ -33,7 +35,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 40px 20px;
+      padding: 48px 16px;
     }
 
     body::before {
@@ -44,18 +46,18 @@
         linear-gradient(var(--border) 1px, transparent 1px),
         linear-gradient(90deg, var(--border) 1px, transparent 1px);
       background-size: 40px 40px;
-      opacity: 0.3;
+      opacity: 0.5;
       pointer-events: none;
     }
 
     .container {
       position: relative;
       width: 100%;
-      max-width: 780px;
+      max-width: 1040px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 40px;
+      gap: 32px;
     }
 
     header {
@@ -65,7 +67,7 @@
 
     .site-title {
       font-family: var(--font-display);
-      font-size: clamp(28px, 6vw, 40px);
+      font-size: clamp(30px, 6.5vw, 46px);
       color: var(--accent);
       letter-spacing: 1px;
       margin-bottom: 8px;
@@ -74,24 +76,20 @@
     .site-title span { color: var(--accent2); }
 
     .site-subtitle {
-      font-size: 14px;
+      font-size: 16px;
       color: var(--muted);
-      font-weight: 300;
+      font-weight: 400;
       letter-spacing: 0.5px;
     }
 
-    .site-desc {
-      margin-top: 6px;
-      font-size: 14px;
-      color: var(--muted);
-      letter-spacing: 0.3px;
-    }
+    section { width: 100%; }
 
     .divider {
       width: 100%;
       display: flex;
       align-items: center;
       gap: 12px;
+      margin-bottom: 16px;
       animation: fadeUp 0.6s ease 0.1s both;
     }
 
@@ -104,94 +102,210 @@
     }
 
     .divider span {
-      font-size: 11px;
+      font-size: 12px;
       color: var(--muted);
       letter-spacing: 2px;
       text-transform: uppercase;
       white-space: nowrap;
     }
 
-    .cards {
-      width: 100%;
+    /* ── 제품 타일 ───────────────────────── */
+    .products {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 16px;
     }
 
-    @media (max-width: 620px) {
-      .cards {
-        grid-template-columns: 1fr;
-      }
+    @media (max-width: 820px) {
+      .products { grid-template-columns: 1fr; }
     }
 
-    .card {
+    .product {
+      --c: var(--accent);
+      position: relative;
       display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 20px;
+      flex-direction: column;
+      gap: 12px;
+      padding: 24px 22px 20px;
       background: var(--panel);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      text-decoration: none;
-      color: var(--text);
-      cursor: pointer;
+      border-top: 3px solid var(--c);
+      border-radius: 14px;
       transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
       animation: fadeUp 0.6s ease both;
     }
 
-    .card:nth-child(1) { animation-delay: 0.2s; }
-    .card:nth-child(2) { animation-delay: 0.3s; }
-    .card:nth-child(3) { animation-delay: 0.4s; }
-    .card:nth-child(4) { animation-delay: 0.5s; }
-    .card:nth-child(5) { animation-delay: 0.6s; }
-    .card:nth-child(6) { animation-delay: 0.7s; }
+    .product:nth-child(1) { animation-delay: 0.15s; }
+    .product:nth-child(2) { animation-delay: 0.25s; }
+    .product:nth-child(3) { animation-delay: 0.35s; }
 
-    .card:hover {
-      border-color: var(--accent);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(79, 195, 161, 0.1);
+    .product:hover {
+      border-color: var(--c);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 28px rgba(7, 54, 66, 0.10);
     }
 
-    .card-icon {
-      font-size: 32px;
-      flex-shrink: 0;
-      width: 48px;
-      text-align: center;
+    .product.dokanizer { --c: #268BD2; }
+    .product.maptime   { --c: var(--accent); }
+    .product.texture   { --c: #859900; }
+
+    .p-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
     }
 
-    .card-body { flex: 1; }
-
-    .card-title {
+    .p-name {
       font-family: var(--font-display);
-      font-size: 18px;
+      font-size: 30px;
+      letter-spacing: 0.5px;
       color: var(--text);
-      margin-bottom: 4px;
     }
 
-    .card-desc {
+    .badge {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--c);
+      color: var(--c);
+      white-space: nowrap;
+    }
+
+    .p-tagline {
+      font-size: 17px;
+      font-weight: 500;
+      color: var(--text);
+      word-break: keep-all;
+    }
+
+    .p-desc {
+      font-size: 15px;
+      line-height: 1.65;
+      color: var(--muted);
+      font-weight: 400;
+      word-break: keep-all;
+      flex: 1;
+    }
+
+    .p-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .p-more {
       font-size: 14px;
       color: var(--muted);
-      font-weight: 300;
+      transition: color 0.2s;
     }
 
-    .card-arrow {
+    .product:hover .p-more { color: var(--c); }
+
+    /* 타일 전체를 덮는 링크 — 그 위에 버튼을 따로 올린다 */
+    .p-link {
+      position: absolute;
+      inset: 0;
+      border-radius: 14px;
+      z-index: 1;
+    }
+
+    .p-link:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; }
+
+    .p-btn {
+      position: relative;
+      z-index: 2;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 7px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--c);
+      background: transparent;
+      color: var(--c);
+      text-decoration: none;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .p-btn:hover { background: var(--c); color: #fff; }
+
+    /* ── 도구 목록 ───────────────────────── */
+    .tools {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px 16px;
+    }
+
+    @media (max-width: 620px) {
+      .tools { grid-template-columns: 1fr; }
+    }
+
+    .tool {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      text-decoration: none;
+      color: var(--text);
+      transition: background 0.2s, border-color 0.2s;
+      animation: fadeUp 0.6s ease 0.45s both;
+    }
+
+    .tool:hover {
+      background: var(--panel);
+      border-color: var(--border);
+    }
+
+    .tool-icon { font-size: 22px; width: 28px; text-align: center; flex-shrink: 0; }
+    .tool-body { flex: 1; min-width: 0; }
+    .tool-title { font-size: 16px; font-weight: 500; }
+    .tool-desc {
+      font-size: 13.5px;
       color: var(--muted);
-      font-size: 18px;
-      flex-shrink: 0;
-      transition: color 0.2s, transform 0.2s;
+      font-weight: 400;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .card:hover .card-arrow {
-      color: var(--accent);
-      transform: translateX(4px);
-    }
+    .tool-arrow { color: var(--muted); transition: color 0.2s, transform 0.2s; }
+    .tool:hover .tool-arrow { color: var(--accent); transform: translateX(3px); }
 
     footer {
-      font-size: 11px;
+      font-size: 12px;
       color: var(--muted);
       letter-spacing: 0.5px;
       animation: fadeUp 0.6s ease 0.5s both;
     }
+
+    /* ── soon~ 안내 ─────────────────────── */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 32px;
+      transform: translate(-50%, 20px);
+      padding: 12px 20px;
+      border-radius: 10px;
+      background: var(--panel2);
+      border: 1px solid var(--panel2);
+      color: #FDF6E3;
+      font-size: 15px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s, transform 0.25s;
+      z-index: 10;
+      max-width: calc(100% - 32px);
+      text-align: center;
+    }
+
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(16px); }
@@ -204,91 +318,141 @@
 
     <header>
       <div class="site-title">Henry<span>suh</span>.github.io</div>
-      <div class="site-subtitle">Henrysuh의 깃허브 홈페이지</div>
-      <div class="site-desc">유용한 사이트 모음 · 계속 추가됩니다</div>
+      <div class="site-subtitle">직접 만들어 쓰는 앱과 도구</div>
     </header>
 
-    <div class="divider"><span>사이트 모음</span></div>
+    <section>
+      <div class="divider"><span>Products</span></div>
+      <div class="products">
 
-    <div class="cards">
-      <a class="card" href="chabak/">
-        <div class="card-icon">🚗</div>
-        <div class="card-body">
-          <div class="card-title">차박지도</div>
-          <div class="card-desc">전국 차박 명소 · 휴양림 · 휴게소 · 전통시장</div>
-        </div>
-        <div class="card-arrow">→</div>
-      </a>
+        <article class="product dokanizer">
+          <a class="p-link" href="dokanizer/" aria-label="Dokanizer 소개"></a>
+          <div class="p-head">
+            <div class="p-name">Dokanizer</div>
+            <span class="badge">Windows · Mac</span>
+          </div>
+          <div class="p-tagline">문서를 라이브러리처럼 관리</div>
+          <div class="p-desc">Markdown · Word · 이메일을 넣으면 Tag로 정리하고, 한 번 넣은 문서를 PPTX · DOCX · EPUB · HTML로 꺼내 씁니다.</div>
+          <div class="p-actions">
+            <span class="p-more">소개 보기 →</span>
+            <a class="p-btn" href="dokanizer/#download">다운로드</a>
+          </div>
+        </article>
 
-      <a class="card" href="tools/tool.html">
-        <div class="card-icon">⚙️</div>
-        <div class="card-body">
-          <div class="card-title">Tool Center</div>
-          <div class="card-desc">생산성 및 데이터 작업을 위한 유용한 도구 모음</div>
-        </div>
-        <div class="card-arrow">→</div>
-      </a>
+        <article class="product maptime">
+          <a class="p-link" href="https://maptime.henrysuh.com" target="_blank" rel="noopener" aria-label="maptime 사이트 열기"></a>
+          <div class="p-head">
+            <div class="p-name">maptime</div>
+            <span class="badge">웹앱</span>
+          </div>
+          <div class="p-tagline">시간과 동선을 함께 짜는 일정</div>
+          <div class="p-desc">출장 · 여행 · 외근처럼 장소 이동과 시간 · 비용이 얽힌 일정을 짜고, 구글 캘린더와 공유 링크로 내보냅니다.</div>
+          <div class="p-actions">
+            <span class="p-more">maptime.henrysuh.com ↗</span>
+          </div>
+        </article>
 
-      <!-- 자산 로드맵 — 당분간 비공개 (asset_roadmap/ 는 .gitignore). 다시 열 때 주석 해제
-      <a class="card" href="asset_roadmap/">
-        <div class="card-icon">🎮</div>
-        <div class="card-body">
-          <div class="card-title">자산 로드맵</div>
-          <div class="card-desc">생활 방식별 비용 시뮬레이터 · 재무 프로젝션</div>
-        </div>
-        <div class="card-arrow">→</div>
-      </a>
-      -->
+        <article class="product texture">
+          <a class="p-link" href="texture/" aria-label="Texture 소개"></a>
+          <div class="p-head">
+            <div class="p-name">Texture</div>
+            <span class="badge">준비 중</span>
+          </div>
+          <div class="p-tagline">덧쓰는 일기장</div>
+          <div class="p-desc">최초의 기록은 그대로 두고 오늘의 감상을 덧씁니다. 감정에 내 말로 이름을 붙이고, 책으로 남깁니다.</div>
+          <div class="p-actions">
+            <span class="p-more">소개 보기 →</span>
+            <button class="p-btn" type="button" data-soon>사이트 열기</button>
+          </div>
+        </article>
 
-      <a class="card" href="hedge/">
-        <div class="card-icon">⚖️</div>
-        <div class="card-body">
-          <div class="card-title">원자재 Hedge Simulation 모델</div>
-          <div class="card-desc">무대응 · Forward · Future · 저가법 평가 손익 비교</div>
-        </div>
-        <div class="card-arrow">→</div>
-      </a>
+      </div>
+    </section>
 
-      <a class="card" href="media/">
-        <div class="card-icon">🎬</div>
-        <div class="card-body">
-          <div class="card-title">Media Center</div>
-          <div class="card-desc">후지 RAF 추출 · SVG 변환 · 이미지/음악 컷팅 & 변환</div>
-        </div>
-        <div class="card-arrow">→</div>
-      </a>
+    <section>
+      <div class="divider"><span>Tools &amp; Lab</span></div>
+      <div class="tools">
+        <a class="tool" href="chabak/">
+          <div class="tool-icon">🚗</div>
+          <div class="tool-body">
+            <div class="tool-title">차박지도</div>
+            <div class="tool-desc">전국 차박 명소 · 휴양림 · 휴게소 · 전통시장</div>
+          </div>
+          <div class="tool-arrow">→</div>
+        </a>
 
-      <a class="card" href="fortune_teller/">
-        <div class="card-icon">🔮</div>
-        <div class="card-body">
-          <div class="card-title">AI 사주 만세력</div>
-          <div class="card-desc">정밀 만세력 연산 · 사주 분석 · AI 마스터 프롬프트 생성</div>
-        </div>
-        <div class="card-arrow">→</div>
-      </a>
-    </div>
+        <a class="tool" href="tools/tool.html">
+          <div class="tool-icon">⚙️</div>
+          <div class="tool-body">
+            <div class="tool-title">Tool Center</div>
+            <div class="tool-desc">생산성 및 데이터 작업을 위한 유용한 도구 모음</div>
+          </div>
+          <div class="tool-arrow">→</div>
+        </a>
+
+        <!-- 자산 로드맵 — 당분간 비공개 (asset_roadmap/ 는 .gitignore). 다시 열 때 주석 해제
+        <a class="tool" href="asset_roadmap/">
+          <div class="tool-icon">🎮</div>
+          <div class="tool-body">
+            <div class="tool-title">자산 로드맵</div>
+            <div class="tool-desc">생활 방식별 비용 시뮬레이터 · 재무 프로젝션</div>
+          </div>
+          <div class="tool-arrow">→</div>
+        </a>
+        -->
+
+        <a class="tool" href="hedge/">
+          <div class="tool-icon">⚖️</div>
+          <div class="tool-body">
+            <div class="tool-title">원자재 Hedge Simulation 모델</div>
+            <div class="tool-desc">무대응 · Forward · Future · 저가법 평가 손익 비교</div>
+          </div>
+          <div class="tool-arrow">→</div>
+        </a>
+
+        <a class="tool" href="media/">
+          <div class="tool-icon">🎬</div>
+          <div class="tool-body">
+            <div class="tool-title">Media Center</div>
+            <div class="tool-desc">후지 RAF 추출 · SVG 변환 · 이미지/음악 컷팅 &amp; 변환</div>
+          </div>
+          <div class="tool-arrow">→</div>
+        </a>
+
+        <a class="tool" href="fortune_teller/">
+          <div class="tool-icon">🔮</div>
+          <div class="tool-body">
+            <div class="tool-title">AI 사주 만세력</div>
+            <div class="tool-desc">정밀 만세력 연산 · 사주 분석 · AI 마스터 프롬프트 생성</div>
+          </div>
+          <div class="tool-arrow">→</div>
+        </a>
+      </div>
+    </section>
 
     <footer>© 2026 Henrysuh · GitHub Pages</footer>
 
   </div>
 
+  <div class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // 준비 중인 사이트(Texture) 버튼 → soon~ 안내
+    const toast = document.querySelector('.toast');
+    let timer;
+    document.querySelectorAll('[data-soon]').forEach(el => {
+      el.addEventListener('click', () => {
+        toast.textContent = 'Texture는 soon~ 지금 열심히 만들고 있어요.';
+        toast.classList.add('show');
+        clearTimeout(timer);
+        timer = setTimeout(() => toast.classList.remove('show'), 2400);
+      });
+    });
+  </script>
+
 <!--
-  [카드 추가 방법]
-  .cards 블록 안에 아래 형식을 복사해서 추가: 현재 200~208행 참조
-
-  <a class="card" href="링크URL">
-    <div class="card-icon">이모지</div>
-    <div class="card-body">
-      <div class="card-title">제목</div>
-      <div class="card-desc">설명</div>
-    </div>
-    <div class="card-arrow">→</div>
-  </a>
-
-  [넘버링 추가]
-  CSS의 nth-child 블록에 다음 줄 추가:
-  .card:nth-child(4) { animation-delay: 0.5s; }
-  .card:nth-child(5) { animation-delay: 0.6s; }
+  [제품 타일 추가] .products 안에 article.product 복사. 색은 .product.<이름> { --c: 색; }
+  [도구 추가] .tools 안에 a.tool 복사.
 -->
 
 </body>

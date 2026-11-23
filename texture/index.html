@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Texture — 덧쓰는 일기장</title>
+  <meta name="description" content="덧쓰는 일기장 Texture: 최초의 기록은 그대로 두고 오늘의 감상을 덧씁니다. 감정에 내 말로 이름을 붙이고, 책으로 남기세요. (준비 중)">
+  <meta name="keywords" content="Texture, 텍스처, 덧쓰는 일기장, 일기 앱, 감정 기록, 감정 태그, 일기 책 만들기">
+  <meta property="og:title" content="Texture — 덧쓰는 일기장">
+  <meta property="og:description" content="문자메시지, 카톡, 자동 알림, AI Slop의 홍수 속에서 나는 없습니다. 내가 읽고 쓰는 나를 마주보기 위해 만든 덧쓰는 일기장.">
+  <meta property="og:type" content="website">
+  <style>
+    :root {
+      --ink: #1f2328; --muted: #5d6168; --faint: #9a9890; --line: #e7e5df;
+      --paper: #faf8f3; --white: #fff; --sage: #5F7A61; --sage-dark: #4b624d; --amber: #D97757;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body { background: var(--white); color: var(--ink); font: 17px/1.6 -apple-system, "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
+    a { color: inherit; text-decoration: none; }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+    @media (min-width: 640px) { .wrap { padding: 0 24px; } }
+
+    header.top { position: sticky; top: 0; z-index: 5; background: rgba(255,255,255,.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid #f1f1ee; }
+    header.top .wrap { height: 60px; display: flex; align-items: center; gap: 12px; }
+    .logo { display: flex; align-items: center; gap: 8px; margin-right: auto; }
+    .logo .mark { width: 34px; height: 34px; border-radius: 10px; background: var(--sage); color: #fff; display: grid; place-items: center; font-weight: 900; font-size: 20px; }
+    .logo b { font-size: 19px; }
+    .home { font-size: 13px; color: var(--muted); }
+    .home:hover { color: var(--ink); }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 12px 20px; border-radius: 12px; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer; border: 0; transition: background-color .15s; }
+    .btn.primary { background: var(--sage); color: #fff; }
+    .btn.primary:hover { background: var(--sage-dark); }
+    .btn.small { padding: 8px 14px; font-size: 14px; border-radius: 8px; background: var(--ink); color: #fff; }
+    .btn.small:hover { background: #3d434b; }
+
+    .soon-badge { display: inline-block; margin-bottom: 20px; padding: 4px 12px; border-radius: 999px; background: #fbeee8; color: var(--amber); font-size: 13px; font-weight: 700; }
+
+    .hero { padding-top: 56px; padding-bottom: 48px; text-align: center; }
+    @media (min-width: 640px) { .hero { padding-top: 88px; } }
+    .hero p.flood { margin: 0 auto; max-width: 720px; font-size: 18px; color: var(--faint); word-break: keep-all; }
+    .hero p.why { margin: 8px auto 28px; max-width: 720px; font-size: 20px; font-weight: 700; word-break: keep-all; }
+    .hero h1 { margin: 0; font-size: 36px; font-weight: 900; letter-spacing: -.025em; line-height: 1.25; word-break: keep-all; }
+    @media (min-width: 640px) { .hero h1 { font-size: 56px; } }
+    .hero h1 em { font-style: normal; color: var(--sage); }
+    .hero p.lead { margin: 20px auto 0; max-width: 640px; font-size: 18px; color: var(--muted); word-break: keep-all; }
+    .hero .ctas { margin-top: 32px; }
+    .hero p.note { margin: 12px 0 0; font-size: 14px; color: var(--faint); }
+
+    .feature:nth-of-type(odd) { background: var(--paper); }
+    .feature .wrap { padding-top: 64px; padding-bottom: 64px; display: flex; flex-direction: column; gap: 36px; }
+    @media (min-width: 960px) {
+      .feature .wrap { flex-direction: row; align-items: center; }
+      .feature.rev .wrap { flex-direction: row-reverse; }
+      .feature .text { width: 42%; }
+      .feature .pic { width: 58%; }
+    }
+    .feature .pic { min-width: 0; }
+    .kicker { margin: 0; font-size: 14px; font-weight: 800; color: var(--sage); }
+    .feature h2 { margin: 10px 0 0; font-size: 28px; font-weight: 900; letter-spacing: -.025em; line-height: 1.35; word-break: keep-all; }
+    @media (min-width: 640px) { .feature h2 { font-size: 34px; } }
+    .feature p.body { margin: 16px 0 0; font-size: 17px; color: var(--muted); line-height: 1.75; word-break: keep-all; }
+    .pic img { display: block; width: auto; max-width: 100%; max-height: 600px; height: auto; margin: 0 auto; border-radius: 16px; border: 1px solid var(--line); background: #fff; box-shadow: 0 20px 25px -5px rgba(0,0,0,.08), 0 8px 10px -6px rgba(0,0,0,.08); }
+
+    .loop { padding: 72px 0; }
+    .loop h2, .annual h2 { margin: 0 0 8px; font-size: 28px; font-weight: 900; letter-spacing: -.02em; text-align: center; word-break: keep-all; }
+    .loop .sub, .annual .sub { margin: 0 auto 32px; max-width: 600px; text-align: center; color: var(--muted); word-break: keep-all; }
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    @media (max-width: 860px) { .steps { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .steps { grid-template-columns: 1fr; } }
+    .step { padding: 20px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+    .step .n { font-size: 13px; font-weight: 800; color: var(--sage); }
+    .step h3 { margin: 4px 0 8px; font-size: 18px; }
+    .step p { margin: 0; font-size: 14.5px; color: var(--muted); word-break: keep-all; }
+    .step code { font-family: inherit; color: var(--sage-dark); background: #eef2ee; padding: 0 5px; border-radius: 4px; }
+
+    .annual { background: var(--paper); padding: 72px 0; }
+    .annual .box { max-width: 720px; margin: 0 auto; }
+    .annual ul { margin: 0; padding-left: 20px; color: var(--muted); }
+    .annual li { margin-bottom: 10px; word-break: keep-all; }
+    .annual li b { color: var(--ink); }
+
+    .last { padding: 80px 0; text-align: center; }
+    .last h2 { margin: 0 0 24px; font-size: 30px; font-weight: 900; letter-spacing: -.025em; word-break: keep-all; }
+
+    footer { border-top: 1px solid var(--line); background: var(--paper); }
+    footer .wrap { padding-top: 28px; padding-bottom: 28px; display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 14px; color: var(--faint); }
+    footer b { color: var(--ink); margin-right: auto; }
+    footer a:hover { color: var(--ink); }
+
+    .toast { position: fixed; left: 50%; bottom: 32px; transform: translate(-50%, 20px); padding: 12px 20px; border-radius: 12px; background: var(--ink); color: #fff; font-size: 15px; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; z-index: 10; max-width: calc(100% - 32px); text-align: center; }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <a class="logo" href="./"><span class="mark">T</span><b>Texture</b></a>
+      <a class="home" href="../">Henrysuh.github.io</a>
+      <button class="btn small" type="button" data-soon>시작하기</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero wrap">
+      <span class="soon-badge">준비 중 · soon~</span>
+      <p class="flood">문자메시지, 카톡, 자동 알림, AI Slop의 홍수 속에서 나는 없습니다.</p>
+      <p class="why">내가 읽고 쓰는 나를 마주보기 위해 만들었습니다.</p>
+      <h1><em>덧쓰는</em> 일기장 Texture</h1>
+      <p class="lead">감정에 나의 단어로 이름을 붙이고, 책으로 남기세요.</p>
+      <div class="ctas">
+        <button class="btn primary" type="button" data-soon>Texture 시작하기</button>
+      </div>
+      <p class="note">구글 계정으로 시작합니다. 일기는 내 구글 드라이브에 저장됩니다.</p>
+    </section>
+
+    <section class="feature">
+      <div class="wrap">
+        <div class="text">
+          <p class="kicker">덧쓰기</p>
+          <h2>최초는 그대로, 오늘의 나를 더합니다.</h2>
+          <p class="body">일기를 고치면 거짓 같나요? Texture는 기록을 고치지 않습니다. 다시 쓴 나의 감상만 진하게 쌓여, 인식의 발전이 보입니다.</p>
+        </div>
+        <div class="pic"><img src="img/rewrite.png" alt="최초 | 최종 표 — 샘플 일기 3/12, 우연일까 → 우연아님" loading="lazy"></div>
+      </div>
+    </section>
+
+    <section class="feature rev">
+      <div class="wrap">
+        <div class="text">
+          <p class="kicker">나의 감정</p>
+          <h2>흩어진 감정에 내 말로 이름을 붙입니다.</h2>
+          <p class="body">조급, 조급함, 초조… 그때그때 붙인 태그를 사전 뜻과 나란히 놓고 정리합니다. AI를 통해 혼잡한 감정의 편린을 정제합니다. 일기가 모이고, 기간(주 · 월 · 년) 단위로 이어 읽을 수 있습니다.</p>
+        </div>
+        <div class="pic"><img src="img/feelings.png" alt="태그 탭 — 내 뜻, 사전 참고, 그 태그의 일기" loading="lazy"></div>
+      </div>
+    </section>
+
+    <section class="feature">
+      <div class="wrap">
+        <div class="text">
+          <p class="kicker">책으로</p>
+          <h2>화면 속 기록을 손에 잡히는 책으로.</h2>
+          <p class="body">하루 한 장에 나의 인식의 변화를 나란히 싣고, 같은 날짜를 10년 동안 한 장에 모읍니다. 인쇄용 PDF와 EPUB까지 만들어 드립니다.</p>
+        </div>
+        <div class="pic"><img src="img/book.png" alt="책 탭 미리보기 — 표지 펼침, 본문 한 쪽" loading="lazy"></div>
+      </div>
+    </section>
+
+    <section class="loop">
+      <div class="wrap">
+        <h2>매일의 기록은 숙제가 아니라 호흡</h2>
+        <p class="sub">앱이 가르치거나 처방하지 않습니다. 하루를 담백하게 남기고, 시간을 두고 다시 고쳐 씁니다.</p>
+        <div class="steps">
+          <div class="step">
+            <div class="n">01</div>
+            <h3>행동</h3>
+            <p>오늘 겪은 일, 머문 곳, 한 일을 꾸밈없이 사실대로.</p>
+          </div>
+          <div class="step">
+            <div class="n">02</div>
+            <h3>감정</h3>
+            <p>그 안에서 올라온 기대와 실망, 안도와 피로를 날것 그대로.</p>
+          </div>
+          <div class="step">
+            <div class="n">03</div>
+            <h3>한 단어</h3>
+            <p>그날의 감정을 <code>#무력감</code>처럼 한 단어로. 나중에 언제든 다시 정의합니다.</p>
+          </div>
+          <div class="step">
+            <div class="n">04</div>
+            <h3>정제</h3>
+            <p>한 달 뒤 다시 읽고 한 줄로 요약하고, 다른 말로 옮겨 봅니다. 감정과 거리가 생깁니다.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="annual">
+      <div class="wrap">
+        <div class="box">
+          <h2>일 년에 단 하루, Annual Day</h2>
+          <p class="sub">내가 정한 하루, 일 년 동안 쌓인 기록을 스스로 정리하며 답을 찾는 날입니다.</p>
+          <ul>
+            <li><b>감정의 시차</b> — 그때는 감당하기 힘들었던 감정이 한 달 뒤, 일 년 뒤 어떻게 다시 쓰였는지 겹쳐 봅니다.</li>
+            <li><b>나만의 감정 사전</b> — 일 년간의 감정 태그를 합치고 나누며 내 말로 다시 정리합니다.</li>
+            <li><b>스스로 세우는 계획</b> — 정리하다 보면 지금 나에게 필요한 쉼과 변화가 자연스럽게 보입니다.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="last wrap">
+      <h2>오늘 밤 일기부터 Texture로</h2>
+      <button class="btn primary" type="button" data-soon>Texture 시작하기</button>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <b>Texture</b>
+      <a href="../">Henrysuh.github.io</a>
+      <span>© 2026 Henrysuh</span>
+    </div>
+  </footer>
+
+  <div class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // 사이트가 아직 열리지 않았다 → soon~ 안내 (열리면 data-soon 버튼을 texture 주소 링크로 바꾼다)
+    const toast = document.querySelector('.toast');
+    let timer;
+    document.querySelectorAll('[data-soon]').forEach(el => {
+      el.addEventListener('click', () => {
+        toast.textContent = 'soon~ Texture는 지금 열심히 만들고 있어요.';
+        toast.classList.add('show');
+        clearTimeout(timer);
+        timer = setTimeout(() => toast.classList.remove('show'), 2400);
+      });
+    });
+  </script>
+</body>
+</html>
