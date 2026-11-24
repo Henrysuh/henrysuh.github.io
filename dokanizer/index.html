@@ -13,7 +13,7 @@
   <!--
     Dokanizer 소개 페이지 (2026-11-23). maptime 소개 페이지와 같은 구성:
     첫 화면 → 핵심 세 가지(넣기·찾기·꺼내기, 좌우 번갈아) → 형식 띠 → 마지막 권유 → 푸터.
-    그림은 img/inbox.png · img/search.png · img/presentation.png. 파일이 없으면 점선 자리만 보인다.
+    그림은 img/edit.png(첫 화면) · img/inbox.png · img/search.png · img/presentation.png. 파일이 없으면 점선 자리만 보인다.
     다운로드는 공개 저장소 Henrysuh/dokanizer-release 의 최신 릴리스에서 고정 파일명으로 받는다.
   -->
   <style>
@@ -58,6 +58,8 @@
     .hero p.lead { margin: 20px auto 0; max-width: 672px; font-size: 18px; color: var(--muted); word-break: keep-all; }
     @media (min-width: 640px) { .hero p.lead { font-size: 20px; } }
     .hero p.note { margin: 12px 0 0; font-size: 14px; color: var(--faint); }
+    .hero .shot { margin-top: 48px; }
+    @media (min-width: 640px) { .hero .shot { margin-top: 64px; } }
 
     /* 핵심 세 가지 */
     .feature:nth-of-type(odd) { background: var(--soft); }
@@ -128,6 +130,7 @@
         <a class="btn secondary" href="https://github.com/Henrysuh/dokanizer-release/releases/latest/download/Dokanizer_macOS.dmg"><svg class="i"><use href="#i-apple"/></svg> macOS 다운로드</a>
       </div>
       <p class="note">90일 체험판 · 관리자 권한 없이 설치</p>
+      <div class="pic shot"><img src="img/edit.png" alt="Edit 탭 — 문서를 요소 단위로 고치고 바로 미리보기" data-ph="Edit 탭 캡처 자리"></div>
     </section>
 
     <!-- 핵심 세 가지 -->
@@ -138,7 +141,7 @@
           <h2>끌어다 놓으면 정리 끝</h2>
           <p class="body">MD · Word · 이메일을 Inbox에 넣으면 파싱, Tag, 이미지 수집까지. Obsidian 첨부 이미지도 따라옵니다.</p>
         </div>
-        <div class="pic"><img src="img/inbox.png" alt="Inbox와 Tag 트리" data-ph="Inbox · Tag 트리 캡처 자리"></div>
+        <div class="pic"><img src="img/inbox.png" alt="DB 탭 — Tag 트리와 문서 목록" data-ph="Inbox · Tag 트리 캡처 자리"></div>
       </div>
     </section>
 
@@ -149,7 +152,7 @@
           <h2>제목 · Tag · 본문,<br>PDF 쪽까지 한 번에</h2>
           <p class="body">흩어진 문서와 참조 PDF를 한곳에서. 찾은 쪽을 바로 보고 복사합니다.</p>
         </div>
-        <div class="pic"><img src="img/search.png" alt="검색 결과와 PDF 탭" data-ph="검색 결과 / PDF 탭 캡처 자리"></div>
+        <div class="pic"><img src="img/search.png" alt="PDF 탭 — 본문 검색과 찾은 쪽 바로 보기" data-ph="검색 결과 / PDF 탭 캡처 자리"></div>
       </div>
     </section>
 
@@ -160,7 +163,7 @@
           <h2>원고 하나,<br>보고서 · 슬라이드 · 전자책</h2>
           <p class="body">템플릿을 한 번 등록하면 슬라이드 배분은 자동. 표로 고치고 바로 미리봅니다.</p>
         </div>
-        <div class="pic"><img src="img/presentation.png" alt="Presentation 탭 — 표 편집과 미리보기" data-ph="Presentation 탭 캡처 자리"></div>
+        <div class="pic"><img src="img/presentation.png" alt="Edit 탭 — 회의록을 미리 보고 DOCX로 꺼내기" data-ph="출력 캡처 자리"></div>
       </div>
     </section>
 
