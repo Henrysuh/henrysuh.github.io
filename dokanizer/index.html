@@ -14,7 +14,7 @@
     Dokanizer 소개 페이지 (2026-11-23). maptime 소개 페이지와 같은 구성:
     첫 화면 → 핵심 세 가지(넣기·찾기·꺼내기, 좌우 번갈아) → 형식 띠 → 마지막 권유 → 푸터.
     그림은 img/edit.png(첫 화면) · img/inbox.png · img/search.png · img/presentation.png. 파일이 없으면 점선 자리만 보인다.
-    다운로드는 공개 저장소 Henrysuh/dokanizer-release 의 최신 릴리스에서 고정 파일명으로 받는다.
+    다운로드: Windows는 공개 저장소 Henrysuh/dokanizer 의 Releases 페이지로 연결, macOS는 준비 중 풍선만 띄운다.
   -->
   <style>
     :root { --ink: #1f2328; --muted: #5d6168; --faint: #9a9890; --line: #e6e8ec; --soft: #f5f7fb; --white: #fff;
@@ -32,6 +32,13 @@
     .btn.primary:hover { background: var(--blue-dark); }
     .btn.secondary { background: #fff; color: var(--ink); border: 1px solid #cfd3d8; }
     .btn.secondary:hover { background: #f6f7f8; }
+    button.btn { font: inherit; font-weight: 700; cursor: pointer; }
+    /* macOS 준비 중 풍선: 버튼 위에 뜬다 */
+    .btn[data-soon] { position: relative; }
+    .bubble { position: absolute; left: 50%; bottom: calc(100% + 10px); transform: translate(-50%, 4px); padding: 8px 12px; border-radius: 10px;
+      background: var(--ink); color: #fff; font-size: 13.5px; font-weight: 600; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .18s, transform .18s; z-index: 5; }
+    .bubble::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -6px; border: 6px solid transparent; border-top-color: var(--ink); }
+    .btn[data-soon]:hover .bubble, .btn[data-soon]:focus-visible .bubble, .bubble.show { opacity: 1; transform: translate(-50%, 0); }
     .ctas { margin-top: 32px; display: flex; flex-direction: column; gap: 12px; justify-content: center; }
     @media (min-width: 640px) { .ctas { flex-direction: row; } }
 
@@ -114,7 +121,7 @@
   <header class="top">
     <div class="wrap">
       <a class="logo" href="./"><img src="icon.png" alt=""><b>Dokanizer</b></a>
-      <a class="nav" href="https://github.com/Henrysuh/dokanizer-release#readme" target="_blank" rel="noopener">사용 방법</a>
+      <a class="nav" href="https://github.com/Henrysuh/dokanizer#readme" target="_blank" rel="noopener">사용 방법</a>
       <a class="start" href="#download">다운로드</a>
     </div>
   </header>
@@ -126,8 +133,8 @@
       <h1>한 번 넣으면,<br>어떤 <em>포맷</em>으로든</h1>
       <p class="lead">Markdown · Word · 이메일을 넣으면 정리되고,<br>PPTX · DOCX · EPUB로 꺼내 씁니다.</p>
       <div class="ctas">
-        <a class="btn primary" href="https://github.com/Henrysuh/dokanizer-release/releases/latest/download/Dokanizer_Setup_Windows.exe"><svg class="i"><use href="#i-win"/></svg> Windows 다운로드</a>
-        <a class="btn secondary" href="https://github.com/Henrysuh/dokanizer-release/releases/latest/download/Dokanizer_macOS.dmg"><svg class="i"><use href="#i-apple"/></svg> macOS 다운로드</a>
+        <a class="btn primary" href="https://github.com/Henrysuh/dokanizer/releases" target="_blank" rel="noopener"><svg class="i"><use href="#i-win"/></svg> Windows 다운로드</a>
+        <button class="btn secondary" type="button" data-soon aria-describedby="mac-soon"><svg class="i"><use href="#i-apple"/></svg> macOS 다운로드<span class="bubble" id="mac-soon" role="status">macOS 다운로드는 준비 중입니다</span></button>
       </div>
       <p class="note">90일 체험판 · 관리자 권한 없이 설치</p>
       <div class="pic shot"><img src="img/edit.png" alt="Edit 탭 — 문서를 요소 단위로 고치고 바로 미리보기" data-ph="Edit 탭 캡처 자리"></div>
@@ -191,8 +198,8 @@
   <footer>
     <div class="wrap">
       <b>Dokanizer</b>
-      <a href="https://github.com/Henrysuh/dokanizer-release#readme" target="_blank" rel="noopener">사용 방법</a>
-      <a href="https://github.com/Henrysuh/dokanizer-release#오픈소스-라이선스" target="_blank" rel="noopener">오픈소스 라이선스</a>
+      <a href="https://github.com/Henrysuh/dokanizer#readme" target="_blank" rel="noopener">사용 방법</a>
+      <a href="https://github.com/Henrysuh/dokanizer#오픈소스-라이선스" target="_blank" rel="noopener">오픈소스 라이선스</a>
       <a href="../">Henrysuh.github.io</a>
       <span>© 2026 Henrysuh</span>
     </div>
@@ -203,6 +210,17 @@
     document.querySelectorAll('.pic img[data-ph]').forEach(img => {
       const swap = () => { const d = document.createElement('div'); d.className = 'ph'; d.textContent = img.dataset.ph; img.replaceWith(d); };
       if (img.complete && img.naturalWidth === 0) swap(); else img.addEventListener('error', swap);
+    });
+
+    // macOS판 준비 중 → 누르면(터치 포함) 풍선을 잠깐 보여 준다
+    document.querySelectorAll('[data-soon]').forEach(btn => {
+      const bubble = btn.querySelector('.bubble');
+      let timer;
+      btn.addEventListener('click', () => {
+        bubble.classList.add('show');
+        clearTimeout(timer);
+        timer = setTimeout(() => bubble.classList.remove('show'), 2400);
+      });
     });
   </script>
 </body>
